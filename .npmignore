@@ -4,3 +4,4 @@ src/
 .vscode/
 sapnwrfc.ini
 dev_rfc.log
+_noderfc.log
