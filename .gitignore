@@ -1,0 +1,7 @@
+node_modules
+dist
+.vscode
+.env
+sapnwrfc.ini
+dev_rfc.log
+_noderfc.log
