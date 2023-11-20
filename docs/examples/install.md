@@ -80,6 +80,12 @@ Other commands you can try after installing the `hello-world` package are **list
 
     Notice how it's also comparing the installed version with the latest available on the registry.
 
+### Demo
+
+<p align="center">
+  <img src="https://docs.trmregistry.com/_media/install.gif" />
+</p>
+
 # Part 2: TRM in your landscape
 
 Suppose you install a package, usually it's destined to be transported across your landscape (typically DEV-> QUA-> PRD).
