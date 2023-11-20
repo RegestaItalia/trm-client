@@ -31,6 +31,16 @@ You can then install the CLI via npm:
 
 `npm install trm-client -g`
 
+## Commands <!-- {docsify-remove} -->
+
+List of all commands is available [here](/docs/commands.md).
+
+### Demo publish <!-- {docsify-remove} -->
+
+<p align="center">
+  <img src="https://docs.trmregistry.com/_media/publish.gif" />
+</p>
+
 # Contributing <!-- {docsify-remove} -->
 
 Like every other TRM open-soruce projects, contributions are always welcomed ❤️.
