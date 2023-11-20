@@ -41,6 +41,12 @@ List of all commands is available [here](/docs/commands.md).
   <img src="https://docs.trmregistry.com/_media/publish.gif" />
 </p>
 
+### Demo install <!-- {docsify-remove} -->
+
+<p align="center">
+  <img src="https://docs.trmregistry.com/_media/install.gif" />
+</p>
+
 # Contributing <!-- {docsify-remove} -->
 
 Like every other TRM open-soruce projects, contributions are always welcomed ❤️.
