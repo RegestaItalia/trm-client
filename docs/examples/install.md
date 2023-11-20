@@ -45,13 +45,13 @@ you'll be prompted with
 The `hello-world` package should now be installed into your system.
 
 <p align="center">
-  <img src="/_media/sample_install.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_install.png" />
 </p>
 
 You can view it with transaction `SE80`, and test the program `ZTRM_HELLOWORLD` with transaction `SE38`.
 
 <p align="center">
-  <img src="/_media/sample_install_se80.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_install_se80.png" />
 </p>
 
 ## List and view command
@@ -65,7 +65,7 @@ Other commands you can try after installing the `hello-world` package are **list
     After connecting to the system (like we did earlier) you should see the list of packages.
 
     <p align="center">
-        <img src="/_media/sample_list.png" />
+        <img src="https://docs.trmregistry.com/_media/sample_list.png" />
     </p>
 
 - With the [view command](https://docs.trmregistry.com/#/client/commands?id=view-package-on-a-system) you'll have more details about a package, like its manifest values.
@@ -75,7 +75,7 @@ Other commands you can try after installing the `hello-world` package are **list
     and connect to your development system again to see the command in action.
 
     <p align="center">
-        <img src="/_media/sample_view.png" />
+        <img src="https://docs.trmregistry.com/_media/sample_view.png" />
     </p>
 
     Notice how it's also comparing the installed version with the latest available on the registry.
@@ -103,7 +103,7 @@ Once a package is installed with TRM, the transports across the landscape is **d
 Take a look at the install log and you'll see that a new transport has been generated.
 
 <p align="center">
-    <img src="/_media/sample_reinstall.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_reinstall.png" />
 </p>
 
 > If you've lost the install log, check transaction `SE01`
@@ -115,13 +115,13 @@ Before releasing, **make sure the package transport layers are correct and manua
 1. Release and import the transport into your QUA system.
 
 <p align="center">
-    <img src="/_media/sample_transport.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_transport.png" />
 </p>
 
 2. Run the list or view command with QUA system connection.
 
 <p align="center">
-    <img src="/_media/sample_view_after_transport.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_view_after_transport.png" />
 </p>
 
 You'll notice that, although trm-server is not installed into QUA, TRM is capable of detecting that the `hello-world` package is installed.
@@ -133,7 +133,7 @@ The [compare command](https://docs.trmregistry.com/#/client/commands?id=compare-
 In this case, run `trm compare hello-world` and, when asked, connect to both DEV and QUA.
 
 <p align="center">
-    <img src="/_media/sample_compare.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_compare.png" />
 </p>
 
 You should see that in both systems you have the same version of `hello-world` installed.
@@ -166,7 +166,7 @@ just like before, you'll be asked the target system connection details.
 This time, you'll see that a dependency is detected and a confirm action (confirm install of the dependency) is expected.
 
 <p align="center">
-    <img src="/_media/sample_dependency_install.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_dependency_install.png" />
 </p>
 
 Confirming, will **first** install `trm-dependency` and **then** continue with the install of `trm-dependant`.
@@ -180,7 +180,7 @@ Running the `list` command now should show both `trm-dependency` and `trm-depend
 If you check transaction `SE01` you should see two new transports, one for each of the TRM packages installed (installed as transportable):
 
 <p align="center">
-    <img src="/_media/sample_dependency_se01.png" />
+    <img src="https://docs.trmregistry.com/_media/sample_dependency_se01.png" />
 </p>
 
 To transport `trm-dependant`, you should transport `trm-dependency` first, to avoid any syntax errors or create a new transport of copies that includes both transports contents.

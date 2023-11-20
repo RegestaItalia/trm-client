@@ -78,7 +78,7 @@ you'll be prompted with
 The package should now be published.
 
 <p align="center">
-  <img src="/_media/sample_publish.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_publish.png" />
 </p>
 
 You'll notice that **version 1.0.0 has been automatically assigned**: this is because we haven't specified a version.
@@ -90,7 +90,13 @@ When no version is specified during publish, the default values if **latest** wh
 You can open the [public registry website](https://trmregistry.com/) and search for your package there.
 
 <p align="center">
-  <img src="/_media/sample_publish_registry.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_publish_registry.png" />
+</p>
+
+### Demo
+
+<p align="center">
+  <img src="https://docs.trmregistry.com/_media/publish.gif" />
 </p>
 
 # Packages with dependencies
@@ -112,7 +118,7 @@ This means package A is the **dependant** and package B is the **dependency**.
 If we run the publish command on package A, it will result in an error:
 
 <p align="center">
-  <img src="/_media/sample_dependency_error.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_dependency_error.png" />
 </p>
 
 The error is telling us that in order to publish package A **we first must publish package B**.
@@ -120,7 +126,7 @@ The error is telling us that in order to publish package A **we first must publi
 After doing so, publishing package A will tell us that the dependency with package B has been found:
 
 <p align="center">
-  <img src="/_media/sample_dependency_success.png" />
+  <img src="https://docs.trmregistry.com/_media/sample_dependency_success.png" />
 </p>
 
 Its [manifest](https://docs.trmregistry.com/#/commons/manifest) will have a dedicated section that looks like this:
