@@ -1,8 +1,0 @@
-.github
-.gitignore
-src
-.vscode
-docs
-dist/sapnwrfc.ini
-dist/dev_rfc.log
-dist/_noderfc.log

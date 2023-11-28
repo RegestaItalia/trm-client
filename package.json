@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "1.0.1",
+  "version": "1.1.0-alpha",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,7 +28,7 @@
   },
   "license": "MIT",
   "trmDependencies": {
-    "trm-server": "^1.0.1"
+    "trm-server": "^1.1.0-alpha"
   },
   "dependencies": {
     "commander": "^11.0.0",
@@ -37,7 +37,7 @@
     "get-root-path": "^2.0.2",
     "ini": "^4.1.1",
     "semver": "^7.5.4",
-    "trm-core": "^1.0.1",
+    "trm-core": "^2.0.0-alpha",
     "trm-registry-types": "^1.0.3",
     "xml2js": "^0.6.2"
   },
