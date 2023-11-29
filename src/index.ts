@@ -9,7 +9,7 @@ const program = new Command();
 program
     .name(`trm`)
     .description(`TRM - Transport Request Manager CLI`)
-    .version(getClientVersion());
+    .version(getClientVersion(), `-cv, --clientVersion`, `Client version`);
 
 /*SYSTEM ALIAS*/
 const createAlias = program.command(`createAlias <alias>`)
