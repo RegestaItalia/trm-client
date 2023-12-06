@@ -48,8 +48,13 @@ export async function connect(commandArgs: ConnectArguments, actionArgs: ActionA
     const inquirer = actionArgs.inquirer;
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     var aInputType = [];
-    const aSapLogonConnections = await getSapLogonConnections();
+    var aSapLogonConnections;
     const aAlias = SystemAlias.getAll();
+    try{
+        aSapLogonConnections = await getSapLogonConnections();
+    }catch(e){
+        aSapLogonConnections = [];
+    }
     if (aAlias.length > 0 && !noSystemAlias) {
         aInputType.push({
             value: 'alias', name: 'System Alias'
