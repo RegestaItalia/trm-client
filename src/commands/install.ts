@@ -13,6 +13,7 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
     const forceInstall = commandArgs.force;
     const ignoreSapEntries = commandArgs.ignoreSapEntries;
     const skipDependencies = commandArgs.skipDependencies;
+    const skipLang = commandArgs.skipLang;
     const keepOriginalPackages = commandArgs.keepOriginalPackages;
     const skipWorkbenchTransport = commandArgs.skipWorkbenchTransport;
     const targetSystem = commandArgs.targetSystem;
@@ -59,6 +60,7 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
         packageReplacements,
         skipWbTransport: skipWorkbenchTransport,
         skipDependencies,
+        skipLang,
         targetSystem,
         transportLayer
     }, inquirer, system, registry, logger);
