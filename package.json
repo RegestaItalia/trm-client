@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,8 @@
     "trm": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "trm",
@@ -38,7 +39,7 @@
     "get-root-path": "^2.0.2",
     "ini": "^4.1.1",
     "semver": "^7.5.4",
-    "trm-core": "^1.0.1",
+    "trm-core": "^2.1.0",
     "trm-registry-types": "^1.0.3",
     "xml2js": "^0.6.2"
   },

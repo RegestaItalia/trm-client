@@ -7,6 +7,7 @@ export type PublishArguments = {
     forceManifest: boolean,
     overwriteManifest: boolean,
     skipDependencies: boolean,
+    skipLang: boolean,
     skipEditSapEntries: boolean,
     skipEditDependencies: boolean,
     skipReadme: boolean,

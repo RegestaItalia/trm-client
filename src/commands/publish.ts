@@ -16,6 +16,7 @@ export async function publish(commandArgs: PublishArguments, actionArgs: ActionA
     const forceManifest = commandArgs.forceManifest;
     const overwriteManifest = commandArgs.overwriteManifest;
     const skipEditSapEntries = commandArgs.skipEditSapEntries;
+    const skipLang = commandArgs.skipLang;
     const skipEditDependencies = commandArgs.skipEditDependencies;
     const skipReadme = commandArgs.skipReadme;
     const skipDependencies = commandArgs.skipDependencies;
@@ -137,6 +138,7 @@ export async function publish(commandArgs: PublishArguments, actionArgs: ActionA
         forceManifestInput: forceManifest,
         overwriteManifestValues: overwriteManifest,
         skipEditDependencies,
+        skipLang,
         skipEditSapEntries,
         skipReadme,
         readme,
