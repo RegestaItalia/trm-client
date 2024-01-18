@@ -87,9 +87,8 @@ registerCommand(publish, {
 });
 
 /*UNPUBLISH*/
-const unpublish = program.command(`unpublish <package>`)
-    .description(`Unpublish package from registry`)
-    .option(`-v, --version <version>`, `REQUIRED - Version to unpublish.`,);
+const unpublish = program.command(`unpublish <package> <version>`)
+    .description(`Unpublish package from registry`);
 registerCommand(unpublish, {
     requiresRegistry: true
 });

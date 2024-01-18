@@ -10,7 +10,7 @@ export async function unpublish(commandArgs: UnpublishArguments, actionArgs: Act
     const packageVersion = semver.clean(commandArgs.version || '');
     
     if(!packageVersion){
-        throw new Error(`Missing required option --version`);
+        throw new Error(`Invalid version.`);
     }
 
     await registry.unpublish(packageName, packageVersion);
