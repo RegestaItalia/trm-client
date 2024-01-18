@@ -95,9 +95,8 @@ registerCommand(unpublish, {
 });
 
 /*INSTALL*/
-const install = program.command(`install <package>`)
+const install = program.command(`install <package> [version]`)
     .description(`Install package`)
-    .option(`-v, --version <version>`, `Version. Allowed values are either "latest" or a semver valid version.`, "latest")
     .option(`-f, --force`, `Force install.`, false)
     .option(`-ci, --ci`, `Clean install, flag used to avoid unnecessary prompts.`, false)
     .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
