@@ -39,7 +39,7 @@ export function registerCommand(command: Command, args?: {
     }
     command.option('-log, --log-type', 'Log type', 'cli');
 
-    command.action(async (arg1, arg2) => {
+    command.action(async (arg1, arg2, arg3) => {
         var args = {
             command: commandName,
             requiresConnection,
@@ -58,7 +58,12 @@ export function registerCommand(command: Command, args?: {
         if(typeof(arg1) === 'string'){
             const requiredArg = command["_args"].find((o: Argument) => o.required);
             args[requiredArg.name()] = arg1;
-            args = {...args, ...arg2};
+            if(typeof(arg2) === 'string'){
+                const optionalArg = command["_args"].find((o: Argument) => !o.required);
+                args[optionalArg.name()] = arg2;
+            }else{
+                args = {...args, ...arg2};
+            }
         }else{
             args = {...args, ...arg1};
         }
