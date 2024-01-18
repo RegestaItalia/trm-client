@@ -65,10 +65,9 @@ registerCommand(ping, {
 });
 
 /*PUBLISH*/
-const publish = program.command(`publish <package>`)
+const publish = program.command(`publish <package> [version]`)
     .description(`Publish package to registry`)
     .option(`-d, --devclass <devclass>`, `Devclass.`)
-    .option(`-v, --version <version>`, `Version. Allowed values are either "latest" or a semver valid version.`, "latest")
     .option(`-t, --target <target>`, `TMS Target.`)
     .option(`-m, --manifest <json>`, `Path to JSON file or JSON containing the manifest values.`)
     .option(`-rm, --readme <markdown>`, `Path to MD file or markdown containing the package README.`)
@@ -88,17 +87,15 @@ registerCommand(publish, {
 });
 
 /*UNPUBLISH*/
-const unpublish = program.command(`unpublish <package>`)
-    .description(`Unpublish package from registry`)
-    .option(`-v, --version <version>`, `REQUIRED - Version to unpublish.`,);
+const unpublish = program.command(`unpublish <package> <version>`)
+    .description(`Unpublish package from registry`);
 registerCommand(unpublish, {
     requiresRegistry: true
 });
 
 /*INSTALL*/
-const install = program.command(`install <package>`)
+const install = program.command(`install <package> [version]`)
     .description(`Install package`)
-    .option(`-v, --version <version>`, `Version. Allowed values are either "latest" or a semver valid version.`, "latest")
     .option(`-f, --force`, `Force install.`, false)
     .option(`-ci, --ci`, `Clean install, flag used to avoid unnecessary prompts.`, false)
     .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')

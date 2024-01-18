@@ -56,9 +56,14 @@ export function registerCommand(command: Command, args?: {
             arg2 = {};
         }
         if(typeof(arg1) === 'string'){
-            const requiredArg = command["_args"].find((o: Argument) => o.required);
-            args[requiredArg.name()] = arg1;
-            args = {...args, ...arg2};
+            const oArg1 = command["_args"][0];
+            args[oArg1.name()] = arg1;
+            if(typeof(arg2) === 'string'){
+                const oArg2 = command["_args"][1];
+                args[oArg2.name()] = arg2;
+            }else{
+                args = {...args, ...arg2};
+            }
         }else{
             args = {...args, ...arg1};
         }
