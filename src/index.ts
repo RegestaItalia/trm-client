@@ -65,10 +65,9 @@ registerCommand(ping, {
 });
 
 /*PUBLISH*/
-const publish = program.command(`publish <package>`)
+const publish = program.command(`publish <package> [version]`)
     .description(`Publish package to registry`)
     .option(`-d, --devclass <devclass>`, `Devclass.`)
-    .option(`-v, --version <version>`, `Version. Allowed values are either "latest" or a semver valid version.`, "latest")
     .option(`-t, --target <target>`, `TMS Target.`)
     .option(`-m, --manifest <json>`, `Path to JSON file or JSON containing the manifest values.`)
     .option(`-rm, --readme <markdown>`, `Path to MD file or markdown containing the package README.`)
