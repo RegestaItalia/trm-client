@@ -20,9 +20,9 @@ System aliases are saved in **plain text** in the AppData `systems.ini` file.
 
 All-in-one command that lets you view, edit or check connection of an alias.
 
-- Command `trm createAlias <<ALIAS_NAME>>`
+- Command `trm createAlias <ALIAS_NAME>`
 - Options
-    - `-a, --systemAlias <<systemAlias>>` - `string`
+    - `-a, --systemAlias <systemAlias>` - `string`
 
         Alias name to manage. If not provided, a list with all of you aliases will be prompted.
 
@@ -30,13 +30,13 @@ All-in-one command that lets you view, edit or check connection of an alias.
 
 Create a new system alias.
 
-- Command `trm createAlias <<ALIAS_NAME>>`
+- Command `trm createAlias <ALIAS_NAME>`
 
 ## Delete alias
 
 Delete a system alias.
 
-- Command `trm deleteAlias <<ALIAS_NAME>>`
+- Command `trm deleteAlias <ALIAS_NAME>`
 
 # Info
 
@@ -44,59 +44,59 @@ Shows informations about the client and the client TRM dependencies on a system.
 
 - Command `trm info`
 - Options
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
@@ -114,59 +114,59 @@ Use this command anytime you want to check a user can access trm-server RFC Func
 
 - Command `trm ping`
 - Options
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
@@ -192,7 +192,7 @@ This command lets you log in into the registry.
 
 - Command `trm login`
 - Options
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
@@ -204,7 +204,7 @@ This command lets you log in into the registry.
 
         This flag will force the login authentication process.
 
-    - `-a, --authentication <<AUTH_DATA>>` - `JSON`
+    - `-a, --authentication <AUTH_DATA>` - `JSON`
 
         If the authentication process is confirmed and this option is not provided, you'll be prompted for the necessary login steps, otherwise this data will be used to automatically login.
 
@@ -216,7 +216,7 @@ Show the currently logged in user data in a registry.
 
 - Command `trm whoami`
 - Options
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
@@ -230,7 +230,7 @@ Log out of the registry.
 
 - Command `trm logout`
 - Options
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
@@ -238,19 +238,19 @@ Log out of the registry.
 
 ## Add private registry
 
-- Command `trm addRegistry <<REGISTRY_NAME>>`
+- Command `trm addRegistry <REGISTRY_NAME>`
 - Options
-    - `-e, --endpoint <<ENDPOINT_URL>>` - `string`
+    - `-e, --endpoint <ENDPOINT_URL>` - `string`
 
         Base url of the registry.
 
-    - `-a, --authentication <<JSON>>` - `string`
+    - `-a, --authentication <JSON>` - `string`
 
         Authentication object.
 
 ## Remove private registry
 
-- Command `trm removeRegistry <<REGISTRY_NAME>>`
+- Command `trm removeRegistry <REGISTRY_NAME>`
 - Options
     - `-f, --force` - `boolean`
 
@@ -264,31 +264,23 @@ TRM identifies a package as the composition of its TRM transports and the manife
 
 ## Publish package from a system
 
-- Command `trm publish <<PACKAGE_NAME>>`
+- Command `trm publish <PACKAGE_NAME> [VERSION]`
 - Options
-    - `-d, --devclass <<DEVCLASS>>` - `string`
+    - `-d, --devclass <DEVCLASS>` - `string`
 
         Name of the devclass on source system.
     
-    - `-v, --version <<VERSION>>` - `string`
-
-        Version to publish.
-
-        Allowed values are either `latest` or a semver valid version.
-
-        Default: `latest` - If the package is published for the first time, the version is set to `1.0.0` by default; if the package already exists in the registry, the latest version is fetched and the patch version is increased
-    
-    - `-t, --target <<TARGET>>` - `string`
+    - `-t, --target <TARGET>` - `string`
 
         System target for transport request release.
 
-    - `-m, --manifest <<JSON>>` - `string`
+    - `-m, --manifest <JSON>` - `string`
 
         Path to JSON file or JSON object containing manifest values.
 
         See [Publish package manifest](#publish-package-manifest) for the detailed explaination.
 
-    - `-rm, --readme <<MARKDOWN>>` - `string`
+    - `-rm, --readme <MARKDOWN>` - `string`
 
         Path to MD file or markdown string containing the readme.
 
@@ -344,69 +336,71 @@ TRM identifies a package as the composition of its TRM transports and the manife
 
         Default: `180`.
 
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
         If one or more registries are found, and this option is not provided, it will prompt for a registry selection.
 
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
         Ignored in conjunction with alias option.
+
+> Version is optional, allowed values are either latest or a semver valid version. Default: latest - If the package is published for the first time, the version is set to 1.0.0 by default; if the package already exists in the registry, the latest version is fetched and the patch version is increased.
 
 > If the direct connection options are incomplete you'll be prompted to fill in the required values.
 
@@ -414,7 +408,7 @@ TRM identifies a package as the composition of its TRM transports and the manife
 
 The manifest is a document that contains information about a package. Its values can be defined during publishing.
 
-The `-m, --manifest <<JSON>>` option allows you to define manifest values with a JSON string.
+The `-m, --manifest <JSON>` option allows you to define manifest values with a JSON string.
 
 It can either indicate a file path or an acutal JSON string.
 
@@ -495,7 +489,7 @@ The expected object should have these values defined:
 
     Each table record should contain the required field/value combination needed in order to extract the required record.
 
-The `dependencies` and `sapEntries` values of the manifest are calculated at runtime (unless running with the `-sd, --skipDependencies` flag) and values from the `-m, --manifest <<JSON>>` json are then merged.
+The `dependencies` and `sapEntries` values of the manifest are calculated at runtime (unless running with the `-sd, --skipDependencies` flag) and values from the `-m, --manifest <JSON>` json are then merged.
 
 Unless running with the `-om, --overwriteManifest` flag, release-indipendent values are kept the same, and not prompted (unless running with `-fm, --forceManifest` flag). 
 
@@ -505,28 +499,20 @@ This command will only remove the package from the registry.
 
 If installed on any of your systems, **it will remain without any changes**.
 
-- Command `trm unpublish <<PACKAGE_NAME>>`
+- Command `trm unpublish <PACKAGE_NAME> <VERSION>`
 - Options
-    - `-v, --version <<VERSION>>` - **required** - `string`
-
-        Version of the release to unpublish.
-        
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
         If one or more registries are found, and this option is not provided, it will prompt for a registry selection.
 
+> Version allowed values are either latest or a semver valid version. Default: latest - If the package is published for the first time, the version is set to 1.0.0 by default; if the package already exists in the registry, the latest version is fetched and the patch version is increased.
+
 ## Install package on a system
 
-- Command `trm install <<PACKAGE_NAME>>`
+- Command `trm install <PACKAGE_NAME> [VERSION]`
 - Options
-    - `-v, --version <<PACKAGE_VERSION>>` - `string`
-
-        Version to get from the registy and install.
-
-        Default: `latest` - Latest version available on the registry.
-
     - `-ci, --ci` - `boolean`
 
         Clean Install - avoids non-blocking prompts.
@@ -543,7 +529,7 @@ If installed on any of your systems, **it will remain without any changes**.
 
         Default: `false` - Confirmation prompt.
 
-    - `-to, --importTimeout <<TIMEOUT>>` - `number`
+    - `-to, --importTimeout <TIMEOUT>` - `number`
 
         Timeout (in seconds) for the package import.
 
@@ -571,7 +557,7 @@ If installed on any of your systems, **it will remain without any changes**.
 
         Default: `false` - Devclass names are calculated/prompted.
 
-    - `-pr, --packageReplacements <<JSON>>` - `string`
+    - `-pr, --packageReplacements <JSON>` - `string`
 
         Path to JSON file or JSON array of package replacements.
 
@@ -585,69 +571,71 @@ If installed on any of your systems, **it will remain without any changes**.
 
         Default: `false` - Transport is generated/updated.
 
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
         If one or more registries are found, and this option is not provided, it will prompt for a registry selection.
 
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
         Ignored in conjunction with alias option.
+
+> Version is optional, allowed values are either latest or a semver valid version. Default: latest - If the package is published for the first time, the version is set to 1.0.0 by default; if the package already exists in the registry, the latest version is fetched and the patch version is increased.
 
 > If the direct connection options are incomplete you'll be prompted to fill in the required values.
 
@@ -722,59 +710,59 @@ If one or more package replacements are not found, a prompt asking a replacement
 
 - Command `trm list`
 - Options
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
@@ -784,67 +772,67 @@ If one or more package replacements are not found, a prompt asking a replacement
 
 ## View package on a system
 
-- Command `trm view <<PACKAGE_NAME>>`
+- Command `trm view <PACKAGE_NAME>`
 - Options
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
         If one or more registries are found, and this option is not provided, it will prompt for a registry selection.
 
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
@@ -854,61 +842,61 @@ If one or more package replacements are not found, a prompt asking a replacement
 
 ## Check package on a system
 
-- Command `trm check <<PACKAGE_NAME>>`
+- Command `trm check <PACKAGE_NAME>`
 - Options
-    - `-a, --systemAlias <<SYSTEM_ALIAS>>` - `string`
+    - `-a, --systemAlias <SYSTEM_ALIAS>` - `string`
 
         Alias of the system to connect.
     
-    - `-d, --dest <<SYSTEM_ID>>` - `string`
+    - `-d, --dest <SYSTEM_ID>` - `string`
 
         System ID of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-h, --ashost <<APPLICATION_SERVER_ADDRESS>>` - `string`
+    - `-h, --ashost <APPLICATION_SERVER_ADDRESS>` - `string`
 
         Application server address of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-n, --sysnr <<INSTANCE_NUMBER>>` - `string`
+    - `-n, --sysnr <INSTANCE_NUMBER>` - `string`
 
         Instance number of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-s, --sapRouter <<SAP_ROUTER>>` - `string`
+    - `-s, --sapRouter <SAP_ROUTER>` - `string`
 
         SAP Router string of the system to connect.
 
         Ignored in conjunction with alias option.
 
-    - `-c, --client <<CLIENT>>` - `string`
+    - `-c, --client <CLIENT>` - `string`
 
         System logon client.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-u, --user <<USER>>` - `string`
+    - `-u, --user <USER>` - `string`
 
         System logon user.
 
         Ignored in conjunction with alias option.
 
-    - `-p, --passwd <<PASSWORD>>` - `string`
+    - `-p, --passwd <PASSWORD>` - `string`
 
         System logon user password.
 
@@ -918,14 +906,14 @@ If one or more package replacements are not found, a prompt asking a replacement
 
 ## Compare package between multiple systems
 
-- Command `trm compare <<PACKAGE_NAME>>`
+- Command `trm compare <PACKAGE_NAME>`
 - Options
-    - `-r, --registry <<REGISTRY_NAME>>` - `string`
+    - `-r, --registry <REGISTRY_NAME>` - `string`
 
         If no private registries are found, it will default to the public registry.
 
         If one or more registries are found, and this option is not provided, it will prompt for a registry selection.
 
-    - `-c, --connections <<JSON_ARRAY>>` - `string`
+    - `-c, --connections <JSON_ARRAY>` - `string`
 
         Array of aliases to compare.
