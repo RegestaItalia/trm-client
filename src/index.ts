@@ -97,6 +97,7 @@ registerCommand(unpublish, {
 const install = program.command(`install <package> [version]`)
     .description(`Install package`)
     .option(`-f, --force`, `Force install.`, false)
+    .option(`-sf, --safe`, `Safe install (Integrity check).`, false)
     .option(`-ci, --ci`, `Clean install, flag used to avoid unnecessary prompts.`, false)
     .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
     .option(`-is, --ignoreSapEntries`, `Ignore missing SAP entries.`, false)
