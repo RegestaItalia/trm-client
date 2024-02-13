@@ -2,6 +2,7 @@ export type InstallArguments = {
     package: string,
     version: string,
     force: boolean,
+    safe: boolean,
     ci: boolean,
     importTimeout: string,
     ignoreSapEntries: boolean,

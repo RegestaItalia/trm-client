@@ -11,6 +11,7 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
     const packageName = commandArgs.package;
     const packageVersion = commandArgs.version || 'latest';
     const forceInstall = commandArgs.force;
+    const safe = commandArgs.safe;
     const ignoreSapEntries = commandArgs.ignoreSapEntries;
     const skipDependencies = commandArgs.skipDependencies;
     const skipLang = commandArgs.skipLang;
@@ -53,6 +54,7 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
         packageName,
         version: packageVersion,
         forceInstall,
+        safe,
         ci,
         importTimeout,
         ignoreSapEntries,
