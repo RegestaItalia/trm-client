@@ -116,15 +116,12 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
         connectionData.push(oConnection.getDest());
         connectionData.push(oSystemViewManifest ? `Yes` : `No`);
         connectionData.push(oSystemViewManifest ? oSystemViewManifest.version : '');
-        if(oSystemViewManifest){
+        if(oSystemViewManifest && oSystemViewManifest.linkedTransport){
             const devclass = await oSystemViewManifest.linkedTransport.getDevclass();
             connectionData.push(devclass);
-        }else{
-            connectionData.push('');
-        }
-        if(oSystemViewManifest && oSystemViewManifest.linkedTransport){
             connectionData.push(oSystemViewManifest.linkedTransport.trkorr);
         }else{
+            connectionData.push('');
             connectionData.push('');
         }
         if(oSystemViewManifest){
