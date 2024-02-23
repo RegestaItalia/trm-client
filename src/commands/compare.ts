@@ -119,7 +119,9 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
         connectionData.push(oSystemViewManifest ? `Yes` : `No`);
         connectionData.push(oSystemViewManifest ? oSystemViewManifest.version : '');
         if(!oSystemView.getDevclass() && oSystemViewManifest && oSystemViewManifest.linkedTransport){
-            devclass = await oSystemViewManifest.linkedTransport.getDevclass();
+            try{
+                devclass = await oSystemViewManifest.linkedTransport.getDevclass();
+            }catch(e){ }
         }else{
             devclass = oSystemView.getDevclass();
         }

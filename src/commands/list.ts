@@ -25,7 +25,9 @@ export async function list(commandArgs: ListArguments, actionArgs: ActionArgumen
                 manifest = oManifest.get(true);
                 const linkedTransport = oManifest.getLinkedTransport();
                 if(!oPackage.getDevclass() && linkedTransport){
-                    devclass = await linkedTransport.getDevclass();
+                    try{
+                        devclass = await linkedTransport.getDevclass();
+                    }catch(e){ }
                 }else{
                     devclass = oPackage.getDevclass();
                 }
