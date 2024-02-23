@@ -24,11 +24,13 @@ export async function list(commandArgs: ListArguments, actionArgs: ActionArgumen
             if (oManifest) {
                 manifest = oManifest.get(true);
                 const linkedTransport = oManifest.getLinkedTransport();
+                if(!oPackage.getDevclass() && linkedTransport){
+                    devclass = await linkedTransport.getDevclass();
+                }else{
+                    devclass = oPackage.getDevclass();
+                }
                 if (linkedTransport) {
                     tkrorr = linkedTransport.trkorr;
-                    try {
-                        devclass = await linkedTransport.getDevclass();
-                    } catch (e) { }
                 }
             }
             connectionData.push(oPackage.packageName);
