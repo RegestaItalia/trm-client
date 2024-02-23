@@ -105,9 +105,11 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
     logger.loading(`Reading system data...`);
     var connectionData = [];
     var oSystemViewManifest: TrmManifest;
+    var devclass: String;
     for (const oConnection of aConnections) {
         connectionData = [];
         oSystemViewManifest = null;
+        devclass = null;
         const aSystemPackages = await oConnection.getInstalledPackages(false);
         const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
         try {
@@ -116,12 +118,15 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
         connectionData.push(oConnection.getDest());
         connectionData.push(oSystemViewManifest ? `Yes` : `No`);
         connectionData.push(oSystemViewManifest ? oSystemViewManifest.version : '');
+        if(!oSystemView.getDevclass() && oSystemViewManifest && oSystemViewManifest.linkedTransport){
+            devclass = await oSystemViewManifest.linkedTransport.getDevclass();
+        }else{
+            devclass = oSystemView.getDevclass();
+        }
+        connectionData.push(devclass || '');
         if(oSystemViewManifest && oSystemViewManifest.linkedTransport){
-            const devclass = await oSystemViewManifest.linkedTransport.getDevclass();
-            connectionData.push(devclass);
             connectionData.push(oSystemViewManifest.linkedTransport.trkorr);
         }else{
-            connectionData.push('');
             connectionData.push('');
         }
         if(oSystemViewManifest){

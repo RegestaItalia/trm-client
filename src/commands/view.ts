@@ -1,6 +1,6 @@
 import { View } from "trm-registry-types";
 import { ActionArguments, ViewArguments } from "./arguments";
-import { TrmManifest, TrmPackage, checkSapEntries } from "trm-core";
+import { Transport, TrmManifest, TrmPackage, checkSapEntries } from "trm-core";
 import { viewRegistryPackage } from "./commons";
 
 export async function view(commandArgs: ViewArguments, actionArgs: ActionArguments) {
@@ -15,14 +15,18 @@ export async function view(commandArgs: ViewArguments, actionArgs: ActionArgumen
     const aSystemPackages = await system.getInstalledPackages(false);
     const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
     var oSystemViewManifest: TrmManifest;
+    var linkedTransport: Transport;
     try {
         oSystemViewManifest = oSystemView.manifest.get(true);
     } catch (e) { }
-    
+    try {
+        linkedTransport = oSystemView.manifest.getLinkedTransport();
+    } catch (e) { }
+
     const oRegistryView = await viewRegistryPackage(registry, packageName, logger);
 
 
-    var linkedTransport: string;
+    var installTransport: string;
     var devclass: string;
     var backwardsCompatible: boolean;
     var shortDescription: string;
@@ -33,30 +37,28 @@ export async function view(commandArgs: ViewArguments, actionArgs: ActionArgumen
     var keywords: string;
     var sapEntries: any;
 
-    try{
-        linkedTransport = oSystemViewManifest ? oSystemViewManifest.linkedTransport.trkorr : undefined;
-    }catch(e){ }
-    try{
-        devclass = await oSystemViewManifest.linkedTransport.getDevclass();
-    }catch(e){ }
-    try{
+    installTransport = linkedTransport ? linkedTransport.trkorr : undefined;
+    try {
+        devclass = oSystemView.getDevclass() || await linkedTransport.getDevclass();
+    } catch (e) { }
+    try {
         backwardsCompatible = oSystemViewManifest ? oSystemViewManifest.backwardsCompatible : undefined; //TODO fix registry doesn't return this info
-    }catch(e){ }
-    try{
+    } catch (e) { }
+    try {
         shortDescription = oSystemViewManifest ? oSystemViewManifest.description : oRegistryView.shortDescription;
-    }catch(e){ }
-    try{
+    } catch (e) { }
+    try {
         git = oSystemViewManifest ? oSystemViewManifest.git : oRegistryView.git;
-    }catch(e){ }
-    try{
+    } catch (e) { }
+    try {
         website = oSystemViewManifest ? oSystemViewManifest.website : oRegistryView.website;
-    }catch(e){ }
-    try{
+    } catch (e) { }
+    try {
         license = oSystemViewManifest ? oSystemViewManifest.license : oRegistryView.license;
-    }catch(e){ }
-    try{
+    } catch (e) { }
+    try {
         sapEntries = oSystemViewManifest ? oSystemViewManifest.sapEntries : [];
-    }catch(e){ }
+    } catch (e) { }
 
 
     logger.info(`Package name: ${packageName}`);
@@ -82,53 +84,53 @@ export async function view(commandArgs: ViewArguments, actionArgs: ActionArgumen
             logger.error(`${system.getDest()} has latest version: Cannot compare`);
         }
     }
-    
-    if(devclass){
+
+    if (devclass) {
         logger.info(`Devclass: ${devclass}`);
     }
-    if(linkedTransport){
-        logger.info(`Transport request: ${linkedTransport}`);
+    if (installTransport) {
+        logger.info(`Install transport request: ${installTransport}`);
     }
-    if(backwardsCompatible !== undefined){
-        if(backwardsCompatible){
+    if (backwardsCompatible !== undefined) {
+        if (backwardsCompatible) {
             logger.success(`Backwards compatible: Yes`);
-        }else{
+        } else {
             logger.warning(`Backwards compatible: No`);
         }
     }
-    if(shortDescription){
+    if (shortDescription) {
         logger.info(`Description: ${shortDescription}`);
     }
-    if(git){
+    if (git) {
         logger.info(`Git: ${git}`);
     }
-    if(website){
+    if (website) {
         logger.info(`Website: ${website}`);
     }
-    if(license){
+    if (license) {
         logger.info(`License: ${license}`);
     }
-    if(authors){
+    if (authors) {
         logger.info(`Authors: ${authors}`);
     }
-    if(keywords){
+    if (keywords) {
         logger.info(`Keywords: ${keywords}`);
     }
 
-    if(oRegistryView && oRegistryView.userAuthorizations){
-        if(oRegistryView.userAuthorizations.canCreateReleases){
+    if (oRegistryView && oRegistryView.userAuthorizations) {
+        if (oRegistryView.userAuthorizations.canCreateReleases) {
             logger.success(`Publish allowed: Yes`);
-        }else{
+        } else {
             logger.info(`Publish allowed: No`);
         }
     }
 
-    if(sapEntries){
+    if (sapEntries) {
         logger.loading(`Checking SAP entries...`);
         const sapEntriesCheckResult = await checkSapEntries(sapEntries || {}, system);
-        if(sapEntriesCheckResult.missingSapEntries.length === 0){
+        if (sapEntriesCheckResult.missingSapEntries.length === 0) {
             logger.success(`SAP entries check OK.`);
-        }else{
+        } else {
             logger.error(`Missing ${sapEntriesCheckResult.missingSapEntries.length} SAP entries.`);
         }
     }
