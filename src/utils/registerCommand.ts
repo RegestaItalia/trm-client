@@ -1,4 +1,4 @@
-import { Argument, Command } from "commander";
+import { Command } from "commander";
 import { executeCommand } from "./executeCommand";
 import { AuthenticationType } from "trm-registry-types";
 
@@ -40,7 +40,7 @@ export function registerCommand(command: Command, args?: {
     command.option('-log, --log-type', 'Log type', 'cli');
 
     command.action(async (arg1, arg2) => {
-        var args = {
+        var args = {...{
             command: commandName,
             requiresConnection,
             requiresTrmDependencies,
@@ -48,7 +48,8 @@ export function registerCommand(command: Command, args?: {
             registryAuthBlacklist,
             noSystemAlias,
             ignoreRegistryUnreachable
-        };
+        }, ...(command['_optionValues'] || {})};
+
         if(!arg1){
             arg1 = {};
         }
