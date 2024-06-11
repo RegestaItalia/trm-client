@@ -1,20 +1,24 @@
-import { Logger, Registry } from "trm-core";
+import { Logger } from "trm-core";
 import { View } from "trm-registry-types";
+import { CommandRegistry } from "./CommandRegistry";
 
-export async function viewRegistryPackage(registry: Registry, packageName: string, logger: Logger) {
-    logger.loading(`Reading registry data...`);
+export async function viewRegistryPackage(packageName: string, print: boolean = true): Promise<View> {
+    Logger.loading(`Reading registry data...`);
     var oRegistryView: View;
     try {
-        oRegistryView = await registry.view(packageName);
+        oRegistryView = await CommandRegistry.get().view(packageName);
     } catch (e) {
+        Logger.error(e, true);
         oRegistryView = null;
     }
-    if(!oRegistryView){
-        logger.warning(`WARNING: This package was not found on the registry.`);
-        logger.warning(`WARNING: This package may have been deleted!`);
-    }else{
-        if(oRegistryView.release && oRegistryView.release.deprecated){
-            logger.warning(`WARNING: This package has been marked as deprecated!`); //TODO fix registry doesn't return deprecated note
+    if(print){
+        if(!oRegistryView){
+            Logger.warning(`WARNING: This package was not found on the registry.`);
+            Logger.warning(`WARNING: This package may have been deleted!`);
+        }else{
+            if(oRegistryView.release && oRegistryView.release.deprecated){
+                Logger.warning(`WARNING: This package has been marked as deprecated!`); //TODO fix registry doesn't return deprecated note
+            }
         }
     }
     return oRegistryView;

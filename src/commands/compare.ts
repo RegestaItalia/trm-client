@@ -1,17 +1,24 @@
 import { View } from "trm-registry-types";
-import { ActionArguments, CompareArguments } from "./arguments";
+import { CompareArguments } from "./arguments";
 import * as fs from "fs";
-import { Inquirer, Logger, SystemConnector, TrmManifest } from "trm-core";
+import { Connection, Inquirer, Logger, ServerSystemConnector } from "trm-core";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
-import { viewRegistryPackage } from "./commons";
+import { CommandRegistry, viewRegistryPackage } from "./commons";
 
-const _promptConnections = async (inquirer: Inquirer, logger: Logger, aConnections: SystemConnector[]) => {
+const _compareConnectionData = (a: Connection, b: Connection): boolean => {
+    return a.dest === b.dest &&
+           a.ashost === b.ashost &&
+           a.sysnr === b.sysnr &&
+           a.saprouter === b.saprouter;
+}
+
+const _promptConnections = async (aConnections: ServerSystemConnector[]) => {
     if (aConnections.length > 0) {
-        logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
+        Logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
     }
     var askConnection = true;
-    const inq1 = await inquirer.prompt([{
+    const inq1 = await Inquirer.prompt([{
         message: "Add another connection?",
         name: "continue",
         type: "confirm",
@@ -20,10 +27,8 @@ const _promptConnections = async (inquirer: Inquirer, logger: Logger, aConnectio
     }]);
     askConnection = inq1.continue !== undefined ? inq1.continue : askConnection;
     if (askConnection) {
-        const connectArgs = await connect({}, {
-            inquirer
-        }, false);
-        const oConnection = new SystemConnector({
+        const connectArgs = await connect({}, false);
+        const oConnection = new ServerSystemConnector({
             ashost: connectArgs.ashost,
             dest: connectArgs.dest,
             sysnr: connectArgs.sysnr,
@@ -33,9 +38,9 @@ const _promptConnections = async (inquirer: Inquirer, logger: Logger, aConnectio
             lang: connectArgs.lang,
             user: connectArgs.user,
             passwd: connectArgs.passwd
-        }, logger);
-        if (!aConnections.find(o => o.address === oConnection.address)) {
-            await oConnection.connect(false);
+        });
+        if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
+            await oConnection.connect();
             aConnections.push(oConnection);
         }
     }
@@ -45,15 +50,12 @@ const _promptConnections = async (inquirer: Inquirer, logger: Logger, aConnectio
     }
 }
 
-export async function compare(commandArgs: CompareArguments, actionArgs: ActionArguments) {
-    const inquirer = actionArgs.inquirer;
-    const registry = actionArgs.registry;
-    const logger = actionArgs.logger;
-
+export async function compare(commandArgs: CompareArguments) {
     const packageName = commandArgs.package;
+    const registry = CommandRegistry.get();
 
     var inputConnections = commandArgs.connections;
-    var aConnections: SystemConnector[] = [];
+    var aConnections: ServerSystemConnector[] = [];
     if (inputConnections) {
         //this could be the json file path or the json itself
         inputConnections = inputConnections.trim();
@@ -70,13 +72,10 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
             throw new Error('Input connections: invalid JSON format.');
         }
         for(const sAlias of aInputConnections){
-            const oAlias = SystemAlias.get(sAlias, logger);
-            if (!oAlias) {
-                throw new Error(`Connection alias "${sAlias}" not found.`);
-            }
+            const oAlias = SystemAlias.get(sAlias);
             const oConnection = oAlias.getConnection();
-            if (!aConnections.find(o => o.address === oConnection.address)) {
-                await oConnection.connect(false);
+            if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
+                await oConnection.connect();
                 aConnections.push(oConnection);
             }
         }
@@ -84,75 +83,64 @@ export async function compare(commandArgs: CompareArguments, actionArgs: ActionA
     if (aConnections.length === 0) {
         var keepPrompt = true;
         while (keepPrompt) {
-            const oPromptRes = await _promptConnections(inquirer, logger, aConnections);
+            const oPromptRes = await _promptConnections(aConnections);
             keepPrompt = oPromptRes.continue;
             aConnections = oPromptRes.connections;
         }
     }
-
     
-    logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
+    Logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
 
-    const tableHead = [`System`, `Installed`, `Version`, `Devclass`, `Transport request`, `Dependencies check`, `SAP Entries check`];
+    const tableHead = [`System`, `Installed`, `Version`, `Devclass`, `Import transport`];
     var tableData = [];
 
-    logger.loading(`Reading registry data...`);
+    Logger.loading(`Reading registry data...`);
     var oRegistryView: View;
     try{
-        oRegistryView = await viewRegistryPackage(registry, packageName, logger);
+        oRegistryView = await viewRegistryPackage(packageName, true);
     }catch(e){ }
 
-    logger.loading(`Reading system data...`);
-    var connectionData = [];
-    var oSystemViewManifest: TrmManifest;
-    var devclass: String;
+    Logger.loading(`Reading system data...`);
+
     for (const oConnection of aConnections) {
-        connectionData = [];
-        oSystemViewManifest = null;
-        devclass = null;
-        const aSystemPackages = await oConnection.getInstalledPackages(false);
+        const system = oConnection.getDest() || '';
+        var installed;
+        var version;
+        var devclass;
+        var importTransport;
+        const aSystemPackages = await oConnection.getInstalledPackages(true);
         const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
-        try {
-            oSystemViewManifest = oSystemView.manifest.get(true);
-        } catch (e) { }
-        connectionData.push(oConnection.getDest());
-        connectionData.push(oSystemViewManifest ? `Yes` : `No`);
-        connectionData.push(oSystemViewManifest ? oSystemViewManifest.version : '');
-        if(!oSystemView.getDevclass() && oSystemViewManifest && oSystemViewManifest.linkedTransport){
-            try{
-                devclass = await oSystemViewManifest.linkedTransport.getDevclass();
-            }catch(e){ }
+        if(oSystemView && oSystemView.manifest){
+            installed = 'Yes';
+            version = oSystemView.manifest.get().version || 'Unknown';
+            devclass = oSystemView.getDevclass() || 'Unknown';
+            if(oSystemView.manifest.getLinkedTransport()){
+                importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+            }else{
+                importTransport = 'Unknown';
+            }
         }else{
-            devclass = oSystemView.getDevclass();
+            installed = 'No';
+            version = '';
+            devclass = '';
+            importTransport = '';
         }
-        connectionData.push(devclass || '');
-        if(oSystemViewManifest && oSystemViewManifest.linkedTransport){
-            connectionData.push(oSystemViewManifest.linkedTransport.trkorr);
-        }else{
-            connectionData.push('');
-        }
-        if(oSystemViewManifest){
-            //const dependenciesCheckResult = await checkDependencies()
-            /*const sapEntriesCheckResult = await checkSapEntries(oSystemViewManifest.sapEntries || {}, oConnection);
-            connectionData.push('Passed');
-            connectionData.push(sapEntriesCheckResult.missingSapEntries.length === 0 ? 'Passed' : 'Failed');*/
-            connectionData.push('');
-            connectionData.push('');
-        }else{
-            connectionData.push('');
-            connectionData.push('');
-        }
-        tableData.push(connectionData);
+        tableData.push([
+            system,
+            installed,
+            version,
+            devclass,
+            importTransport
+        ]);
     }
 
-
-    logger.info(`Package name: ${packageName}`);
-    logger.info(`Registry: ${registry.name}`);
+    Logger.info(`Package name: ${packageName}`);
+    Logger.info(`Registry: ${registry.name}`);
     try {
-        logger.info(`Latest version: ${oRegistryView.release.version}`);
+        Logger.info(`Latest version: ${oRegistryView.release.version}`);
     } catch (e) {
-        logger.warning(`Latest version: Unknown`);
+        Logger.warning(`Latest version: Unknown`);
     }
-    logger.log(` `);
-    logger.table(tableHead, tableData);
+    Logger.log(`\n`);
+    Logger.table(tableHead, tableData);
 }

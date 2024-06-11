@@ -1,14 +1,19 @@
+import { Logger } from "trm-core";
 import { TrmDependencies, getClientVersion } from "../utils";
-import { ActionArguments, InfoArguments } from "./arguments";
+import { InfoArguments } from "./arguments";
 
-export async function info(commandArgs: InfoArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
+export async function info(commandArgs: InfoArguments) {
     const clientVersion = getClientVersion();
     const trmServer = TrmDependencies.getInstance().get('trm-server');
-    logger.info(`Client version: ${clientVersion}`);
+    Logger.info(`trm-client version: ${clientVersion}`);
     if(trmServer){
-        logger.info(`Server version: ${trmServer.manifest!.get().version}`);
+        try{
+            Logger.info(`trm-server version: ${trmServer.manifest!.get().version}`);
+        }catch(e){
+            Logger.error(`trm-server version: unknown`);
+            Logger.error(e, true);
+        }
     }else{
-        logger.warning(`Server version: not installed`);
+        Logger.warning(`trm-server version: not installed`);
     }
 }

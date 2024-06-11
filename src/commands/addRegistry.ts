@@ -1,10 +1,9 @@
+import { Inquirer, Logger } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
-import { ActionArguments, AddRegistryArguments } from "./arguments";
+import { AddRegistryArguments } from "./arguments";
 
-export async function addRegistry(commandArgs: AddRegistryArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
-    const inquirer = actionArgs.inquirer;
-    const registryName = commandArgs.registry.trim();
+export async function addRegistry(commandArgs: AddRegistryArguments) {
+    const registryName = commandArgs.registryName.trim();
     const auth = commandArgs.authentication;
     var endpoint = commandArgs.endpoint;
     var oAuth;
@@ -18,7 +17,7 @@ export async function addRegistry(commandArgs: AddRegistryArguments, actionArgs:
             throw new Error(`Invalid authentication JSON object.`);
         }
     }
-    const inq1 = await inquirer.prompt({
+    const inq1 = await Inquirer.prompt({
         type: "input",
         name: "endpoint",
         message: "Registry endpoint",
@@ -26,16 +25,18 @@ export async function addRegistry(commandArgs: AddRegistryArguments, actionArgs:
         when: !endpoint
     });
     endpoint = inq1.endpoint || endpoint;
-    const registry = RegistryAlias.create(registryName, endpoint, oAuth, logger);
+    const registry = RegistryAlias.create(registryName, endpoint, oAuth)
     var pingSuccess = true;
     try{
-        await registry.getRegistry(false, inquirer)
+        const ping = await registry.getRegistry().ping();
+        Logger.registryResponse(ping.wallMessage);
     }catch(e){
+        Logger.error(`Ping to registry "${registryName}" (${endpoint}) failed.`);
         pingSuccess = false;
         throw e;
     }finally{
         if(pingSuccess){
-            logger.success(`Registry added.`);
+            Logger.success(`Registry "${registryName}" added.`);
         }else{
             RegistryAlias.delete(registryName);
         }

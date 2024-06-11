@@ -1,14 +1,9 @@
 import { install as action } from "trm-core";
-import { ActionArguments, InstallArguments } from "./arguments";
+import { InstallArguments } from "./arguments";
 import * as fs from "fs";
 
-export async function install(commandArgs: InstallArguments, actionArgs: ActionArguments) {
-    const inquirer = actionArgs.inquirer;
-    const system = actionArgs.system;
-    const registry = actionArgs.registry;
-    const logger = actionArgs.logger;
-
-    const packageName = commandArgs.package;
+export async function install(commandArgs: InstallArguments) {
+    /*const packageName = commandArgs.package;
     const packageVersion = commandArgs.version || 'latest';
     const forceInstall = commandArgs.force;
     const safe = commandArgs.safe;
@@ -48,9 +43,9 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
         } catch (e) {
             throw new Error('Input package replacements: invalid JSON format.');
         }
-    }
+    }*/
 
-    await action({
+    /*await action({
         packageName,
         version: packageVersion,
         forceInstall,
@@ -65,5 +60,5 @@ export async function install(commandArgs: InstallArguments, actionArgs: ActionA
         skipLang,
         targetSystem,
         transportLayer
-    }, inquirer, system, registry, logger);
+    }, inquirer, system, registry, logger);*/
 }

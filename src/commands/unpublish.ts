@@ -1,11 +1,10 @@
 
-import { ActionArguments, UnpublishArguments } from "./arguments";
+import { UnpublishArguments } from "./arguments";
 import * as semver from "semver";
+import { CommandRegistry } from "./commons";
+import { Logger } from "trm-core";
 
-export async function unpublish(commandArgs: UnpublishArguments, actionArgs: ActionArguments) {
-    const registry = actionArgs.registry;
-    const logger = actionArgs.logger;
-
+export async function unpublish(commandArgs: UnpublishArguments) {
     const packageName = commandArgs.package;
     const packageVersion = semver.clean(commandArgs.version || '');
     
@@ -13,7 +12,7 @@ export async function unpublish(commandArgs: UnpublishArguments, actionArgs: Act
         throw new Error(`Invalid version.`);
     }
 
-    await registry.unpublish(packageName, packageVersion);
+    await CommandRegistry.get().unpublish(packageName, packageVersion);
 
-    logger.success(`- ${packageName.trim()} v${packageVersion}`);
+    Logger.success(`- ${packageName.trim()} v${packageVersion}`);
 }

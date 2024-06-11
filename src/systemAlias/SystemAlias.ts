@@ -1,4 +1,4 @@
-import { Connection, Logger, Login, SystemConnector } from "trm-core";
+import { Connection, Login, ServerSystemConnector } from "trm-core";
 import { getRoamingFolder } from "../utils";
 import path from "path";
 import * as fs from "fs";
@@ -9,10 +9,10 @@ const SYSTEM_FILE_NAME = "systems.ini";
 
 export class SystemAlias {
 
-    constructor(private _connection: Connection, private _login: Login, private _logger?: Logger) { }
+    constructor(private _connection: Connection, private _login: Login) { }
 
-    public getConnection(): SystemConnector {
-        return new SystemConnector(this._connection, this._login, this._logger);
+    public getConnection(): ServerSystemConnector {
+        return new ServerSystemConnector(this._connection, this._login);
     }
 
     private static generateFile(content: SystemAliasData[], filePath?: string): void {
@@ -67,15 +67,20 @@ export class SystemAlias {
         return aAlias;
     }
 
-    public static get(name: string, logger?: Logger): SystemAlias {
+    public static get(name: string): SystemAlias {
         const aAlias = this.getAll();
         const alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if(alias){
-            return new SystemAlias(alias.connection, alias.login, logger);
+            return new SystemAlias(alias.connection, alias.login);
+        }else{
+            throw new Error(`System alias "${name}" not found.`);
         }
     }
 
-    public static create(name: string, connection: Connection, login: Login, logger?: Logger): SystemAlias {
+    public static create(name: string, connection: Connection, login: Login): SystemAlias {
+        if(!name){
+            throw new Error(`Invalid alias name.`);
+        }
         var aAlias = this.getAll();
         const alreadyExists = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase()) ? true : false;
         if(alreadyExists){
@@ -88,7 +93,7 @@ export class SystemAlias {
             });
             this.generateFile(aAlias);
         }
-        return new SystemAlias(connection, login, logger);
+        return new SystemAlias(connection, login);
     }
 
     public static delete(name: string): void {

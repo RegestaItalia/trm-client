@@ -10,3 +10,5 @@ export * from "./checkCliUpdate";
 export * from "./getClientPackage";
 export * from "./getClientVersion";
 export * from "./TrmDependencies";
+export * from "./getTempFolder";
+export * from "./getLogFolder";

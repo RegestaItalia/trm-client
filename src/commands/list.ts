@@ -1,52 +1,38 @@
-import { RegistryType, TrmManifest } from "trm-core";
-import { ActionArguments, ListArguments } from "./arguments";
+import { Logger, RegistryType, SystemConnector } from "trm-core";
+import { ListArguments } from "./arguments";
 
-export async function list(commandArgs: ListArguments, actionArgs: ActionArguments) {
-    const system = actionArgs.system;
-    const logger = actionArgs.logger;
-
-    logger.loading(`Reading packages...`);
-    const aPackages = await system.getInstalledPackages(true);
+export async function list(commandArgs: ListArguments) {
+    Logger.loading(`Reading packages...`);
+    const dest = SystemConnector.getDest();
+    const aPackages = await SystemConnector.getInstalledPackages(true);
     if (aPackages.length > 0) {
-        const tableHead = [`Package name`, `Version`, `Registry`, `Devclass`, `Transport request`];
+        const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `Import transport`];
         var tableData = [];
-
-        var connectionData = [];
-        var tkrorr: string;
-        var devclass: string;
-        var manifest: TrmManifest;
         for (const oPackage of aPackages) {
-            connectionData = [];
-            tkrorr = null;
-            devclass = null;
-            manifest = null;
-            const oManifest = oPackage.manifest;
-            if (oManifest) {
-                manifest = oManifest.get(true);
-                const linkedTransport = oManifest.getLinkedTransport();
-                if(!oPackage.getDevclass() && linkedTransport){
-                    try{
-                        devclass = await linkedTransport.getDevclass();
-                    }catch(e){ }
-                }else{
-                    devclass = oPackage.getDevclass();
-                }
-                if (linkedTransport) {
-                    tkrorr = linkedTransport.trkorr;
-                }
+            try{
+                const packageName = oPackage.packageName || '';
+                const version = oPackage.manifest.get().version || '';
+                const registry = oPackage.registry.getRegistryType() === RegistryType.PUBLIC ? 'public' : oPackage.registry.endpoint;
+                const devclass = oPackage.getDevclass() || '';
+                const importTransport = oPackage.manifest.getLinkedTransport().trkorr;
+                tableData.push([
+                    packageName,
+                    version,
+                    registry,
+                    devclass,
+                    importTransport
+                ]);
+            }catch(e){
+                Logger.error(e, true);
             }
-            connectionData.push(oPackage.packageName);
-            connectionData.push(manifest ? manifest.version : '');
-            connectionData.push(oPackage.registry.getRegistryType() === RegistryType.PUBLIC ? 'public' : oPackage.registry.endpoint);
-            connectionData.push(devclass || '');
-            connectionData.push(tkrorr || '');
-            tableData.push(connectionData);
         }
-
-        logger.info(`${system.getDest()} has ${aPackages.length} packages.`);
-        logger.log(` `);
-        logger.table(tableHead, tableData);
+        if(tableData.length < aPackages.length){
+            Logger.warning(`${aPackages.length - tableData.length} packages couldn't be printed (check logs).`);
+        }
+        Logger.info(`${dest} has ${aPackages.length} packages.`);
+        Logger.log(`\n`);
+        Logger.table(tableHead, tableData);
     } else {
-        logger.info(`No packages found.`);
+        Logger.info(`${dest} has 0 packages.`);
     }
 }

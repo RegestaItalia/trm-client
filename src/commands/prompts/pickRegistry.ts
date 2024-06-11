@@ -1,34 +1,29 @@
+import { Inquirer } from "trm-core";
 import { RegistryAlias } from "../../registryAlias";
-import { ActionArguments } from "../arguments";
 
-export async function pickRegistry(actionArgs: ActionArguments, alias?: string): Promise<RegistryAlias> {
-    const inquirer = actionArgs.inquirer;
-    const logger = actionArgs.logger;
+export async function pickRegistry(): Promise<RegistryAlias> {
     var registryAlias: RegistryAlias;
-    var allRegistries = RegistryAlias.getAll();
-    if(!allRegistries.find(o => o.alias.trim().toLowerCase() === 'public')){
-        RegistryAlias.create('public', 'public', null, logger);
-        allRegistries = RegistryAlias.getAll();
+
+    //generate public alias if it doesn't exist
+    RegistryAlias.generatePublicRegistryAlias();
+
+    const allAliases = RegistryAlias.getAll();
+    if (allAliases.length === 1) {
+        registryAlias = RegistryAlias.get(allAliases[0].alias);
+    } else {
+        const inq1 = await Inquirer.prompt({
+            type: "list",
+            name: "alias",
+            message: `Choose registry`,
+            choices: allAliases.map(o => {
+                return {
+                    name: o.alias,
+                    value: o.alias
+                }
+            })
+        });
+        registryAlias = RegistryAlias.get(inq1.alias);
     }
-    if(!alias){
-        if(allRegistries.length === 1){
-            registryAlias = RegistryAlias.get(allRegistries[0].alias, logger);
-        }else{
-            const inq1 = await inquirer.prompt({
-                type: "list",
-                name: "alias",
-                message: `Select registry`,
-                choices: allRegistries.map(o => {
-                    return {
-                        name: o.alias,
-                        value: o.alias
-                    }
-                })
-            });
-            registryAlias = RegistryAlias.get(inq1.alias, logger);
-        }
-    }else{
-        registryAlias = RegistryAlias.get(alias, logger);
-    }
+
     return registryAlias;
 }

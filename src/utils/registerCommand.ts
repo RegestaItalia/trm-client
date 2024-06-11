@@ -22,22 +22,23 @@ export function registerCommand(command: Command, args?: {
     const noSystemAlias = args.noSystemAlias ? true : false;
     const registryAuthBlacklist = args.registryAuthBlacklist || [];
     if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid...
-        command.option(`-d, --dest <dest>`, `System ID`)
-            .option(`-u, --user <user>`, `System User Logon`)
-            .option(`-p, --passwd <passwd>`, `System User Logon Password`)
-            .option(`-c, --client <client>`, `System Logon Client`)
-            .option(`-l, --lang <lang>`, `System User Logon Language`)
-            .option(`-h, --ashost <ashost>`, `System application server address`)
-            .option(`-s, --sapRouter <sapRouter>`, `System SAP Router string`)
-            .option(`-n, --sysnr <sysnr>`, `System instance number`);
+        command.option(`-d, --dest <dest>`, `System ID.`)
+            .option(`-u, --user <user>`, `System User Logon.`)
+            .option(`-p, --passwd <passwd>`, `System User Logon Password.`)
+            .option(`-c, --client <client>`, `System Logon Client.`)
+            .option(`-l, --lang <lang>`, `System User Logon Language.`, 'EN')
+            .option(`-h, --ashost <ashost>`, `System application server address.`)
+            .option(`-s, --saprouter <sapRouter>`, `System SAP Router string.`)
+            .option(`-n, --sysnr <sysnr>`, `System instance number.`);
         if (!noSystemAlias) {
-            command.option(`-a, --systemAlias <systemAlias>`, `System Alias`);
+            command.option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
         }
     }
     if(requiresRegistry){
-        command.option(`-r, --registry <registry>`, `Registry`);
+        command.option(`-r, --registry <registry>`, `Registry name.`);
     }
-    command.option('-log, --log-type', 'Log type', 'cli');
+    command.option('-log, --logType', 'Log type.', 'CLI');
+    command.option('-v, --verbose', 'Verbose logging.', false);
 
     command.action(async (arg1, arg2) => {
         var args = {...{
