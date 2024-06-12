@@ -1,64 +1,78 @@
-import { install as action } from "trm-core";
 import { InstallArguments } from "./arguments";
-import * as fs from "fs";
+import { InstallPackageReplacements, install as action } from "trm-core";
+import { CommandRegistry } from "./commons";
+import * as fs from 'fs';
+import { getTempFolder } from "../utils";
 
-export async function install(commandArgs: InstallArguments) {
-    /*const packageName = commandArgs.package;
-    const packageVersion = commandArgs.version || 'latest';
-    const forceInstall = commandArgs.force;
-    const safe = commandArgs.safe;
-    const ignoreSapEntries = commandArgs.ignoreSapEntries;
-    const skipDependencies = commandArgs.skipDependencies;
-    const skipLang = commandArgs.skipLang;
-    const keepOriginalPackages = commandArgs.keepOriginalPackages;
-    const skipWorkbenchTransport = commandArgs.skipWorkbenchTransport;
-    const targetSystem = commandArgs.targetSystem;
-    const transportLayer = commandArgs.transportLayer;
-    const ci = commandArgs.ci;
-    var importTimeout;
-    try{
-        importTimeout = parseInt(commandArgs.importTimeout);
-    }catch(e){
-        importTimeout = 180;
-    }
-
-    var packageReplacements;
-    var inputPackageReplacementsArg = commandArgs.packageReplacements;
-    if (inputPackageReplacementsArg) {
+const _parsePackageReplacementsArgument = (packageReplacements: string): InstallPackageReplacements[] => {
+    var returnValue: InstallPackageReplacements[] = [];
+    if (packageReplacements) {
         //this could be the json file path or the json itself
-        inputPackageReplacementsArg = inputPackageReplacementsArg.trim();
-        var sInputPackageReplacements;
-        if (inputPackageReplacementsArg[0] === '{') {
-            sInputPackageReplacements = inputPackageReplacementsArg;
+        packageReplacements = packageReplacements.trim();
+        var sInput;
+        if (packageReplacements[0] === '[') {
+            sInput = packageReplacements;
         } else {
-            sInputPackageReplacements = fs.readFileSync(inputPackageReplacementsArg);
+            sInput = fs.readFileSync(packageReplacements);
         }
         try {
-            packageReplacements = JSON.parse(sInputPackageReplacements);
-            packageReplacements.forEach(o => {
-                if(!o.originalDevclass || !o.installDevclass){
-                    throw new Error();
-                }
-            });
+            returnValue = JSON.parse(sInput);
         } catch (e) {
-            throw new Error('Input package replacements: invalid JSON format.');
+            throw new Error('Input package replacements map: invalid JSON format.');
         }
-    }*/
+    }
+    return returnValue;
+}
 
-    /*await action({
-        packageName,
+const _parseImportTimeoutArg = (arg: string): number => {
+    if(arg){
+        try{
+            return parseInt(arg);
+        }catch(e){ }
+    }
+}
+
+export async function install(commandArgs: InstallArguments) {
+    const registry = CommandRegistry.get();
+    const packageName = commandArgs.package;
+    const packageVersion = commandArgs.version || 'latest';
+    const transportLayer = commandArgs.transportLayer;
+    const force = commandArgs.force;
+    const keepOriginalDevclass = commandArgs.keepOriginals ? true : false;
+    const importTimeout = _parseImportTimeoutArg(commandArgs.importTimeout);
+    const generateTransport = commandArgs.workbenchGen;
+    const skipSapEntriesCheck = commandArgs.skipSapEntries;
+    const skipObjectTypesCheck = commandArgs.skipObjectsCheck;
+    const skipLangImport = commandArgs.skipLang;
+    const skipCustImport = commandArgs.skipCustomizing;
+    const ignoreDependencies = commandArgs.skipDependencies;
+    const wbTrTargetSystem = commandArgs.workbenchTarget;
+    const silent = commandArgs.silent;
+    const packageReplacements = _parsePackageReplacementsArgument(commandArgs.packageReplacements);
+    const allowReplace = commandArgs.replaceAllowed;
+    
+    const tmpFolder = getTempFolder(); 
+    await action({
+        packageName: packageName,
+        registry: registry,
         version: packageVersion,
-        forceInstall,
-        safe,
-        ci,
+        r3transOptions: {
+            //r3transDirPath: '',
+            tempDirPath: tmpFolder
+        },
+        transportLayer,
+        force,
+        keepOriginalDevclass,
         importTimeout,
-        ignoreSapEntries,
-        keepOriginalPackages,
+        generateTransport,
+        skipSapEntriesCheck,
+        skipObjectTypesCheck,
+        skipLangImport,
+        skipCustImport,
+        ignoreDependencies,
+        wbTrTargetSystem,
+        silent,
         packageReplacements,
-        skipWbTransport: skipWorkbenchTransport,
-        skipDependencies,
-        skipLang,
-        targetSystem,
-        transportLayer
-    }, inquirer, system, registry, logger);*/
+        allowReplace
+    });
 }

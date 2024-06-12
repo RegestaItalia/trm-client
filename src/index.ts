@@ -106,20 +106,24 @@ registerCommand(unpublish, {
 });
 
 /*INSTALL*/
-const install = program.command(`install <package> [version]`)
-    .description(`Install package`)
-    .option(`-f, --force`, `Force install.`, false)
-    .option(`-sf, --safe`, `Safe install (Integrity check).`, false)
-    .option(`-ci, --ci`, `Clean install, flag used to avoid unnecessary prompts.`, false)
-    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
-    .option(`-is, --ignoreSapEntries`, `Ignore missing SAP entries.`, false)
-    .option(`-sd, --skipDependencies`, `Skip dependencies install.`, false)
-    .option(`-sl, --skipLang`, `Skip translation transports.`, false)
-    .option(`-swb, --skipWorkbenchTransport`, `Skip workbench transport generation.`, false)
-    .option(`-k, --keepOriginalPackages`, `Keep original packages.`, false)
-    .option(`-pr, --packageReplacements`, `Path to JSON file or JSON containing package replacements.`)
-    .option(`-ts, --targetSystem`, `Generated transport target system.`)
-    .option(`-tl, --transportLayer`, `Devclass transport layers.`);
+const install = program.command(`install <package> [version]`) //OK
+    .description(`Install package from registry to system`)
+    .addHelpText(`before`, `When no version is specified, the latest will be installed.
+This command won't let you update/downgrade a package unless specified differently with the appropriate flag.`)
+    .option(`-tl, --transportLayer <transportLayer>`,`Transport layer used for package generation. (default: System default)`)
+    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists`, false)
+    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists)`, false)
+    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds)`, '180')
+    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape`, true)
+    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check`, false)
+    .option(`-so, --skipObjectsCheck`, `Skip object types check`, false)
+    .option(`-sl, --skipLang`, `Skip translation transport`, false)
+    .option(`-sc, --skipCustomizing`, `Skip customizing transport`, false)
+    .option(`-sd, --skipDependencies`, `Skip dependencies`, false)
+    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate (default: None)`)
+    .option(`-s, --silent`, `No manual inputs`, false)
+    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map`)
+    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade`, false);
 registerCommand(install, {
     requiresConnection: true,
     requiresRegistry: true,
