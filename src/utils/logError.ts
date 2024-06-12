@@ -1,6 +1,10 @@
 import { Logger, SystemConnector } from "trm-core";
 
 export async function logError(e: Error) {
+    //temporary solution for workflow exceptions
+    if(e['stepName'] && e['originalException']){
+        e = e['originalException'];
+    }
     var sError = e.toString();
     if (e.name === 'TrmRegistryError') {
         const status = e['status'];
