@@ -90,7 +90,7 @@ If a default manifest with dependencies is provided in conjunction with the auto
     .option(`-ses, --skipEditSapEntries`, `Skip SAP entries edit prompt.`, false)
     .option(`-sed, --skipEditDependencies`, `Skip dependencies edit prompt.`, false)
     .option(`-srm, --skipReadme`, `Skip readme prompt.`, false)
-    .option(`-st, --silent`, `Avoid unnecessary prompts.`, false)
+    //.option(`-st, --silent`, `Avoid unnecessary prompts.`, false)
     .option(`-to, --releaseTimeout <timeout>`, `Release timeout (in seconds).`, '180');
 registerCommand(publish, {
     requiresConnection: true,

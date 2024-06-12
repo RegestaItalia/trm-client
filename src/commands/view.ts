@@ -1,8 +1,9 @@
 import { ViewArguments } from "./arguments";
-import { Logger, SystemConnector, TrmPackage } from "trm-core";
+import { Logger, SystemConnector, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandRegistry, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
+import { RegistryAlias } from "../registryAlias";
 
 type PrintManifest = {
     devclass?: string,
@@ -89,6 +90,37 @@ const _printManifestSection = (manifest: PrintManifest) => {
     }
 }
 
+const _printDependenciesSection = (dependencies: TrmManifestDependency[]) => {
+    if(dependencies.length > 0){
+        Logger.log(''); //new line
+        Logger.info(`This package has a total of ${dependencies.length} dependencies.`);
+        const registryAliases = RegistryAlias.getAll();
+        const tableHead = [`Name`, `Version`, `Registry`];
+        var tableData = [];
+        dependencies.forEach(o => {
+            const dependencyName = o.name;
+            const dependencyVersion = o.version;
+            var dependencyRegistry;
+            if(!o.registry || o.registry.trim().toLowerCase() === 'public'){
+                dependencyRegistry = 'public';
+            }else{
+                const oRegistryAlias = registryAliases.find(k => k.endpointUrl === o.registry);
+                if(oRegistryAlias){
+                    dependencyRegistry = oRegistryAlias.alias;
+                }else{
+                    dependencyRegistry = o.registry;
+                }
+            }
+            tableData.push([
+                dependencyName,
+                dependencyVersion,
+                dependencyRegistry
+            ]);
+        });
+        Logger.table(tableHead, tableData);
+    }
+}
+
 export async function view(commandArgs: ViewArguments) {
     const packageName = commandArgs.package;
     const dest = SystemConnector.getDest();
@@ -100,13 +132,28 @@ export async function view(commandArgs: ViewArguments) {
     var authors: string;
     var keywords: string;
     var printManifest: PrintManifest;
+    var dependencies: TrmManifestDependency[];
     if(oSystemView){
         if(!oSystemView.manifest){
             throw new Error(`Package "${packageName}" found, but manifest is missing on ${dest}!`);
         }
         const oSystemManifest = oSystemView.manifest.get();
         if(Array.isArray(oSystemManifest.authors)){
-            authors = oSystemManifest.authors.join(', ');
+            authors = oSystemManifest.authors.map(o => {
+                var sAuthor;
+                if(o.email){
+                    if(o.name){
+                        sAuthor = `${o.name} <${o.email}>`
+                    }else{
+                        sAuthor = o.email;
+                    }
+                }else if(o.name){
+                    sAuthor = o.name;
+                }else{
+                    return undefined;
+                }
+                return sAuthor;
+            }).join(', ');
         }else{
             authors = oSystemManifest.authors;
         }
@@ -116,6 +163,7 @@ export async function view(commandArgs: ViewArguments) {
             keywords = oSystemManifest.keywords;
         }
         const importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+        dependencies = oSystemManifest.dependencies || [];
         printManifest = {
             devclass: oSystemView.getDevclass(),
             private: oSystemManifest.private,
@@ -129,6 +177,7 @@ export async function view(commandArgs: ViewArguments) {
             importTransport
         };
     }else if(oRegistryView){
+        dependencies = [];
         printManifest = {
             private: oRegistryView.private,
             description: oRegistryView.shortDescription,
@@ -146,4 +195,5 @@ export async function view(commandArgs: ViewArguments) {
     _printHeaderSection(packageName);
     _printVersionSection(oSystemView, oRegistryView);
     _printManifestSection(printManifest);
+    _printDependenciesSection(dependencies);
 }
