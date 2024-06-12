@@ -71,13 +71,13 @@ registerCommand(ping, {
 const publish = program.command(`publish <package> [version]`) //OK
     .description(`Publish package to registry.`)
     .addHelpText(`before`, `When no version is defined, it will automatically set to:
-                            - When it's the first release ever: 1.0.0
-                            - When it's already published: the latest available released with patch increased by 1
-                            When it's the first publish, full manifest definition is asked (unless running with flags that will disable it).
-                            When a release is already published, the latest available manifest is used and no overwrite is expected (unless specified by flags).
-                            Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flags).
-                            Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flags).
-                            If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
+- When it's the first release ever: 1.0.0
+- When it's already published: the latest available released with patch increased by 1
+When it's the first publish, full manifest definition is asked (unless running with flags that will disable it).
+When a release is already published, the latest available manifest is used and no overwrite is expected (unless specified by flags).
+Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flags).
+Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flags).
+If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
     .option(`-d, --devclass <devclass`, `Devclass (SAP package) that contains user custom developments to publish. `)
     .option(`-t, --target <target>`, `TMS Target (Used for transport release).`)
     .option(`-m, --manifest <manifestJson>`, `Path to JSON file or JSON string containing manifest publish default values.`)
@@ -130,7 +130,7 @@ registerCommand(install, {
 const view = program.command(`view <package>`) //OK
     .description(`View package`)
     .addHelpText(`before`, `Shows package details.
-                            If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
+If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
 registerCommand(view, {
     requiresConnection: true,
     requiresRegistry: true
