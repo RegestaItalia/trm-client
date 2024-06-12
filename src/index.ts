@@ -154,7 +154,7 @@ const list = program.command(`list`) //OK
 registerCommand(list, {
     requiresConnection: true
 });
-/*CHECK*/
+/*CHECK TOOLS*/
 const check = program.command(`check <package>`) //OK
     .description(`Analyze installed package status on a system`)
     .option(`-at, --analysisType`, `Analysis type`);
@@ -162,6 +162,12 @@ registerCommand(check, {
     requiresConnection: true,
     requiresRegistry: true,
     ignoreRegistryUnreachable: true
+});
+const findDependencies = program.command(`findDependencies <devclass>`)
+    .description(`Find SAP package dependencies with custom packages/trm packages/SAP Entries`)
+    .option(`-se, --sapEntries`, `Show list of required SAP Entries`, false)
+registerCommand(findDependencies, {
+    requiresConnection: true
 });
 
 /*INFO*/

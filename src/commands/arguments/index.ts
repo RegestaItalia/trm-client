@@ -16,3 +16,4 @@ export * from "./InfoArguments";
 export * from "./CheckArguments";
 export * from "./UnpublishArguments";
 export * from "./RemoveRegistryArguments";
+export * from "./FindDependenciesArguments";
