@@ -5,6 +5,7 @@ import { CommandRegistry } from "./commons";
 var systemPackages: TrmPackage[] = [];
 
 const _dependencies = async (oPackage: TrmPackage) => {
+    Logger.loading(`Analyzing package dependencies...`);
     await checkPackageDependencies({
         trmPackage: oPackage,
         systemPackages,
@@ -13,6 +14,7 @@ const _dependencies = async (oPackage: TrmPackage) => {
 }
 
 const _sapEntries = async (oPackage: TrmPackage) => {
+    Logger.loading(`Analyzing package SAP Entries...`);
     await checkSapEntries({
         trmPackage: oPackage,
         print: true

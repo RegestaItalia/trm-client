@@ -16,3 +16,4 @@ export * from "./ping";
 export * from "./removeRegistry";
 export * from "./unpublish";
 export * from "./info";
+export * from "./check";
