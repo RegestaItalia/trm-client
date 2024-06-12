@@ -1,11 +1,10 @@
 import { Registry, SystemConnector } from "trm-core";
 import { satisfies } from "semver";
-import { getClientPackage } from "./getClientPackage";
 import { TrmDependencies } from "./TrmDependencies";
+import { getTrmDependencies } from "./getTrmDependencies";
 
 export async function checkTrmDependencies() {
-    const trmClientPackage = getClientPackage();
-    const trmDependencies = trmClientPackage.trmDependencies;
+    const trmDependencies = getTrmDependencies();
     if(trmDependencies && Object.keys(trmDependencies).length > 0){
         const oPublicRegistry = new Registry('public');
         const aSystemPackages = await SystemConnector.getInstalledPackages(true);
