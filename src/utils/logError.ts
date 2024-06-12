@@ -2,7 +2,7 @@ import { Logger, SystemConnector } from "trm-core";
 
 export async function logError(e: Error) {
     var sError = e.toString();
-    if (e.name === 'AxiosError') {
+    if (e.name === 'TrmRegistryError') {
         const apiResponse = e['response'];
         sError = `${apiResponse.status} ${apiResponse.statusText}`;
         if (apiResponse.status === 401) {
@@ -11,9 +11,9 @@ export async function logError(e: Error) {
     }
     if (e.name === 'ABAPError') {
         if(e['key'] === 'TRM_RFC_UNAUTHORIZED'){
-            sError = `You are not authorized to access TRM RFC Functions.`;
+            sError = `You are not authorized to access TRM RFC functions.`;
             if(SystemConnector.systemConnector){
-                sError += ` Ask BASIS to enable user "${SystemConnector.getLogonUser()}".`;
+                sError += ` Ask to enable user "${SystemConnector.getLogonUser()}" on ${SystemConnector.getDest()}.`;
             }
         }else{
             try {
@@ -35,7 +35,6 @@ export async function logError(e: Error) {
     if(e.name === 'RfcLibError'){
         sError = e.message;
     }
-    
     if (!Logger.logger) {
         console.error(sError);
     }else{
