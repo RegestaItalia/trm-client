@@ -20,7 +20,7 @@ registerCommand(createAlias, {
 const deleteAlias = program.command(`deleteAlias <alias>`) //OK
     .description(`Delete a system alias`);
 registerCommand(deleteAlias);
-const manageAliases = program.command(`alias`) //OK partially - needs edit function
+const manageAliases = program.command(`alias`) //OK
     .description(`List and manage aliases`)
     .option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
 registerCommand(manageAliases);

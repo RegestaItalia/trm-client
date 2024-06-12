@@ -1,8 +1,9 @@
 import { Inquirer, Logger } from "trm-core";
 import { SystemAlias, SystemAliasData } from "../systemAlias";
-import { AliasArguments } from "./arguments";
+import { AliasArguments, ConnectArguments } from "./arguments";
 import { createAlias } from "./createAlias";
 import { deleteAlias } from "./deleteAlias";
+import { connect } from "./prompts";
 
 const _create = async () => {
     const inq1 = await Inquirer.prompt({
@@ -24,42 +25,42 @@ const _view = (alias: SystemAliasData) => {
     const lang = alias.login.lang;
     const user = alias.login.user;
     const hasPassword = alias.login.passwd ? true : false;
-    if(dest){
+    if (dest) {
         Logger.info(`System ID: ${dest}`);
-    }else{
+    } else {
         Logger.warning(`System ID: Unknown`);
     }
-    if(ashost){
+    if (ashost) {
         Logger.info(`Application server: ${ashost}`);
-    }else{
+    } else {
         Logger.warning(`Application server: Unknown`);
     }
-    if(sysnr){
+    if (sysnr) {
         Logger.info(`Instance number: ${sysnr}`);
-    }else{
+    } else {
         Logger.warning(`Instance number: Unknown`);
     }
-    if(saprouter){
+    if (saprouter) {
         Logger.info(`SAProuter: ${saprouter}`);
     }
-    if(client){
+    if (client) {
         Logger.info(`Logon client: ${client}`);
-    }else{
+    } else {
         Logger.warning(`Logon client: Unknown`);
     }
-    if(lang){
+    if (lang) {
         Logger.info(`Logon language: ${lang}`);
-    }else{
+    } else {
         Logger.warning(`Logon language: Unknown`);
     }
-    if(user){
+    if (user) {
         Logger.info(`Logon user: ${user}`);
-    }else{
+    } else {
         Logger.warning(`Logon user: Unknown`);
     }
-    if(hasPassword){
+    if (hasPassword) {
         Logger.info(`Logon password: Saved`);
-    }else{
+    } else {
         Logger.warning(`Logon password: Unknown`);
     }
 }
@@ -67,17 +68,59 @@ const _view = (alias: SystemAliasData) => {
 const _check = async (alias: SystemAliasData) => {
     Logger.loading(`Checking connection with alias "${alias.alias}"...`);
     const oSystemAlias = new SystemAlias(alias.connection, alias.login);
-    try{
+    try {
         await oSystemAlias.getConnection().connect();
         Logger.success(`Connection OK.`);
-    }catch(e){
+    } catch (e) {
         Logger.error(`Connection failed!`);
         Logger.error(e.toString());
     }
 }
 
 const _edit = async (alias: SystemAliasData) => {
-    //
+    var connectionSuccess = true;
+    const connectionArgs = await connect({
+        ...alias.connection,
+        ...alias.login,
+        ...{
+            noSystemAlias: true
+        }
+    } as ConnectArguments, false);
+    try {
+        SystemAlias.delete(alias.alias);
+        const updatedAlias = SystemAlias.create(alias.alias, {
+            ashost: connectionArgs.ashost,
+            dest: connectionArgs.dest,
+            sysnr: connectionArgs.sysnr,
+            saprouter: connectionArgs.saprouter
+        }, {
+            client: connectionArgs.client,
+            lang: connectionArgs.lang,
+            passwd: connectionArgs.passwd,
+            user: connectionArgs.user
+        });
+        await updatedAlias.getConnection().connect();
+    } catch (e) {
+        connectionSuccess = false;
+        throw e;
+    } finally {
+        if (connectionSuccess) {
+            Logger.success(`Alias "${alias.alias}" updated.`);
+        } else {
+            Logger.error(`Alias "${alias.alias}" couldn't be updated.`);
+            SystemAlias.create(alias.alias, {
+                ashost: alias.connection.ashost,
+                dest: alias.connection.dest,
+                sysnr: alias.connection.sysnr,
+                saprouter: alias.connection.saprouter
+            }, {
+                client: alias.login.client,
+                lang: alias.login.lang,
+                passwd: alias.login.passwd,
+                user: alias.login.user
+            });
+        }
+    }
 }
 
 const _delete = async (alias: SystemAliasData) => {
@@ -117,7 +160,7 @@ export async function alias(commandArgs: AliasArguments) {
             value: `pick_delete`
         }]
     });
-    if(inq1.action.startsWith(`pick_`) && !aliasPick){
+    if (inq1.action.startsWith(`pick_`) && !aliasPick) {
         const inq2 = await Inquirer.prompt({
             name: `aliasPick`,
             message: `Select system alias`,
@@ -133,7 +176,7 @@ export async function alias(commandArgs: AliasArguments) {
     }
     const oAliasPick = aAlias.find(o => o.alias === aliasPick);
     const action = inq1.action.replace(/^pick_/gmi, '');
-    switch(action){
+    switch (action) {
         case 'create':
             await _create();
             break;
