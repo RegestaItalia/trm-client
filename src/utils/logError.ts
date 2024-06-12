@@ -3,9 +3,10 @@ import { Logger, SystemConnector } from "trm-core";
 export async function logError(e: Error) {
     var sError = e.toString();
     if (e.name === 'TrmRegistryError') {
-        const apiResponse = e['response'];
-        sError = `${apiResponse.status} ${apiResponse.statusText}`;
-        if (apiResponse.status === 401) {
+        const status = e['status'];
+        const message = e.message;
+        sError = `${status}: ${message}`;
+        if (status === 401) {
             sError += `\nYou may need to log in.`;
         }
     }
