@@ -14,6 +14,10 @@ export class TrmDependencies {
         return this._dependencies.find(o => o.compareName(packageName));
     }
 
+    public getAll(): TrmPackage[] {
+        return this._dependencies;
+    }
+
     public static getInstance(): TrmDependencies {
         if(!this._instance){
             this._instance = new TrmDependencies();
