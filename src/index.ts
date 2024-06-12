@@ -13,7 +13,7 @@ program
 
 /*SYSTEM ALIAS*/
 const createAlias = program.command(`createAlias <alias>`) //OK
-    .description(`Create a new system alias.`);
+    .description(`Create a new system alias`);
 registerCommand(createAlias, {
     noSystemAlias: true,
 });
@@ -32,11 +32,11 @@ const addRegistry = program.command(`addRegistry <registryName>`) //OK
     .option(`-a, --authentication <authentication>`, `Optional authentication as a valid JSON string.`);
 registerCommand(addRegistry);
 const removeRegistry = program.command(`removeRegistry <registryName>`) //OK
-    .description(`Removes a registry`)
+    .description(`Remove a registry`)
     .option(`-f, --force`, `Force.`, false);
 registerCommand(removeRegistry);
 const login = program.command(`login`) //OK
-    .description(`Log into a registry.`)
+    .description(`Log into a registry`)
     .addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`)
     .option(`-f, --force`, `Force login.`, false)
     .option(`-a, --authentication <authentication>`, `Authentication as a valid JSON string.`);
@@ -45,7 +45,7 @@ registerCommand(login, {
     registryAuthBlacklist: [AuthenticationType.NO_AUTH]
 });
 const whoami = program.command(`whoami`) //OK
-    .description(`Registry logged user data.`)
+    .description(`Registry logged user data`)
     .addHelpText(`before`, `This command has no effect when trying to get user info from a registry that doesn't require authentication.`);
 registerCommand(whoami, {
     requiresRegistry: true,
@@ -69,7 +69,7 @@ registerCommand(ping, {
 
 /*PUBLISH*/
 const publish = program.command(`publish <package> [version]`) //OK
-    .description(`Publish package to registry.`)
+    .description(`Publish package to registry`)
     .addHelpText(`before`, `When no version is defined, it will automatically set to:
 - When it's the first release ever: 1.0.0
 - When it's already published: the latest available released with patch increased by 1
@@ -133,7 +133,8 @@ const view = program.command(`view <package>`) //OK
 If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
 registerCommand(view, {
     requiresConnection: true,
-    requiresRegistry: true
+    requiresRegistry: true,
+    ignoreRegistryUnreachable: true
 });
 /*COMPARE*/
 const compare = program.command(`compare <package>`) //OK
@@ -150,9 +151,9 @@ registerCommand(list, {
     requiresConnection: true
 });
 /*CHECK*/
-const check = program.command(`check <package>`)
-    .description(`Check installed package`);
-//.option(`-e, --extended`, `Show full list of SAP entries and dependencies.`, false);
+const check = program.command(`check <package>`) //OK
+    .description(`Analyze installed package status on a system`)
+    .option(`-at, --analysisType`, `Analysis type`);
 registerCommand(check, {
     requiresConnection: true,
     requiresRegistry: true,
