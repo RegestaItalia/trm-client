@@ -70,10 +70,10 @@ export async function executeCommand(args: any) {
                 });
             }
             await system.connect();
+            SystemConnector.systemConnector = system;
             if (requiresTrmDependencies) {
                 await checkTrmDependencies();
             }
-            SystemConnector.systemConnector = system;
         }
 
         if (requiresRegistry) {
