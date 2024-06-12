@@ -35,6 +35,7 @@ export async function login(commandArgs: LoginArguments) {
             oAuth = undefined;
         }
         await CommandRegistry.get().authenticate(oAuth);
+        oAuth = CommandRegistry.get().getAuthData();
         Logger.success('Logged in.');
         RegistryAlias.update(CommandRegistry.get().name, oAuth);
         await whoami({ });
