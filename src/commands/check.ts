@@ -1,7 +1,11 @@
 import { TrmManifest, checkSapEntries } from "trm-core";
-import { ActionArguments, CheckArguments } from "./arguments";
+import { CheckArguments } from "./arguments";
 
-export async function check(commandArgs: CheckArguments, actionArgs: ActionArguments) {
+export async function check(commandArgs: CheckArguments) {
+
+}
+
+/*export async function check(commandArgs: CheckArguments) {
     const logger = actionArgs.logger;
     const system = actionArgs.system;
     const registry = actionArgs.registry;
@@ -22,7 +26,7 @@ export async function check(commandArgs: CheckArguments, actionArgs: ActionArgum
     logger.loading(`Checking SAP entries...`);
     const sapEntriesCheckResult = await checkSapEntries(oSystemViewManifest.sapEntries || {}, system);
     if (extended) {
-        /*logger.error(`Missing SAP table entries.`);
+        logger.error(`Missing SAP table entries.`);
         logger.error(`Please check the list below and, if necessary, check notes.`);
         sapEntriesCheckResult.missingSapEntries.forEach(o => {
             var tableHead = [];
@@ -46,7 +50,7 @@ export async function check(commandArgs: CheckArguments, actionArgs: ActionArgum
             logger.error(` `);
             logger.error(`Table ${o.table}:`);
             logger.table(tableHead, tableData);
-        });*/
+        });
     } else {
         if (sapEntriesCheckResult.missingSapEntries.length === 0) {
             logger.success(`SAP entries check OK.`);
@@ -54,4 +58,4 @@ export async function check(commandArgs: CheckArguments, actionArgs: ActionArgum
             logger.error(`Missing ${sapEntriesCheckResult.missingSapEntries.length} SAP entries.`);
         }
     }
-}
+}*/

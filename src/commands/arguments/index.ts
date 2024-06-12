@@ -1,4 +1,3 @@
-export * from "./ActionArguments";
 export * from "./PublishArguments"
 export * from "./CreateAliasArguments";
 export * from "./ConnectArguments";

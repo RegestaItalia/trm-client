@@ -106,7 +106,7 @@ registerCommand(unpublish, {
 });
 
 /*INSTALL*/
-const install = program.command(`install <package> [version]`) //OK
+const install = program.command(`install <package> [version]`)
     .description(`Install package`)
     .option(`-f, --force`, `Force install.`, false)
     .option(`-sf, --safe`, `Safe install (Integrity check).`, false)
@@ -136,7 +136,7 @@ registerCommand(view, {
     requiresRegistry: true
 });
 /*COMPARE*/
-const compare = program.command(`compare <package>`)
+const compare = program.command(`compare <package>`) //OK
     .description(`Compare a package on different systems`)
     .option(`-c, --connections <json>`, `Path to JSON file or JSON containing an array of aliases.`);
 registerCommand(compare, {

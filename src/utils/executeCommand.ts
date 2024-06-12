@@ -55,7 +55,8 @@ export async function executeCommand(args: any) {
             if (args.systemAlias) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
-                const connectionArgs = await commands.connect(args as commands.ConnectArguments, {});
+                const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
+                const connectionArgs = await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command));
                 system = new ServerSystemConnector({
                     ashost: connectionArgs.ashost,
                     dest: connectionArgs.dest,
