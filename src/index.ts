@@ -115,15 +115,15 @@ This command won't let you update/downgrade a package unless specified different
     .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists)`, false)
     .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds)`, '180')
     .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape`, true)
-    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check`, false)
-    .option(`-so, --skipObjectsCheck`, `Skip object types check`, false)
+    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force)`, false)
+    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force)`, false)
     .option(`-sl, --skipLang`, `Skip translation transport`, false)
     .option(`-sc, --skipCustomizing`, `Skip customizing transport`, false)
-    .option(`-sd, --skipDependencies`, `Skip dependencies`, false)
+    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force)`, false)
     .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate (default: None)`)
     .option(`-s, --silent`, `No manual inputs`, false)
     .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map`)
-    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade`, false);
+    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade  (has no effect with flag force)`, false);
 registerCommand(install, {
     requiresConnection: true,
     requiresRegistry: true,
