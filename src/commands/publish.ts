@@ -165,6 +165,6 @@ export async function publish(commandArgs: PublishArguments) {
         skipLang,
         skipReadme,
         tmpFolder,
-        
+        silent
     });
 }
