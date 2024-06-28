@@ -12,7 +12,8 @@ export enum LoggerType {
     CLI = 'CLI',
     CLI_LOG = 'CLI_LOG',
     CONSOLE = 'CONSOLE',
-    VOID = 'VOID'
+    VOID = 'VOID',
+    KEY = 'VALUE'
 }
 
 export enum InquirerType {
@@ -28,14 +29,14 @@ const _getLogger = (type: LoggerType, debug: boolean, logOutputFolder?: string):
         case LoggerType.CLI_LOG: return new CliLogFileLogger(logOutputFolder, debug);
         case LoggerType.CONSOLE: return new ConsoleLogger(debug);
         case LoggerType.VOID: return new DummyLogger();
-        default: throw new Error(`Unknown logger type "${type}".`);
+        default: throw new Error(`Unknown logger type "${type}". Possible values are ${Object.keys(LoggerType).map(k => LoggerType[k]).join(', ')}.`);
     }
 }
 
 const _getInquirer = (type: InquirerType) => {
     switch (type) {
         case InquirerType.CLI: return new CliInquirer();
-        default: throw new Error(`Unknown inquirer type "${type}".`);
+        default: throw new Error(`Unknown inquirer type "${type}". Possible values are ${Object.keys(InquirerType).map(k => InquirerType[k]).join(', ')}.`);
     }
 }
 
