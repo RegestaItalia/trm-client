@@ -25,7 +25,7 @@ export class Settings {
         }
         const filePath = this.getFilePath();
         this.data[key] = value;
-        fs.writeFileSync(filePath, ini.encode(this.data), { encoding: 'utf8', flag: 'w' });
+        this.generateFile(this.data, filePath);
     }
 
     private getFilePath(): string {
