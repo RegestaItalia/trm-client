@@ -37,6 +37,7 @@ const _getInquirer = (type: InquirerType) => {
 }
 
 export async function executeCommand(args: any) {
+    var exitCode: number;
     try {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
         Logger.logger = _getLogger(args.logType, args.verbose);
@@ -121,15 +122,16 @@ export async function executeCommand(args: any) {
         }
 
         //Disappear like man was never here!
-        process.exit();
+        exitCode = 0;
     } catch (e) {
         await logError(e);
-        process.exit(1);
+        exitCode = 1;
     } finally {
         if(Logger.logger instanceof CliLogFileLogger){
             const sessionId = Logger.logger.getSessionId();
             const logFilePath = Logger.logger.getFilePath();
             console.log(`Log output "${logFilePath}" for session ID ${sessionId}.`);
         }
+        process.exit(exitCode);
     }
 }
