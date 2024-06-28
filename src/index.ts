@@ -12,30 +12,30 @@ program
     .version(getClientVersion(), `-cv, --clientVersion`, `Client version`);
 
 /*SYSTEM ALIAS*/
-const createAlias = program.command(`createAlias <alias>`) //OK
+const createAlias = program.command(`createAlias <alias>`)
     .description(`Create a new system alias`);
 registerCommand(createAlias, {
     noSystemAlias: true,
 });
-const deleteAlias = program.command(`deleteAlias <alias>`) //OK
+const deleteAlias = program.command(`deleteAlias <alias>`)
     .description(`Delete a system alias`);
 registerCommand(deleteAlias);
-const manageAliases = program.command(`alias`) //OK
+const manageAliases = program.command(`alias`)
     .description(`List and manage aliases`)
     .option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
 registerCommand(manageAliases);
 
 /*REGISTRY*/
-const addRegistry = program.command(`addRegistry <registryName>`) //OK
+const addRegistry = program.command(`addRegistry <registryName>`)
     .description(`Add a new registry`)
     .option(`-e, --endpoint <endpoint>`, `Endpoint.`)
     .option(`-a, --authentication <authentication>`, `Optional authentication as a valid JSON string.`);
 registerCommand(addRegistry);
-const removeRegistry = program.command(`removeRegistry <registryName>`) //OK
+const removeRegistry = program.command(`removeRegistry <registryName>`)
     .description(`Remove a registry`)
     .option(`-f, --force`, `Force.`, false);
 registerCommand(removeRegistry);
-const login = program.command(`login`) //OK
+const login = program.command(`login`)
     .description(`Log into a registry`)
     .addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`)
     .option(`-f, --force`, `Force login.`, false)
@@ -44,14 +44,14 @@ registerCommand(login, {
     requiresRegistry: true,
     registryAuthBlacklist: [AuthenticationType.NO_AUTH]
 });
-const whoami = program.command(`whoami`) //OK
+const whoami = program.command(`whoami`)
     .description(`Registry logged user data`)
     .addHelpText(`before`, `This command has no effect when trying to get user info from a registry that doesn't require authentication.`);
 registerCommand(whoami, {
     requiresRegistry: true,
     registryAuthBlacklist: [AuthenticationType.NO_AUTH]
 });
-const logout = program.command(`logout`) //OK
+const logout = program.command(`logout`)
     .description(`Log out of a registry`)
     .addHelpText(`before`, `This command has no effect when trying to logout from a registry that doesn't require authentication.`);
 registerCommand(logout, {
@@ -60,7 +60,7 @@ registerCommand(logout, {
 });
 
 /*PING*/
-const ping = program.command(`ping`) //OK
+const ping = program.command(`ping`)
     .description(`Test trm-server with ping RFC function`);
 registerCommand(ping, {
     requiresConnection: true,
@@ -68,7 +68,7 @@ registerCommand(ping, {
 });
 
 /*PUBLISH*/
-const publish = program.command(`publish <package> [version]`) //OK
+const publish = program.command(`publish <package> [version]`)
     .description(`Publish package to registry`)
     .addHelpText(`before`, `When no version is defined, it will automatically set to:
 - When it's the first release ever: 1.0.0
@@ -99,14 +99,14 @@ registerCommand(publish, {
 });
 
 /*UNPUBLISH*/
-const unpublish = program.command(`unpublish <package> <version>`) //OK
+const unpublish = program.command(`unpublish <package> <version>`)
     .description(`Unpublish a package release from registry`);
 registerCommand(unpublish, {
     requiresRegistry: true
 });
 
 /*INSTALL*/
-const install = program.command(`install <package> [version]`) //OK
+const install = program.command(`install <package> [version]`)
     .description(`Install package from registry to system`)
     .addHelpText(`before`, `When no version is specified, the latest will be installed.
 This command won't let you update/downgrade a package unless specified differently with the appropriate flag.`)
@@ -131,7 +131,7 @@ registerCommand(install, {
 });
 
 /*VIEW*/
-const view = program.command(`view <package>`) //OK
+const view = program.command(`view <package>`)
     .description(`View package`)
     .addHelpText(`before`, `Shows package details.
 If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
@@ -141,7 +141,7 @@ registerCommand(view, {
     ignoreRegistryUnreachable: true
 });
 /*COMPARE*/
-const compare = program.command(`compare <package>`) //OK
+const compare = program.command(`compare <package>`)
     .description(`Compare a package on different systems`)
     .option(`-c, --connections <json>`, `Path to JSON file or JSON containing an array of aliases.`);
 registerCommand(compare, {
@@ -149,13 +149,13 @@ registerCommand(compare, {
     ignoreRegistryUnreachable: true
 });
 /*LIST*/
-const list = program.command(`list`) //OK
+const list = program.command(`list`)
     .description(`List packages installed on a system`);
 registerCommand(list, {
     requiresConnection: true
 });
 /*CHECK TOOLS*/
-const check = program.command(`check <package>`) //OK
+const check = program.command(`check <package>`)
     .description(`Analyze installed package status on a system`)
     .option(`-at, --analysisType`, `Analysis type`);
 registerCommand(check, {
@@ -171,7 +171,7 @@ registerCommand(findDependencies, {
 });
 
 /*INFO*/
-const info = program.command(`info`) //OK
+const info = program.command(`info`)
     .description(`TRM Client/Server Info`);
 registerCommand(info, {
     requiresConnection: true,
