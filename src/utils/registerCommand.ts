@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { executeCommand } from "./executeCommand";
 import { AuthenticationType } from "trm-registry-types";
+import { Settings } from "../settings";
 
 export function registerCommand(command: Command, args?: {
     requiresConnection?: boolean, //sets connection arguments
@@ -21,6 +22,9 @@ export function registerCommand(command: Command, args?: {
     const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable ? true : false;
     const noSystemAlias = args.noSystemAlias ? true : false;
     const registryAuthBlacklist = args.registryAuthBlacklist || [];
+    const defaultLogger = Settings.getInstance().data.loggerType;
+    const logOutputFolder = Settings.getInstance().data.logOutputFolder;
+
     if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid...
         command.option(`-de, --dest <dest>`, `System ID.`)
             .option(`-us, --user <user>`, `System User Logon.`)
@@ -37,7 +41,7 @@ export function registerCommand(command: Command, args?: {
     if(requiresRegistry){
         command.option(`-r, --registry <registry>`, `Registry name.`);
     }
-    command.option('-log, --logType', 'Log type.', 'CLI');
+    command.option('-log, --logType', 'Log type.', defaultLogger);
     command.option('-v, --verbose', 'Verbose logging.', false);
 
     command.action(async (arg1, arg2) => {
@@ -48,7 +52,8 @@ export function registerCommand(command: Command, args?: {
             requiresRegistry,
             registryAuthBlacklist,
             noSystemAlias,
-            ignoreRegistryUnreachable
+            ignoreRegistryUnreachable,
+            logOutputFolder
         }, ...(command['_optionValues'] || {})};
 
         if(!arg1){

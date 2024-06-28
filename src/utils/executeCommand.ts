@@ -19,10 +19,13 @@ export enum InquirerType {
     CLI = 'CLI'
 }
 
-const _getLogger = (type: LoggerType, debug: boolean): any => {
+const _getLogger = (type: LoggerType, debug: boolean, logOutputFolder?: string): any => {
+    if(!logOutputFolder || logOutputFolder.trim().toLowerCase() === 'default'){
+        logOutputFolder = getLogFolder();
+    }
     switch (type) {
         case LoggerType.CLI: return new CliLogger(debug);
-        case LoggerType.CLI_LOG: return new CliLogFileLogger(getLogFolder(), debug);
+        case LoggerType.CLI_LOG: return new CliLogFileLogger(logOutputFolder, debug);
         case LoggerType.CONSOLE: return new ConsoleLogger(debug);
         case LoggerType.VOID: return new DummyLogger();
         default: throw new Error(`Unknown logger type "${type}".`);
@@ -40,7 +43,7 @@ export async function executeCommand(args: any) {
     var exitCode: number;
     try {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
-        Logger.logger = _getLogger(args.logType, args.verbose);
+        Logger.logger = _getLogger(args.logType, args.verbose, args.logOutputFolder);
 
         const requiresConnection = args.requiresConnection;
         const requiresTrmDependencies = args.requiresTrmDependencies;

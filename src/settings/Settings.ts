@@ -7,7 +7,8 @@ import * as ini from "ini";
 const SETTINGS_FILE_NAME = "settings.ini";
 
 const defaultData: SettingsData = {
-    alwaysUpdate: false
+    loggerType: 'CLI',
+    logOutputFolder: 'default'
 }
 
 export class Settings {
