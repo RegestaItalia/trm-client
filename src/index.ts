@@ -178,6 +178,11 @@ registerCommand(info, {
     requiresTrmDependencies: true
 });
 
+/*SETTINGS*/
+const settings = program.command(`settings`)
+    .description(`Show/Set settings`)
+    .option(`-s, --set <property>`, `Property as KEY=VALUE`)
+registerCommand(settings);
 
 
 program.parse(process.argv);

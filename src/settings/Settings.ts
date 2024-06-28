@@ -19,8 +19,21 @@ export class Settings {
         this.data = this.getSettings();
     }
 
+    public set(key: string, value: string): void {
+        if(this.data[key] === undefined){
+            throw new Error(`Invalid key ${key}.`);
+        }
+        const filePath = this.getFilePath();
+        this.data[key] = value;
+        fs.writeFileSync(filePath, ini.encode(this.data), { encoding: 'utf8', flag: 'w' });
+    }
+
+    private getFilePath(): string {
+        return path.join(getRoamingFolder(), SETTINGS_FILE_NAME);
+    }
+
     private getSettings(): SettingsData {
-        const filePath = path.join(getRoamingFolder(), SETTINGS_FILE_NAME);
+        const filePath = this.getFilePath();
         if (fs.existsSync(filePath)) {
             try {
                 const sIni = fs.readFileSync(filePath).toString();

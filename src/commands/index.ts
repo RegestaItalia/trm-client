@@ -18,3 +18,4 @@ export * from "./unpublish";
 export * from "./info";
 export * from "./check";
 export * from "./findDependencies";
+export * from "./settings";
