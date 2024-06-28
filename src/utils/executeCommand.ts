@@ -125,5 +125,11 @@ export async function executeCommand(args: any) {
     } catch (e) {
         await logError(e);
         process.exit(1);
+    } finally {
+        if(Logger.logger instanceof CliLogFileLogger){
+            const sessionId = Logger.logger.getSessionId();
+            const logFilePath = Logger.logger.getFilePath();
+            console.log(`Log output "${logFilePath}" for session ID ${sessionId}.`);
+        }
     }
 }
