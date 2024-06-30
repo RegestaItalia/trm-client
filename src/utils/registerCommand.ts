@@ -41,7 +41,7 @@ export function registerCommand(command: Command, args?: {
     if(requiresRegistry){
         command.option(`-r, --registry <registry>`, `Registry name.`);
     }
-    command.option('-log, --logType', 'Log type.', defaultLogger);
+    command.option('-log, --logType <logType>', 'Log type.', defaultLogger);
     command.option('-v, --verbose', 'Verbose logging.', false);
 
     command.action(async (arg1, arg2) => {
