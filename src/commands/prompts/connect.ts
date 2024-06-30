@@ -47,6 +47,7 @@ const languageList = [
 
 export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
+    const force = commandArgs.force ? true : false;
     var aInputType = [];
     var aSapLogonConnections;
     const aAlias = SystemAlias.getAll();
@@ -119,49 +120,49 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             name: `ashost`,
             message: `Application server`,
             default: commandArgs.ashost,
-            when: commandArgs.ashost ? false : true
+            when: (commandArgs.ashost ? false : true) || force
         }, {
             type: `input`,
             name: `dest`,
             message: `System ID`,
             default: commandArgs.dest,
-            when: commandArgs.dest ? false : true
+            when: (commandArgs.dest ? false : true) || force
         }, {
             type: `input`,
             name: `sysnr`,
             message: `Instance number`,
             default: commandArgs.sysnr,
-            when: commandArgs.sysnr ? false : true
+            when: (commandArgs.sysnr ? false : true) || force
         }, {
             type: `input`,
             name: `saprouter`,
             message: `SAProuter`,
             default: commandArgs.saprouter,
-            when: false //commandArgs.saprouter ? false : true
+            when: force
         }, {
             type: `input`,
             name: `client`,
             message: `Logon Client`,
             default: commandArgs.client,
-            when: commandArgs.client ? false : true
+            when: (commandArgs.client ? false : true) || force
         }, {
             type: `input`,
             name: `user`,
             message: `Logon User`,
             default: commandArgs.user,
-            when: commandArgs.user ? false : true
+            when: (commandArgs.user ? false : true) || force
         }, {
             type: `password`,
             name: `passwd`,
             message: `Logon Password`,
             default: commandArgs.passwd,
-            when: commandArgs.passwd ? false : true
+            when: (commandArgs.passwd ? false : true) || force
         }, {
             type: `list`,
             name: `lang`,
             message: `Logon Language`,
             default: commandArgs.lang,
-            when: commandArgs.lang ? false : true,
+            when: (commandArgs.lang ? false : true) || force,
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
             },

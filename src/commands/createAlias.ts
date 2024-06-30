@@ -5,7 +5,8 @@ import { connect } from "./prompts";
 
 export async function createAlias(commandArgs: CreateAliasArguments,) {
     const connectionArgs = await connect({
-        noSystemAlias: true
+        noSystemAlias: true,
+        force: true
     }, false);
     const alias = SystemAlias.create(commandArgs.alias, {
         ashost: connectionArgs.ashost,

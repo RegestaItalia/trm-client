@@ -83,7 +83,8 @@ const _edit = async (alias: SystemAliasData) => {
         ...alias.connection,
         ...alias.login,
         ...{
-            noSystemAlias: true
+            noSystemAlias: true,
+            force: true
         }
     } as ConnectArguments, false);
     try {
@@ -108,6 +109,7 @@ const _edit = async (alias: SystemAliasData) => {
             Logger.success(`Alias "${alias.alias}" updated.`);
         } else {
             Logger.error(`Alias "${alias.alias}" couldn't be updated.`);
+            SystemAlias.delete(alias.alias);
             SystemAlias.create(alias.alias, {
                 ashost: alias.connection.ashost,
                 dest: alias.connection.dest,
