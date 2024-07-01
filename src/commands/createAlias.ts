@@ -1,10 +1,13 @@
+import { Logger } from "trm-core";
 import { SystemAlias } from "../systemAlias";
-import { ActionArguments, ConnectArguments, CreateAliasArguments } from "./arguments";
+import { CreateAliasArguments } from "./arguments";
 import { connect } from "./prompts";
 
-export async function createAlias(commandArgs: CreateAliasArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
-    const connectionArgs = await connect(commandArgs as ConnectArguments, actionArgs, false);
+export async function createAlias(commandArgs: CreateAliasArguments,) {
+    const connectionArgs = await connect({
+        noSystemAlias: true,
+        force: true
+    }, false);
     const alias = SystemAlias.create(commandArgs.alias, {
         ashost: connectionArgs.ashost,
         dest: connectionArgs.dest,
@@ -15,16 +18,16 @@ export async function createAlias(commandArgs: CreateAliasArguments, actionArgs:
         lang: connectionArgs.lang,
         passwd: connectionArgs.passwd,
         user: connectionArgs.user
-    }, logger);
+    });
     var connectionSuccess = true;
     try{
-        await alias.getConnection().connect(false);
+        await alias.getConnection().connect();
     }catch(e){
         connectionSuccess = false;
         throw e;
     }finally{
         if(connectionSuccess){
-            logger.success(`Alias created.`);
+            Logger.success(`Alias "${commandArgs.alias}" created.`);
         }else{
             SystemAlias.delete(commandArgs.alias);
         }

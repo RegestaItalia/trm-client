@@ -1,4 +1,3 @@
-export * from "./ActionArguments";
 export * from "./PublishArguments"
 export * from "./CreateAliasArguments";
 export * from "./ConnectArguments";
@@ -17,3 +16,6 @@ export * from "./InfoArguments";
 export * from "./CheckArguments";
 export * from "./UnpublishArguments";
 export * from "./RemoveRegistryArguments";
+export * from "./FindDependenciesArguments";
+export * from "./SettingsArgument";
+export * from "./UpdateArguments";

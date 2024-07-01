@@ -1,19 +1,18 @@
+import { Inquirer, Logger } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
-import { ActionArguments, LoginArguments } from "./arguments";
+import { LoginArguments } from "./arguments";
+import { CommandRegistry } from "./commons";
 import { whoami } from "./whoami";
 
-export async function login(commandArgs: LoginArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
-    const inquirer = actionArgs.inquirer;
-    var registry = actionArgs.registry;
+export async function login(commandArgs: LoginArguments) {
     var continueLogin = false;
     if(!commandArgs.force){
         try {
-            const whoami = await registry.whoAmI();
-            const inq1 = await inquirer.prompt({
+            const whoami = await CommandRegistry.get().whoAmI();
+            const inq1 = await Inquirer.prompt({
                 type: "confirm",
                 name: "continue",
-                message: `Already logged in as ${whoami.username}". Do you want to logout and continue?`,
+                message: `Already logged in as "${whoami.username}". Do you want to logout and continue?`,
                 default: false
             });
             continueLogin = inq1.continue;
@@ -25,18 +24,20 @@ export async function login(commandArgs: LoginArguments, actionArgs: ActionArgum
     }
     if (continueLogin) {
         const auth = commandArgs.authentication;
+        var oAuth: any;
         if (auth) {
             try {
-                const oAuth = JSON.parse(auth);
-                RegistryAlias.update(registry.name, oAuth);
+                oAuth = JSON.parse(auth);
             } catch (e) {
                 throw new Error(`Invalid authentication JSON object.`);
             }
+        }else{
+            oAuth = undefined;
         }
-        registry = await RegistryAlias.get(registry.name, logger).getRegistry(true, inquirer, false, true);
-        logger.success('Logged in.');
-        await whoami({}, {...actionArgs, ...{
-            registry
-        }});
+        await CommandRegistry.get().authenticate(oAuth);
+        oAuth = CommandRegistry.get().getAuthData();
+        Logger.success('Logged in.');
+        RegistryAlias.update(CommandRegistry.get().name, oAuth);
+        await whoami({ });
     }
 }

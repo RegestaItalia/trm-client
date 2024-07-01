@@ -1,14 +1,11 @@
+import { Logger } from "trm-core";
 import { SystemAlias } from "../systemAlias";
-import { ActionArguments, DeleteAliasArguments } from "./arguments";
+import { DeleteAliasArguments } from "./arguments";
 
-export async function deleteAlias(commandArgs: DeleteAliasArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
+export async function deleteAlias(commandArgs: DeleteAliasArguments) {
     const alias = commandArgs.alias;
-    const oAlias = SystemAlias.get(alias);
-    if(oAlias){
-        SystemAlias.delete(alias);
-        logger.success(`Alias "${alias}" deleted.`);
-    }else{
-        throw new Error(`Alias "${alias}" doesn't exist.`);
-    }
+    //this throws if alias doesn't exist
+    SystemAlias.get(alias);
+    SystemAlias.delete(alias);
+    Logger.success(`Alias "${alias}" deleted.`);
 }

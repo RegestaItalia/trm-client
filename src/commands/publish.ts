@@ -1,48 +1,23 @@
 import { TrmManifest, TrmManifestAuthor, publish as action } from "trm-core";
-import { ActionArguments, PublishArguments } from "./arguments";
+import { PublishArguments } from "./arguments";
 import * as fs from "fs";
-import { getRoamingFolder } from "../utils";
+import { getTempFolder } from "../utils";
+import { CommandRegistry } from "./commons";
 
-export async function publish(commandArgs: PublishArguments, actionArgs: ActionArguments) {
-    const inquirer = actionArgs.inquirer;
-    const system = actionArgs.system;
-    const registry = actionArgs.registry;
-    const logger = actionArgs.logger;
-
-    const packageName = commandArgs.package;
-    const packageVersion = commandArgs.version || 'latest';
-    const devclass = commandArgs.devclass;
-    const target = commandArgs.target;
-    const forceManifest = commandArgs.forceManifest;
-    const overwriteManifest = commandArgs.overwriteManifest;
-    const skipEditSapEntries = commandArgs.skipEditSapEntries;
-    const skipLang = commandArgs.skipLang;
-    const skipEditDependencies = commandArgs.skipEditDependencies;
-    const skipReadme = commandArgs.skipReadme;
-    const skipDependencies = commandArgs.skipDependencies;
-    const ci = commandArgs.ci;
-    var releaseTimeout;
-    try{
-        releaseTimeout = parseInt(commandArgs.releaseTimeout);
-    }catch(e){
-        releaseTimeout = 180;
-    }
-
+const _parseManifestArgument = (packageName: string, packageVersion: string, manifestArg: string): TrmManifest => {
     var manifest: TrmManifest = {
         name: packageName,
         version: packageVersion
     }
-
-    var inputManifestArg = commandArgs.manifest;
-    if (inputManifestArg) {
+    if (manifestArg) {
         //this could be the json file path or the json itself
-        inputManifestArg = inputManifestArg.trim();
+        manifestArg = manifestArg.trim();
         var sInputManifest;
         var oInputManifest;
-        if (inputManifestArg[0] === '{') {
-            sInputManifest = inputManifestArg;
+        if (manifestArg[0] === '{') {
+            sInputManifest = manifestArg;
         } else {
-            sInputManifest = fs.readFileSync(inputManifestArg);
+            sInputManifest = fs.readFileSync(manifestArg);
         }
         try {
             oInputManifest = JSON.parse(sInputManifest);
@@ -121,30 +96,75 @@ export async function publish(commandArgs: PublishArguments, actionArgs: ActionA
         }
         manifest.sapEntries = oInputManifest.sapEntries || {};
     }
+    return manifest;
+}
 
-    var readme;
-    if(commandArgs.readme){
+const _parseReadmeArg = (arg: string): string => {
+    if(arg){
         try{
-            readme = fs.readFileSync(commandArgs.readme);
+            return fs.readFileSync(arg).toString();
         }catch(e){
-            readme = commandArgs.readme;
+            return arg;
         }
     }
+}
+
+const _parseReleaseTimeoutArg = (arg: string): number => {
+    if(arg){
+        try{
+            return parseInt(arg);
+        }catch(e){ }
+    }
+}
+
+const _parseCustTransportsArg = (arg: string): string[] => {
+    if(arg){
+        try{
+            return arg.split(/\s+/);
+        }catch(e){
+            return [];
+        }
+    }
+}
+
+export async function publish(commandArgs: PublishArguments) {
+    const registry = CommandRegistry.get();
+    const packageName = commandArgs.package;
+    const packageVersion = commandArgs.version || 'latest';
+    const devclass = commandArgs.devclass;
+    const target = commandArgs.target;
+    const forceManifestInput = commandArgs.forceManifest;
+    const skipLang = commandArgs.skipLang;
+    const skipCust = commandArgs.skipCustomizing;
+    const skipDependencies = commandArgs.skipDependencies;
+    var skipEditSapEntries = commandArgs.skipEditSapEntries;
+    var skipEditDependencies = commandArgs.skipEditDependencies;
+    var skipReadme = commandArgs.skipReadme;
+    const silent = commandArgs.silent;
+    
+    const manifest = _parseManifestArgument(packageName, packageVersion, commandArgs.manifest);
+    const readme = _parseReadmeArg(commandArgs.readme);
+    const releaseTimeout = _parseReleaseTimeoutArg(commandArgs.releaseTimeout);
+    const customizingTransports = _parseCustTransportsArg(commandArgs.customizingTransports);
+
+    const tmpFolder = getTempFolder();
     
     await action({
         package: manifest,
-        devclass: devclass,
-        target: target,
-        forceManifestInput: forceManifest,
-        overwriteManifestValues: overwriteManifest,
-        skipEditDependencies,
-        skipLang,
-        skipEditSapEntries,
-        skipReadme,
+        registry,
+        devclass,
+        target,
+        forceManifestInput,
+        customizingTransports,
+        releaseTimeout,
         readme,
-        ci,
-        tmpFolder: getRoamingFolder(),
+        skipCust,
         skipDependencies,
-        releaseTimeout
-    }, inquirer, system, registry, logger);
+        skipEditDependencies,
+        skipEditSapEntries,
+        skipLang,
+        skipReadme,
+        tmpFolder,
+        silent
+    });
 }

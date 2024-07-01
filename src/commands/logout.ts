@@ -1,14 +1,14 @@
+import { Logger } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
-import { ActionArguments, LogoutArguments } from "./arguments";
+import { LogoutArguments } from "./arguments";
+import { CommandRegistry } from "./commons";
 
-export async function logout(commandArgs: LogoutArguments, actionArgs: ActionArguments) {
-    const logger = actionArgs.logger;
-    const registry = actionArgs.registry;
+export async function logout(commandArgs: LogoutArguments) {
     try{
-        await registry.whoAmI();
-        RegistryAlias.update(registry.name, null);
-        logger.info(`Logged out.`);
+        await CommandRegistry.get().whoAmI();
+        RegistryAlias.update(CommandRegistry.get().name, null);
+        Logger.info(`Logged out.`);
     }catch(e){
-        logger.info(`Not logged in. Did you mean to use command "login"?`);
+        Logger.info(`Not logged in. Did you mean to use command "login"?`);
     }
 }

@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { executeCommand } from "./executeCommand";
 import { AuthenticationType } from "trm-registry-types";
+import { Settings } from "../settings";
 
 export function registerCommand(command: Command, args?: {
     requiresConnection?: boolean, //sets connection arguments
@@ -21,23 +22,27 @@ export function registerCommand(command: Command, args?: {
     const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable ? true : false;
     const noSystemAlias = args.noSystemAlias ? true : false;
     const registryAuthBlacklist = args.registryAuthBlacklist || [];
+    const defaultLogger = Settings.getInstance().data.loggerType;
+    const logOutputFolder = Settings.getInstance().data.logOutputFolder;
+
     if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid...
-        command.option(`-d, --dest <dest>`, `System ID`)
-            .option(`-u, --user <user>`, `System User Logon`)
-            .option(`-p, --passwd <passwd>`, `System User Logon Password`)
-            .option(`-c, --client <client>`, `System Logon Client`)
-            .option(`-l, --lang <lang>`, `System User Logon Language`)
-            .option(`-h, --ashost <ashost>`, `System application server address`)
-            .option(`-s, --sapRouter <sapRouter>`, `System SAP Router string`)
-            .option(`-n, --sysnr <sysnr>`, `System instance number`);
+        command.option(`-de, --dest <dest>`, `System ID.`)
+            .option(`-us, --user <user>`, `System User Logon.`)
+            .option(`-pw, --passwd <passwd>`, `System User Logon Password.`)
+            .option(`-cl, --client <client>`, `System Logon Client.`)
+            .option(`-la, --lang <lang>`, `System User Logon Language.`, 'EN')
+            .option(`-ah, --ashost <ashost>`, `System application server address.`)
+            .option(`-sr, --saprouter <sapRouter>`, `System SAP Router string.`)
+            .option(`-sn, --sysnr <sysnr>`, `System instance number.`);
         if (!noSystemAlias) {
-            command.option(`-a, --systemAlias <systemAlias>`, `System Alias`);
+            command.option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
         }
     }
     if(requiresRegistry){
-        command.option(`-r, --registry <registry>`, `Registry`);
+        command.option(`-r, --registry <registry>`, `Registry name.`);
     }
-    command.option('-log, --log-type', 'Log type', 'cli');
+    command.option(`-log, --logType <logType>`, `Log type.`, defaultLogger);
+    command.option(`-v, --verbose`, `Verbose logging.`, false);
 
     command.action(async (arg1, arg2) => {
         var args = {...{
@@ -47,7 +52,8 @@ export function registerCommand(command: Command, args?: {
             requiresRegistry,
             registryAuthBlacklist,
             noSystemAlias,
-            ignoreRegistryUnreachable
+            ignoreRegistryUnreachable,
+            logOutputFolder
         }, ...(command['_optionValues'] || {})};
 
         if(!arg1){

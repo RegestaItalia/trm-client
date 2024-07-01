@@ -1,5 +1,5 @@
 export type AddRegistryArguments = {
-    registry: string,
+    registryName: string,
     endpoint?: string,
     authentication?: string
 }

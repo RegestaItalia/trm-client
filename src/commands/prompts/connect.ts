@@ -1,6 +1,7 @@
+import { Inquirer } from "trm-core";
 import { SystemAlias } from "../../systemAlias";
 import { getSapLogonConnections } from "../../utils";
-import { ActionArguments, ConnectArguments } from "../arguments";
+import { ConnectArguments } from "../arguments";
 
 const languageList = [
     { value: 'AR', name: 'AR (Arabic)' },
@@ -44,9 +45,9 @@ const languageList = [
     { value: 'VI', name: 'VI (Vietnamese)' }
 ];
 
-export async function connect(commandArgs: ConnectArguments, actionArgs: ActionArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
-    const inquirer = actionArgs.inquirer;
+export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
+    const force = commandArgs.force ? true : false;
     var aInputType = [];
     var aSapLogonConnections;
     const aAlias = SystemAlias.getAll();
@@ -72,7 +73,7 @@ export async function connect(commandArgs: ConnectArguments, actionArgs: ActionA
     var result: ConnectArguments;
     var inputType: string;
     if (!commandArgs.ashost && !commandArgs.dest && !commandArgs.sysnr) {
-        const inq1 = await inquirer.prompt({
+        const inq1 = await Inquirer.prompt({
             type: `list`,
             name: `inputType`,
             message: `Select connection type`,
@@ -84,7 +85,7 @@ export async function connect(commandArgs: ConnectArguments, actionArgs: ActionA
     }
 
     if (inputType === 'alias') {
-        const inq2 = await inquirer.prompt({
+        const inq2 = await Inquirer.prompt({
             type: `list`,
             name: `aliasName`,
             message: `Select alias`,
@@ -98,7 +99,7 @@ export async function connect(commandArgs: ConnectArguments, actionArgs: ActionA
         result = { ...alias.connection, ...alias.login };
     } else {
         if (inputType === 'logon') {
-            const inq3 = await inquirer.prompt({
+            const inq3 = await Inquirer.prompt({
                 type: `list`,
                 name: `logonConnection`,
                 message: `Select connection`,
@@ -114,54 +115,54 @@ export async function connect(commandArgs: ConnectArguments, actionArgs: ActionA
             commandArgs.sysnr = logonConnection.sysnr;
             commandArgs.saprouter = logonConnection.saprouter;
         }
-        result = await inquirer.prompt([{
+        result = await Inquirer.prompt([{
             type: `input`,
             name: `ashost`,
             message: `Application server`,
             default: commandArgs.ashost,
-            when: commandArgs.ashost ? false : true
+            when: (commandArgs.ashost ? false : true) || force
         }, {
             type: `input`,
             name: `dest`,
             message: `System ID`,
             default: commandArgs.dest,
-            when: commandArgs.dest ? false : true
+            when: (commandArgs.dest ? false : true) || force
         }, {
             type: `input`,
             name: `sysnr`,
             message: `Instance number`,
             default: commandArgs.sysnr,
-            when: commandArgs.sysnr ? false : true
+            when: (commandArgs.sysnr ? false : true) || force
         }, {
             type: `input`,
             name: `saprouter`,
-            message: `SAP Router`,
+            message: `SAProuter`,
             default: commandArgs.saprouter,
-            when: false //commandArgs.saprouter ? false : true
+            when: force
         }, {
             type: `input`,
             name: `client`,
-            message: `Client`,
+            message: `Logon Client`,
             default: commandArgs.client,
-            when: commandArgs.client ? false : true
+            when: (commandArgs.client ? false : true) || force
         }, {
             type: `input`,
             name: `user`,
-            message: `User`,
+            message: `Logon User`,
             default: commandArgs.user,
-            when: commandArgs.user ? false : true
+            when: (commandArgs.user ? false : true) || force
         }, {
             type: `password`,
             name: `passwd`,
-            message: `Password`,
+            message: `Logon Password`,
             default: commandArgs.passwd,
-            when: commandArgs.passwd ? false : true
+            when: (commandArgs.passwd ? false : true) || force
         }, {
             type: `list`,
             name: `lang`,
-            message: `Logon language`,
+            message: `Logon Language`,
             default: commandArgs.lang,
-            when: commandArgs.lang ? false : true,
+            when: (commandArgs.lang ? false : true) || force,
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
             },

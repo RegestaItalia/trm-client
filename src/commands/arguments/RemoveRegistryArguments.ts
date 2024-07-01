@@ -1,4 +1,4 @@
 export type RemoveRegistryArguments = {
-    registry: string,
+    registryName: string,
     force: boolean
 }
