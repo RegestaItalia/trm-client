@@ -9,34 +9,34 @@ const program = new Command();
 program
     .name(`trm`)
     .description(`TRM - Transport Request Manager CLI`)
-    .version(getClientVersion(), `-cv, --clientVersion`, `Client version`);
+    .version(getClientVersion(), `-cv, --clientVersion`, `Client version.`);
 
 /*SYSTEM ALIAS*/
 const createAlias = program.command(`createAlias <alias>`)
-    .description(`Create a new system alias`);
+    .description(`Create a new system alias.`);
 registerCommand(createAlias, {
     noSystemAlias: true,
 });
 const deleteAlias = program.command(`deleteAlias <alias>`)
-    .description(`Delete a system alias`);
+    .description(`Delete a system alias.`);
 registerCommand(deleteAlias);
 const manageAliases = program.command(`alias`)
-    .description(`List and manage aliases`)
+    .description(`List and manage aliases.`)
     .option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
 registerCommand(manageAliases);
 
 /*REGISTRY*/
 const addRegistry = program.command(`addRegistry <registryName>`)
-    .description(`Add a new registry`)
+    .description(`Add a new registry.`)
     .option(`-e, --endpoint <endpoint>`, `Endpoint.`)
     .option(`-a, --authentication <authentication>`, `Optional authentication as a valid JSON string.`);
 registerCommand(addRegistry);
 const removeRegistry = program.command(`removeRegistry <registryName>`)
-    .description(`Remove a registry`)
+    .description(`Remove a registry.`)
     .option(`-f, --force`, `Force.`, false);
 registerCommand(removeRegistry);
 const login = program.command(`login`)
-    .description(`Log into a registry`)
+    .description(`Log into a registry.`)
     .addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`)
     .option(`-f, --force`, `Force login.`, false)
     .option(`-a, --authentication <authentication>`, `Authentication as a valid JSON string.`);
@@ -45,14 +45,14 @@ registerCommand(login, {
     registryAuthBlacklist: [AuthenticationType.NO_AUTH]
 });
 const whoami = program.command(`whoami`)
-    .description(`Registry logged user data`)
+    .description(`Registry logged user data.`)
     .addHelpText(`before`, `This command has no effect when trying to get user info from a registry that doesn't require authentication.`);
 registerCommand(whoami, {
     requiresRegistry: true,
     registryAuthBlacklist: [AuthenticationType.NO_AUTH]
 });
 const logout = program.command(`logout`)
-    .description(`Log out of a registry`)
+    .description(`Log out of a registry.`)
     .addHelpText(`before`, `This command has no effect when trying to logout from a registry that doesn't require authentication.`);
 registerCommand(logout, {
     requiresRegistry: true,
@@ -61,7 +61,7 @@ registerCommand(logout, {
 
 /*PING*/
 const ping = program.command(`ping`)
-    .description(`Test trm-server with ping RFC function`);
+    .description(`Test trm-server with ping RFC function.`);
 registerCommand(ping, {
     requiresConnection: true,
     requiresTrmDependencies: true
@@ -69,7 +69,7 @@ registerCommand(ping, {
 
 /*PUBLISH*/
 const publish = program.command(`publish <package> [version]`)
-    .description(`Publish package to registry`)
+    .description(`Publish package to registry.`)
     .addHelpText(`before`, `When no version is defined, it will automatically set to:
 - When it's the first release ever: 1.0.0
 - When it's already published: the latest available released with patch increased by 1
@@ -78,7 +78,7 @@ When a release is already published, the latest available manifest is used and n
 Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flags).
 Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flags).
 If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
-    .option(`-d, --devclass <devclass`, `Devclass (SAP package) that contains user custom developments to publish. `)
+    .option(`-d, --devclass <devclass>`, `Devclass (SAP package) that contains user custom developments to publish.`)
     .option(`-t, --target <target>`, `TMS Target (Used for transport release).`)
     .option(`-m, --manifest <manifestJson>`, `Path to JSON file or JSON string containing manifest publish default values.`)
     .option(`-rm, -readme <readme>`, `Path to or text containing the package default value for the readme.`)
@@ -90,7 +90,7 @@ If a default manifest with dependencies is provided in conjunction with the auto
     .option(`-ses, --skipEditSapEntries`, `Skip SAP entries edit prompt.`, false)
     .option(`-sed, --skipEditDependencies`, `Skip dependencies edit prompt.`, false)
     .option(`-srm, --skipReadme`, `Skip readme prompt.`, false)
-    .option(`-s, --silent`, `No manual inputs`, false)
+    .option(`-s, --silent`, `No manual inputs.`, false)
     .option(`-to, --releaseTimeout <timeout>`, `Release timeout (in seconds).`, '180');
 registerCommand(publish, {
     requiresConnection: true,
@@ -100,30 +100,30 @@ registerCommand(publish, {
 
 /*UNPUBLISH*/
 const unpublish = program.command(`unpublish <package> <version>`)
-    .description(`Unpublish a package release from registry`);
+    .description(`Unpublish a package release from registry.`);
 registerCommand(unpublish, {
     requiresRegistry: true
 });
 
 /*INSTALL*/
 const install = program.command(`install <package> [version]`)
-    .description(`Install package from registry to system`)
+    .description(`Install package from registry to system.`)
     .addHelpText(`before`, `When no version is specified, the latest will be installed.
 This command won't let you update/downgrade a package unless specified differently with the appropriate flag.`)
     .option(`-tl, --transportLayer <transportLayer>`,`Transport layer used for package generation. (default: System default)`)
-    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists`, false)
-    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists)`, false)
-    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds)`, '180')
-    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape`, true)
-    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force)`, false)
-    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force)`, false)
-    .option(`-sl, --skipLang`, `Skip translation transport`, false)
-    .option(`-sc, --skipCustomizing`, `Skip customizing transport`, false)
-    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force)`, false)
-    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate (default: None)`)
-    .option(`-s, --silent`, `No manual inputs`, false)
-    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map`)
-    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade  (has no effect with flag force)`, false);
+    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists.`, false)
+    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
+    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape.`, true)
+    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force).`, false)
+    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force).`, false)
+    .option(`-sl, --skipLang`, `Skip translation transport.`, false)
+    .option(`-sc, --skipCustomizing`, `Skip customizing transport.`, false)
+    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force).`, false)
+    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate. (default: None)`)
+    .option(`-s, --silent`, `No manual inputs.`, false)
+    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map.`)
+    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade  (has no effect with flag force).`, false);
 registerCommand(install, {
     requiresConnection: true,
     requiresRegistry: true,
@@ -132,7 +132,7 @@ registerCommand(install, {
 
 /*VIEW*/
 const view = program.command(`view <package>`)
-    .description(`View package`)
+    .description(`View package.`)
     .addHelpText(`before`, `Shows package details.
 If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
 registerCommand(view, {
@@ -142,7 +142,7 @@ registerCommand(view, {
 });
 /*COMPARE*/
 const compare = program.command(`compare <package>`)
-    .description(`Compare a package on different systems`)
+    .description(`Compare a package on different systems.`)
     .option(`-c, --connections <json>`, `Path to JSON file or JSON containing an array of aliases.`);
 registerCommand(compare, {
     requiresRegistry: true,
@@ -150,29 +150,29 @@ registerCommand(compare, {
 });
 /*LIST*/
 const list = program.command(`list`)
-    .description(`List packages installed on a system`);
+    .description(`List packages installed on a system.`);
 registerCommand(list, {
     requiresConnection: true
 });
 /*CHECK TOOLS*/
 const check = program.command(`check <package>`)
-    .description(`Analyze installed package status on a system`)
-    .option(`-at, --analysisType`, `Analysis type`);
+    .description(`Analyze installed package status on a system.`)
+    .option(`-at, --analysisType`, `Analysis type.`);
 registerCommand(check, {
     requiresConnection: true,
     requiresRegistry: true,
     ignoreRegistryUnreachable: true
 });
 const findDependencies = program.command(`findDependencies <devclass>`)
-    .description(`Find SAP package dependencies with custom packages/trm packages/SAP Entries`)
-    .option(`-se, --sapEntries`, `Show list of required SAP Entries`, false)
+    .description(`Find SAP package dependencies with custom packages/trm packages/SAP Entries.`)
+    .option(`-se, --sapEntries`, `Show list of required SAP Entries.`, false)
 registerCommand(findDependencies, {
     requiresConnection: true
 });
 
 /*INFO*/
 const info = program.command(`info`)
-    .description(`TRM Client/Server Info`);
+    .description(`TRM Client/Server Info.`);
 registerCommand(info, {
     requiresConnection: true,
     requiresTrmDependencies: true
@@ -180,8 +180,8 @@ registerCommand(info, {
 
 /*SETTINGS*/
 const settings = program.command(`settings`)
-    .description(`Show/Set settings`)
-    .option(`-s, --set <property>`, `Property as KEY=VALUE`)
+    .description(`Show/Set settings.`)
+    .option(`-s, --set <property>`, `Property as KEY=VALUE.`)
 registerCommand(settings);
 
 

@@ -27,7 +27,7 @@ To sum up the installation:
 
 - Download the RFC SDK from the SAP® Support Portal (follow the updated link of the note in [this section](https://support.sap.com/en/product/connectors/nwrfcsdk.html?anchorId=section_1291717368))
 
-> **TRM DOESN'T PROVIDE THE REQUIRED SDK, IT CAN AND SHOULD ONLY BE DOWNLOADED FROM OFFICIAL SOURCES**
+> **TRM DOESN'T PROVIDE THE REQUIRED SDK, IT CAN BE DOWNLOADED FROM OFFICIAL SOURCES**
 
 - On Windows
     - Create the folder `C:\nwrfcsdk`
@@ -57,7 +57,7 @@ To sum up the installation:
 
 - Download the RFC SDK from [SAP® Software Download Center](https://support.sap.com/en/my-support/software-downloads.html)
 
-> **TRM DOESN'T PROVIDE THE R3TRANS PROGRAM, IT CAN AND SHOULD ONLY BE DOWNLOADED FROM OFFICIAL SOURCES**
+> **TRM DOESN'T PROVIDE THE R3TRANS PROGRAM, IT CAN BE DOWNLOADED FROM OFFICIAL SOURCES**
 
 - On Windows
 
