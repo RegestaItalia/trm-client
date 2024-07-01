@@ -129,6 +129,28 @@ registerCommand(install, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+/*UPDATE*/
+const update = program.command(`update <package> [version]`)
+    .description(`Update package from registry to system.`)
+    .addHelpText(`before`, `When no version is specified, the latest will be installed.`)
+    .option(`-tl, --transportLayer <transportLayer>`,`Transport layer used for package generation. (default: System default)`)
+    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists.`, false)
+    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
+    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape.`, true)
+    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force).`, false)
+    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force).`, false)
+    .option(`-sl, --skipLang`, `Skip translation transport.`, false)
+    .option(`-sc, --skipCustomizing`, `Skip customizing transport.`, false)
+    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force).`, false)
+    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate. (default: None)`)
+    .option(`-s, --silent`, `No manual inputs.`, false)
+    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map.`);
+registerCommand(update, {
+    requiresConnection: true,
+    requiresRegistry: true,
+    requiresTrmDependencies: true
+});
 
 /*VIEW*/
 const view = program.command(`view <package>`)
