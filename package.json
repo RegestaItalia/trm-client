@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,7 +39,7 @@
     "get-root-path": "^2.0.2",
     "ini": "^4.1.1",
     "semver": "^7.5.4",
-    "trm-core": "^3.1.5",
+    "trm-core": "^4.0.0",
     "trm-registry-types": "^1.0.3",
     "xml2js": "^0.6.2"
   },
