@@ -1,15 +1,16 @@
 import { Logger, SystemConnector } from "trm-core";
+import { inspect } from "util";
 
 export async function logError(err: any) {
     var e: Error;
     if(err.originalException){
         e = err;
         while((e as any).originalException){
-            Logger.error(e.toString(), true);
+            Logger.error(inspect(e, { breakLength: Infinity, compact: true }), true);
             e = (e as any).originalException;
         }
     }else{
-        Logger.error(err.toString(), true);
+        Logger.error(inspect(err, { breakLength: Infinity, compact: true }), true);
         e = err;
     }
     var sError = e.toString();
@@ -28,19 +29,21 @@ export async function logError(err: any) {
                 sError += ` Ask to enable user "${SystemConnector.getLogonUser()}" on ${SystemConnector.getDest()}.`;
             }
         }else{
-            try {
-                sError = await SystemConnector.getMessage({
-                    class: e['abapMsgClass'],
-                    no: e['abapMsgNumber'],
-                    v1: e['abapMsgV1'],
-                    v2: e['abapMsgV2'],
-                    v3: e['abapMsgV3'],
-                    v4: e['abapMsgV4']
-                });
-            } catch (e) {
-                if(e['key']){
-                    sError += ` - ${e['key']}`;
+            if(e['abapMsgClass'] && e['abapMsgNumber']){
+                try {
+                    sError = await SystemConnector.getMessage({
+                        class: e['abapMsgClass'],
+                        no: e['abapMsgNumber'],
+                        v1: e['abapMsgV1'],
+                        v2: e['abapMsgV2'],
+                        v3: e['abapMsgV3'],
+                        v4: e['abapMsgV4']
+                    });
+                } catch (exc) {
+                    sError = `${e['key']} - ${e['message']}`;
                 }
+            }else{
+                sError = `${e['key']} - ${e['message']}`;
             }
         }
     }
