@@ -14,7 +14,8 @@ export async function list(commandArgs: ListArguments) {
                 const version = oPackage.manifest.get().version || '';
                 const registry = oPackage.registry.getRegistryType() === RegistryType.PUBLIC ? 'public' : oPackage.registry.endpoint;
                 const devclass = oPackage.getDevclass() || '';
-                const importTransport = oPackage.manifest.getLinkedTransport().trkorr;
+                const linkedTransport = oPackage.manifest.getLinkedTransport();
+                const importTransport = linkedTransport ? linkedTransport.trkorr : '';
                 tableData.push([
                     packageName,
                     version,
