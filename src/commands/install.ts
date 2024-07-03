@@ -1,5 +1,5 @@
 import { InstallArguments } from "./arguments";
-import { InstallPackageReplacements, install as action } from "trm-core";
+import { InstallPackageReplacements, Logger, install as action } from "trm-core";
 import { CommandRegistry } from "./commons";
 import * as fs from 'fs';
 import { getTempFolder } from "../utils";
@@ -52,7 +52,7 @@ export async function install(commandArgs: InstallArguments) {
     const allowReplace = commandArgs.replaceAllowed;
     
     const tmpFolder = getTempFolder(); 
-    await action({
+    const output = await action({
         packageName: packageName,
         registry: registry,
         version: packageVersion,
@@ -75,4 +75,11 @@ export async function install(commandArgs: InstallArguments) {
         packageReplacements,
         allowReplace
     });
+    var sOutput = `${output.trmPackage.packageName} installed`;
+    if(output.wbTransport){
+        sOutput += `, use ${output.wbTransport} transport.`;
+    }else{
+        sOutput += `.`;
+    }
+    Logger.success(sOutput);
 }

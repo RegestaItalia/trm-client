@@ -7,12 +7,13 @@ import { Logger } from "trm-core";
 export async function unpublish(commandArgs: UnpublishArguments) {
     const packageName = commandArgs.package;
     const packageVersion = semver.clean(commandArgs.version || '');
+    const registry = CommandRegistry.get();
     
     if(!packageVersion){
         throw new Error(`Invalid version.`);
     }
 
-    await CommandRegistry.get().unpublish(packageName, packageVersion);
-
-    Logger.success(`- ${packageName.trim()} v${packageVersion}`);
+    await registry.unpublish(packageName, packageVersion);
+    const sOutput = `- ${packageName} ${packageVersion} on ${registry.name}`;
+    Logger.success(sOutput);
 }
