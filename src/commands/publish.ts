@@ -1,4 +1,4 @@
-import { TrmManifest, TrmManifestAuthor, publish as action } from "trm-core";
+import { Logger, TrmManifest, TrmManifestAuthor, publish as action } from "trm-core";
 import { PublishArguments } from "./arguments";
 import * as fs from "fs";
 import { getTempFolder } from "../utils";
@@ -149,7 +149,7 @@ export async function publish(commandArgs: PublishArguments) {
 
     const tmpFolder = getTempFolder();
     
-    await action({
+    const output = await action({
         package: manifest,
         registry,
         devclass,
@@ -167,4 +167,6 @@ export async function publish(commandArgs: PublishArguments) {
         tmpFolder,
         silent
     });
+    const sOutput = `+ ${output.manifest.get().name} ${output.manifest.get().version} on ${registry.name}`;
+    Logger.success(sOutput);
 }
