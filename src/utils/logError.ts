@@ -1,14 +1,16 @@
 import { Logger, SystemConnector } from "trm-core";
 
-export async function logError(iError: Error) {
+export async function logError(err: any) {
     var e: Error;
-    try{
-        //temporary solution for workflow exceptions
-        e = (iError as any).originalException.originalException as Error;
-        Logger.error(iError.toString(), true);
-    }catch(ex){
-        Logger.error(e.toString(), true);
-        e = iError;
+    if(err.originalException){
+        e = err;
+        while((e as any).originalException){
+            Logger.error(e.toString(), true);
+            e = (e as any).originalException;
+        }
+    }else{
+        Logger.error(err.toString(), true);
+        e = err;
     }
     var sError = e.toString();
     if (e.name === 'TrmRegistryError') {
