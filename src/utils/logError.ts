@@ -1,9 +1,14 @@
 import { Logger, SystemConnector } from "trm-core";
 
-export async function logError(e: Error) {
-    //temporary solution for workflow exceptions
-    if(e['stepName'] && e['originalException']){
-        e = e['originalException'];
+export async function logError(iError: Error) {
+    var e: Error;
+    try{
+        //temporary solution for workflow exceptions
+        e = (iError as any).originalException.originalException as Error;
+        Logger.error(iError.toString(), true);
+    }catch(ex){
+        Logger.error(e.toString(), true);
+        e = iError;
     }
     var sError = e.toString();
     if (e.name === 'TrmRegistryError') {
@@ -40,9 +45,5 @@ export async function logError(e: Error) {
     if(e.name === 'RfcLibError'){
         sError = e.message;
     }
-    if (!Logger.logger) {
-        console.error(sError);
-    }else{
-        Logger.error(sError);
-    }
+    Logger.error(sError);
 }
