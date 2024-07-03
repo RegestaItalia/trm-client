@@ -1,9 +1,17 @@
 import { Logger, SystemConnector } from "trm-core";
+import { inspect } from "util";
 
-export async function logError(e: Error) {
-    //temporary solution for workflow exceptions
-    if(e['stepName'] && e['originalException']){
-        e = e['originalException'];
+export async function logError(err: any) {
+    var e: Error;
+    if(err.originalException){
+        e = err;
+        while((e as any).originalException){
+            Logger.error(inspect(e, { breakLength: Infinity, compact: true }), true);
+            e = (e as any).originalException;
+        }
+    }else{
+        Logger.error(inspect(err, { breakLength: Infinity, compact: true }), true);
+        e = err;
     }
     var sError = e.toString();
     if (e.name === 'TrmRegistryError') {
@@ -21,28 +29,26 @@ export async function logError(e: Error) {
                 sError += ` Ask to enable user "${SystemConnector.getLogonUser()}" on ${SystemConnector.getDest()}.`;
             }
         }else{
-            try {
-                sError = await SystemConnector.getMessage({
-                    class: e['abapMsgClass'],
-                    no: e['abapMsgNumber'],
-                    v1: e['abapMsgV1'],
-                    v2: e['abapMsgV2'],
-                    v3: e['abapMsgV3'],
-                    v4: e['abapMsgV4']
-                });
-            } catch (e) {
-                if(e['key']){
-                    sError += ` - ${e['key']}`;
+            if(e['abapMsgClass'] && e['abapMsgNumber']){
+                try {
+                    sError = await SystemConnector.getMessage({
+                        class: e['abapMsgClass'],
+                        no: e['abapMsgNumber'],
+                        v1: e['abapMsgV1'],
+                        v2: e['abapMsgV2'],
+                        v3: e['abapMsgV3'],
+                        v4: e['abapMsgV4']
+                    });
+                } catch (exc) {
+                    sError = `${e['key']} - ${e['message']}`;
                 }
+            }else{
+                sError = `${e['key']} - ${e['message']}`;
             }
         }
     }
     if(e.name === 'RfcLibError'){
         sError = e.message;
     }
-    if (!Logger.logger) {
-        console.error(sError);
-    }else{
-        Logger.error(sError);
-    }
+    Logger.error(sError);
 }
