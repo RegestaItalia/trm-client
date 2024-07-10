@@ -77,7 +77,7 @@ export async function install(commandArgs: InstallArguments) {
     });
     var sOutput = `${output.trmPackage.packageName} installed`;
     if(output.wbTransport){
-        sOutput += `, use ${output.wbTransport} transport.`;
+        sOutput += `, use ${output.wbTransport.trkorr} transport.`;
     }else{
         sOutput += `.`;
     }
