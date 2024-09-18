@@ -162,7 +162,10 @@ export async function view(commandArgs: ViewArguments) {
         }else{
             keywords = oSystemManifest.keywords;
         }
-        const importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+        var importTransport: string;
+        try{
+            importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+        }catch(e){ }
         dependencies = oSystemManifest.dependencies || [];
         printManifest = {
             devclass: oSystemView.getDevclass(),
@@ -183,10 +186,7 @@ export async function view(commandArgs: ViewArguments) {
             description: oRegistryView.shortDescription,
             git: oRegistryView.git,
             website: oRegistryView.website,
-            license: oRegistryView.license,
-            backwardsCompatible: undefined,
-            authors: undefined,
-            keywords: undefined
+            license: oRegistryView.license
         };
     }else{
         throw new Error(`Package "${packageName}" does not exist or insufficient view permissions.`);
