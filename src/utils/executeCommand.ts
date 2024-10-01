@@ -46,6 +46,10 @@ export async function executeCommand(args: any) {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
         Logger.logger = _getLogger(args.logType, args.verbose, args.logOutputFolder);
 
+        if (!/^win/i.test(process.platform)) {
+            Logger.warning(`Running on untested OS ${process.platform}! Some features aren't tested yet.`);
+        }
+
         const requiresConnection = args.requiresConnection;
         const requiresTrmDependencies = args.requiresTrmDependencies;
         const requiresRegistry = args.requiresRegistry;
