@@ -41,7 +41,7 @@ To sum up the installation:
 
     - Create an enviroment variable named `SAPNWRFC_HOME`, with the path `C:\nwrfcsdk`
 
-    - Add `C:\nwrfcsdk\lib` to the PATH variable (same procedure done earlier for checking the npm install)
+    - Add `C:\nwrfcsdk\bin` to the PATH variable (same procedure done earlier for checking the npm install)
 
 ## R3Trans program
 
@@ -67,7 +67,7 @@ To sum up the installation:
 
     - Make sure `C:\R3Trans\R3trans.exe` exists
 
-    - Make sure `C:\nwrfcsdk\lib` is in the list of your PATH enviroment variable
+    - Make sure `C:\` is in the list of your PATH enviroment variable
 
     - Running the command `R3trans` through cmd, in the folder `C:\R3Trans`, should list possible commands
 
