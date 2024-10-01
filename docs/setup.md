@@ -31,6 +31,7 @@ To sum up the installation:
 
 - On Windows
     - Create the folder `C:\nwrfcsdk`
+      
     - Place the content downloaded into this folder (extract if needed)
 
     - Make sure `C:\nwrfcsdk\bin` exists
@@ -66,8 +67,6 @@ To sum up the installation:
     - Place the content downloaded into this folder (extract if needed)
 
     - Make sure `C:\R3Trans\R3trans.exe` exists
-
-    - Make sure `C:\` is in the list of your PATH enviroment variable
 
     - Running the command `R3trans` through cmd, in the folder `C:\R3Trans`, should list possible commands
 
