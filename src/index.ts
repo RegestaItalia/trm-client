@@ -187,10 +187,13 @@ registerCommand(check, {
 });
 const findDependencies = program.command(`findDependencies <devclass>`)
     .description(`Find SAP package dependencies with custom packages/trm packages/SAP Entries.`)
-    .option(`-se, --sapEntries`, `Show list of required SAP Entries.`, false)
+    .option(`-se, --sapEntries`, `Show list of required SAP Entries.`, false);
 registerCommand(findDependencies, {
     requiresConnection: true
 });
+const contents = program.command(`contents <package> [version]`)
+    .description(`List package content.`);
+registerCommand(contents);
 
 /*INFO*/
 const info = program.command(`info`)
@@ -203,7 +206,7 @@ registerCommand(info, {
 /*SETTINGS*/
 const settings = program.command(`settings`)
     .description(`Show/Set settings.`)
-    .option(`-s, --set <property>`, `Property as KEY=VALUE.`)
+    .option(`-s, --set <property>`, `Property as KEY=VALUE.`);
 registerCommand(settings);
 
 
