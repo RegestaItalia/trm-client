@@ -56,7 +56,7 @@ A guide on installing the program can be found [here](https://github.com/Regesta
 
 To sum up the installation:
 
-- Download the RFC SDK from [SAP® Software Download Center](https://support.sap.com/en/my-support/software-downloads.html)
+- Download the R3trans program from [SAP® Software Download Center](https://support.sap.com/en/my-support/software-downloads.html)
 
 > **TRM DOESN'T PROVIDE THE R3TRANS PROGRAM, IT CAN BE DOWNLOADED FROM OFFICIAL SOURCES**
 
