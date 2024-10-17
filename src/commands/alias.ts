@@ -1,9 +1,10 @@
-import { Inquirer, Logger } from "trm-core";
+import { Inquirer, Logger, RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias, SystemAliasData } from "../systemAlias";
 import { AliasArguments, ConnectArguments } from "./arguments";
 import { createAlias } from "./createAlias";
 import { deleteAlias } from "./deleteAlias";
 import { connect } from "./prompts";
+import { SystemConnectorType } from "../utils";
 
 const _create = async () => {
     const inq1 = await Inquirer.prompt({
@@ -17,36 +18,49 @@ const _create = async () => {
 }
 
 const _view = (alias: SystemAliasData) => {
-    const dest = alias.connection.dest;
-    const ashost = alias.connection.ashost;
-    const sysnr = alias.connection.sysnr;
-    const saprouter = alias.connection.saprouter;
-    const client = alias.login.client;
     const lang = alias.login.lang;
     const user = alias.login.user;
     const hasPassword = alias.login.passwd ? true : false;
-    if (dest) {
-        Logger.info(`System ID: ${dest}`);
-    } else {
-        Logger.warning(`System ID: Unknown`);
-    }
-    if (ashost) {
-        Logger.info(`Application server: ${ashost}`);
-    } else {
-        Logger.warning(`Application server: Unknown`);
-    }
-    if (sysnr) {
-        Logger.info(`Instance number: ${sysnr}`);
-    } else {
-        Logger.warning(`Instance number: Unknown`);
-    }
-    if (saprouter) {
-        Logger.info(`SAProuter: ${saprouter}`);
-    }
-    if (client) {
-        Logger.info(`Logon client: ${client}`);
-    } else {
-        Logger.warning(`Logon client: Unknown`);
+    if(alias.type === SystemConnectorType.RFC){
+        const dest = (alias.connection as RFCConnection).dest;
+        const ashost = (alias.connection as RFCConnection).ashost;
+        const sysnr = (alias.connection as RFCConnection).sysnr;
+        const saprouter = (alias.connection as RFCConnection).saprouter;
+        const client = alias.login.client;
+        if (dest) {
+            Logger.info(`System ID: ${dest}`);
+        } else {
+            Logger.warning(`System ID: Unknown`);
+        }
+        if (ashost) {
+            Logger.info(`Application server: ${ashost}`);
+        } else {
+            Logger.warning(`Application server: Unknown`);
+        }
+        if (sysnr) {
+            Logger.info(`Instance number: ${sysnr}`);
+        } else {
+            Logger.warning(`Instance number: Unknown`);
+        }
+        if (saprouter) {
+            Logger.info(`SAProuter: ${saprouter}`);
+        }
+        if (client) {
+            Logger.info(`Logon client: ${client}`);
+        } else {
+            Logger.warning(`Logon client: Unknown`);
+        }
+    }else if(alias.type === SystemConnectorType.REST){
+        const endpoint = (alias.connection as RESTConnection).endpoint;
+        const rfcdest = (alias.connection as RESTConnection).rfcdest;
+        if (endpoint) {
+            Logger.info(`System endpoint: ${endpoint}`);
+        } else {
+            Logger.warning(`System endpoint: Unknown`);
+        }
+        if(rfcdest){
+            Logger.info(`RFC Forward: ${rfcdest}`);
+        }
     }
     if (lang) {
         Logger.info(`Logon language: ${lang}`);
@@ -67,7 +81,7 @@ const _view = (alias: SystemAliasData) => {
 
 const _check = async (alias: SystemAliasData) => {
     Logger.loading(`Checking connection with alias "${alias.alias}"...`);
-    const oSystemAlias = new SystemAlias(alias.connection, alias.login);
+    const oSystemAlias = new SystemAlias(alias.type, alias.connection, alias.login);
     try {
         await oSystemAlias.getConnection().connect();
         Logger.success(`Connection OK.`);
@@ -83,23 +97,36 @@ const _edit = async (alias: SystemAliasData) => {
         ...alias.connection,
         ...alias.login,
         ...{
+            type: alias.type,
             noSystemAlias: true,
             force: true
         }
     } as ConnectArguments, false);
     try {
         SystemAlias.delete(alias.alias);
-        const updatedAlias = SystemAlias.create(alias.alias, {
-            ashost: connectionArgs.ashost,
-            dest: connectionArgs.dest,
-            sysnr: connectionArgs.sysnr,
-            saprouter: connectionArgs.saprouter
-        }, {
-            client: connectionArgs.client,
-            lang: connectionArgs.lang,
-            passwd: connectionArgs.passwd,
-            user: connectionArgs.user
-        });
+        var updatedAlias: SystemAlias;
+        if(connectionArgs.type === SystemConnectorType.RFC){
+            updatedAlias = SystemAlias.create(alias.alias, connectionArgs.type, {
+                ashost: connectionArgs.ashost,
+                dest: connectionArgs.dest,
+                sysnr: connectionArgs.sysnr,
+                saprouter: connectionArgs.saprouter
+            }, {
+                client: connectionArgs.client,
+                lang: connectionArgs.lang,
+                passwd: connectionArgs.passwd,
+                user: connectionArgs.user
+            });
+        }else if(connectionArgs.type === SystemConnectorType.REST){
+            updatedAlias = SystemAlias.create(alias.alias, connectionArgs.type, {
+                endpoint: connectionArgs.endpoint,
+                rfcdest: connectionArgs.forwardRfcDest
+            }, {
+                lang: connectionArgs.lang,
+                passwd: connectionArgs.passwd,
+                user: connectionArgs.user
+            });
+        }
         await updatedAlias.getConnection().connect();
     } catch (e) {
         connectionSuccess = false;
@@ -110,17 +137,28 @@ const _edit = async (alias: SystemAliasData) => {
         } else {
             Logger.error(`Alias "${alias.alias}" couldn't be updated.`);
             SystemAlias.delete(alias.alias);
-            SystemAlias.create(alias.alias, {
-                ashost: alias.connection.ashost,
-                dest: alias.connection.dest,
-                sysnr: alias.connection.sysnr,
-                saprouter: alias.connection.saprouter
-            }, {
-                client: alias.login.client,
-                lang: alias.login.lang,
-                passwd: alias.login.passwd,
-                user: alias.login.user
-            });
+            if(alias.type === SystemConnectorType.RFC){
+                SystemAlias.create(alias.alias, alias.type, {
+                    ashost: (alias.connection as RFCConnection).ashost,
+                    dest: (alias.connection as RFCConnection).dest,
+                    sysnr: (alias.connection as RFCConnection).sysnr,
+                    saprouter: (alias.connection as RFCConnection).saprouter
+                }, {
+                    client: alias.login.client,
+                    lang: alias.login.lang,
+                    passwd: alias.login.passwd,
+                    user: alias.login.user
+                });
+            }else if(alias.type === SystemConnectorType.REST){
+                SystemAlias.create(alias.alias, alias.type, {
+                    endpoint: (alias.connection as RESTConnection).endpoint,
+                    rfcdest: (alias.connection as RESTConnection).rfcdest
+                }, {
+                    lang: alias.login.lang,
+                    passwd: alias.login.passwd,
+                    user: alias.login.user
+                });
+            }
         }
     }
 }

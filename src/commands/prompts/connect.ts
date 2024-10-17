@@ -1,6 +1,6 @@
-import { Inquirer } from "trm-core";
+import { Inquirer, ISystemConnector, RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias } from "../../systemAlias";
-import { getSapLogonConnections } from "../../utils";
+import { getSapLogonConnections, getSystemConnector, SystemConnectorType } from "../../utils";
 import { ConnectArguments } from "../arguments";
 
 const languageList = [
@@ -48,6 +48,7 @@ const languageList = [
 export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     const force = commandArgs.force ? true : false;
+    var type = commandArgs.type;
     var aInputType = [];
     var aSapLogonConnections;
     const aAlias = SystemAlias.getAll();
@@ -63,7 +64,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }
     if (aSapLogonConnections.length > 0) {
         aInputType.push({
-            value: 'logon', name: 'SAP Logon Connection'
+            value: 'logon', name: 'SAP Logon Connection (Uses node-rfc - deprecated)'
         });
     }
     aInputType.push({
@@ -114,75 +115,165 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             commandArgs.dest = logonConnection.dest;
             commandArgs.sysnr = logonConnection.sysnr;
             commandArgs.saprouter = logonConnection.saprouter;
+            type = SystemConnectorType.RFC;
+        }else{
+            type = commandArgs.type;
         }
         result = await Inquirer.prompt([{
+            type: `list`,
+            name: `type`,
+            message: `Connection type`,
+            choices: [{
+                value: 'RFC',
+                name: 'RFC (Uses node-rfc - deprecated)'
+            }, {
+                value: 'REST',
+                name: 'REST (Requires trm-rest)'
+            }],
+            when: (type ? false : true) || force
+        },
+        //RFC
+        {
             type: `input`,
             name: `ashost`,
             message: `Application server`,
             default: commandArgs.ashost,
-            when: (commandArgs.ashost ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force)
+            }
         }, {
             type: `input`,
             name: `dest`,
             message: `System ID`,
             default: commandArgs.dest,
-            when: (commandArgs.dest ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force)
+            }
         }, {
             type: `input`,
             name: `sysnr`,
             message: `Instance number`,
             default: commandArgs.sysnr,
-            when: (commandArgs.sysnr ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force)
+            }
         }, {
             type: `input`,
             name: `saprouter`,
             message: `SAProuter`,
             default: commandArgs.saprouter,
-            when: force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force)
+            }
         }, {
             type: `input`,
             name: `client`,
             message: `Logon Client`,
             default: commandArgs.client,
-            when: (commandArgs.client ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.client ? false : true) || force)
+            }
         }, {
             type: `input`,
             name: `user`,
             message: `Logon User`,
             default: commandArgs.user,
-            when: (commandArgs.user ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.user ? false : true) || force)
+            }
         }, {
             type: `password`,
             name: `passwd`,
             message: `Logon Password`,
             default: commandArgs.passwd,
-            when: (commandArgs.passwd ? false : true) || force
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.passwd ? false : true) || force)
+            }
         }, {
             type: `list`,
             name: `lang`,
             message: `Logon Language`,
-            default: commandArgs.lang,
-            when: (commandArgs.lang ? false : true) || force,
+            default: commandArgs.lang || 'EN', //default to english
+            when: (hash) => {
+                return hash.type === 'RFC' && ((commandArgs.lang ? false : true) || force)
+            },
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
             },
             choices: languageList
+        },
+        //REST
+        {
+            type: `input`,
+            name: `endpoint`,
+            message: `System endpoint`,
+            default: commandArgs.endpoint,
+            when: (hash) => {
+                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force)
+            }
+        }, {
+            type: `input`,
+            name: `forwardRfcDest`,
+            message: `Forward RFC Destination`,
+            default: commandArgs.forwardRfcDest,
+            when: (hash) => {
+                return hash.type === 'REST' && ((commandArgs.forwardRfcDest ? false : true) || force)
+            }
         }]);
     }
 
-    result.ashost = result.ashost || commandArgs.ashost;
-    result.dest = result.dest || commandArgs.dest;
-    result.saprouter = result.saprouter || commandArgs.saprouter;
-    result.sysnr = result.sysnr || commandArgs.sysnr;
-    result.client = result.client || commandArgs.client;
     result.user = result.user || commandArgs.user;
     result.passwd = result.passwd || commandArgs.passwd;
     result.lang = result.lang || commandArgs.lang;
-    result.noSystemAlias = commandArgs.noSystemAlias;
-
-    result.dest = result.dest.toUpperCase();
     result.user = result.user.toUpperCase();
     result.lang = result.lang.toUpperCase();
+
+    if(type === SystemConnectorType.RFC){
+        result.ashost = result.ashost || commandArgs.ashost;
+        result.dest = result.dest || commandArgs.dest;
+        result.saprouter = result.saprouter || commandArgs.saprouter;
+        result.sysnr = result.sysnr || commandArgs.sysnr;
+        result.client = result.client || commandArgs.client;
+        result.noSystemAlias = commandArgs.noSystemAlias;
+    
+        result.dest = result.dest.toUpperCase();
+        
+        result.connection = getSystemConnector(SystemConnectorType.RFC, {
+            connection: {
+                dest: result.dest,
+                ashost: result.ashost,
+                sysnr: result.sysnr,
+                saprouter: result.saprouter
+            } as RFCConnection,
+            login: {
+                user: result.user,
+                passwd: result.passwd,
+                lang: result.lang,
+                client: result.client
+            }
+        });
+    }else if(type === SystemConnectorType.REST){
+        result.endpoint = result.endpoint || commandArgs.endpoint;
+        result.forwardRfcDest = result.forwardRfcDest || commandArgs.forwardRfcDest;
+
+        if(result.forwardRfcDest){
+            result.forwardRfcDest = result.forwardRfcDest.toUpperCase();
+        }
+
+        result.connection = getSystemConnector(SystemConnectorType.REST, {
+            connection: {
+                endpoint: result.endpoint,
+                rfcdest: result.forwardRfcDest || 'NONE'
+            } as RESTConnection,
+            login: {
+                user: result.user,
+                passwd: result.passwd,
+                lang: result.lang
+            }
+        });
+    }
+
+    return result;
 
     /*if(createAliasIfNotExist){
         const aliasExists = aAlias.find(o => {
@@ -198,5 +289,4 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
 
         }
     }*/
-    return result;
 }

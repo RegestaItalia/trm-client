@@ -1,19 +1,22 @@
 import { View } from "trm-registry-types";
 import { CompareArguments } from "./arguments";
 import * as fs from "fs";
-import { Connection, Inquirer, Logger, ServerSystemConnector } from "trm-core";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
 import { CommandRegistry, viewRegistryPackage } from "./commons";
+import { Inquirer, ISystemConnector, Logger, RESTConnection, RFCConnection } from "trm-core";
+import { getSystemConnector, SystemConnectorType } from "../utils";
 
-const _compareConnectionData = (a: Connection, b: Connection): boolean => {
-    return a.dest === b.dest &&
+const _compareConnectionData = (a: RESTConnection | RFCConnection, b: RESTConnection | RFCConnection): boolean => {
+    /*return a.dest === b.dest &&
            a.ashost === b.ashost &&
            a.sysnr === b.sysnr &&
-           a.saprouter === b.saprouter;
+           a.saprouter === b.saprouter;*/
+    //TODO FIX compare
+    return false;
 }
 
-const _promptConnections = async (aConnections: ServerSystemConnector[]) => {
+const _promptConnections = async (aConnections: ISystemConnector[]) => {
     if (aConnections.length > 0) {
         Logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
     }
@@ -28,20 +31,41 @@ const _promptConnections = async (aConnections: ServerSystemConnector[]) => {
     askConnection = inq1.continue !== undefined ? inq1.continue : askConnection;
     if (askConnection) {
         const connectArgs = await connect({}, false);
-        const oConnection = new ServerSystemConnector({
-            ashost: connectArgs.ashost,
-            dest: connectArgs.dest,
-            sysnr: connectArgs.sysnr,
-            saprouter: connectArgs.saprouter
-        }, {
-            client: connectArgs.client,
-            lang: connectArgs.lang,
-            user: connectArgs.user,
-            passwd: connectArgs.passwd
-        });
-        if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
-            await oConnection.connect();
-            aConnections.push(oConnection);
+        var oConnection: ISystemConnector;
+        if(connectArgs.type === SystemConnectorType.RFC){
+            oConnection = getSystemConnector(connectArgs.type, {
+                connection: {
+                    ashost: connectArgs.ashost,
+                    dest: connectArgs.dest,
+                    sysnr: connectArgs.sysnr,
+                    saprouter: connectArgs.saprouter
+                },
+                login: {
+                    user: connectArgs.user,
+                    passwd: connectArgs.passwd,
+                    lang: connectArgs.lang,
+                    client: connectArgs.client
+                }
+            });
+        }else if(connectArgs.type === SystemConnectorType.REST){
+            oConnection = getSystemConnector(connectArgs.type, {
+                connection: {
+                    endpoint: connectArgs.endpoint,
+                    rfcdest: connectArgs.forwardRfcDest
+                },
+                login: {
+                    user: connectArgs.user,
+                    passwd: connectArgs.passwd,
+                    lang: connectArgs.lang,
+                    client: connectArgs.client
+                }
+            });
+        }
+        if(oConnection){
+            if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
+                await oConnection.connect();
+                aConnections.push(oConnection);
+            }
         }
     }
     return {
@@ -55,7 +79,7 @@ export async function compare(commandArgs: CompareArguments) {
     const registry = CommandRegistry.get();
 
     var inputConnections = commandArgs.connections;
-    var aConnections: ServerSystemConnector[] = [];
+    var aConnections: ISystemConnector[] = [];
     if (inputConnections) {
         //this could be the json file path or the json itself
         inputConnections = inputConnections.trim();

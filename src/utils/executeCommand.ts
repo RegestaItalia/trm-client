@@ -3,7 +3,7 @@ import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
 import { checkCliUpdate } from "./checkCliUpdate";
-import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ServerSystemConnector, Registry, SystemConnector } from "trm-core";
+import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, Registry, SystemConnector } from "trm-core";
 import { getLogFolder } from "./getLogFolder";
 import { CommandRegistry } from "../commands/commons";
 import { RegistryAlias } from "../registryAlias";
@@ -58,25 +58,14 @@ export async function executeCommand(args: any) {
 
         await checkCliUpdate();
 
-        var system: ServerSystemConnector;
+        var system: ISystemConnector;
         var registry: Registry;
         if (requiresConnection) {
             if (args.systemAlias) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
                 const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
-                const connectionArgs = await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command));
-                system = new ServerSystemConnector({
-                    ashost: connectionArgs.ashost,
-                    dest: connectionArgs.dest,
-                    sysnr: connectionArgs.sysnr,
-                    saprouter: connectionArgs.saprouter
-                }, {
-                    client: connectionArgs.client,
-                    lang: connectionArgs.lang,
-                    passwd: connectionArgs.passwd,
-                    user: connectionArgs.user
-                });
+                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command))).connection;
             }
             await system.connect();
             SystemConnector.systemConnector = system;

@@ -1,18 +1,21 @@
-import { Connection, Login, ServerSystemConnector } from "trm-core";
-import { getRoamingFolder } from "../utils";
+import { getRoamingFolder, getSystemConnector, SystemConnectorType } from "../utils";
 import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { SystemAliasData } from "./SystemAliasData";
+import { ISystemConnector, Login, RESTConnection, RFCConnection } from "trm-core";
 
 const SYSTEM_FILE_NAME = "systems.ini";
 
 export class SystemAlias {
 
-    constructor(private _connection: Connection, private _login: Login) { }
+    constructor(public type: SystemConnectorType, private _connection: RFCConnection | RESTConnection, private _login: Login) { }
 
-    public getConnection(): ServerSystemConnector {
-        return new ServerSystemConnector(this._connection, this._login);
+    public getConnection(): ISystemConnector {
+        return getSystemConnector(this.type, {
+            connection: this._connection,
+            login: this._login
+        });
     }
 
     private static generateFile(content: SystemAliasData[], filePath?: string): void {
@@ -21,14 +24,25 @@ export class SystemAlias {
         }
         var oContent = {};
         content.forEach(o => {
-            oContent[o.alias] = {
-                dest: o.connection.dest,
-                ashost: o.connection.ashost,
-                sysnr: o.connection.sysnr,
-                client: o.login.client,
-                user: o.login.user,
-                passwd: o.login.passwd,
-                lang: o.login.lang
+            if(o.type === SystemConnectorType.RFC){
+                oContent[o.alias] = {
+                    dest: (o.connection as RFCConnection).dest,
+                    ashost: (o.connection as RFCConnection).ashost,
+                    sysnr: (o.connection as RFCConnection).sysnr,
+                    client: o.login.client,
+                    user: o.login.user,
+                    passwd: o.login.passwd,
+                    lang: o.login.lang
+                };
+            }else if(o.type === SystemConnectorType.REST){
+                oContent[o.alias] = {
+                    endpoint: (o.connection as RESTConnection).endpoint,
+                    rfcdest: (o.connection as RESTConnection).rfcdest,
+                    client: o.login.client,
+                    user: o.login.user,
+                    passwd: o.login.passwd,
+                    lang: o.login.lang
+                };
             }
         });
         fs.writeFileSync(filePath, ini.encode(oContent), {encoding:'utf8',flag:'w'});
@@ -48,21 +62,39 @@ export class SystemAlias {
         const sIni = fs.readFileSync(filePath).toString();
         const oIni = ini.decode(sIni);
         Object.keys(oIni).forEach(sAlias => {
-            aAlias.push({
-                alias: sAlias,
-                connection: {
-                    dest: oIni[sAlias].dest,
-                    ashost: oIni[sAlias].ashost,
-                    sysnr: oIni[sAlias].sysnr,
-                    saprouter: oIni[sAlias].saprouter
-                },
-                login: {
-                    client: oIni[sAlias].client,
-                    user: oIni[sAlias].user,
-                    passwd: oIni[sAlias].passwd,
-                    lang: oIni[sAlias].lang
-                }
-            })
+            if(oIni[sAlias].type === SystemConnectorType.RFC || oIni[sAlias].type === ''){ //blank defaults to RFC (for backwards compatibility)
+                aAlias.push({
+                    alias: sAlias,
+                    type: SystemConnectorType.RFC,
+                    connection: {
+                        dest: oIni[sAlias].dest,
+                        ashost: oIni[sAlias].ashost,
+                        sysnr: oIni[sAlias].sysnr,
+                        saprouter: oIni[sAlias].saprouter
+                    },
+                    login: {
+                        client: oIni[sAlias].client,
+                        user: oIni[sAlias].user,
+                        passwd: oIni[sAlias].passwd,
+                        lang: oIni[sAlias].lang
+                    }
+                });
+            }else if(oIni[sAlias].type === SystemConnectorType.REST){
+                aAlias.push({
+                    alias: sAlias,
+                    type: SystemConnectorType.REST,
+                    connection: {
+                        endpoint: oIni[sAlias].endpoint,
+                        rfcdest: oIni[sAlias].rfcdest
+                    },
+                    login: {
+                        client: oIni[sAlias].client,
+                        user: oIni[sAlias].user,
+                        passwd: oIni[sAlias].passwd,
+                        lang: oIni[sAlias].lang
+                    }
+                });
+            }
         })
         return aAlias;
     }
@@ -71,13 +103,13 @@ export class SystemAlias {
         const aAlias = this.getAll();
         const alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if(alias){
-            return new SystemAlias(alias.connection, alias.login);
+            return new SystemAlias(alias.type, alias.connection, alias.login);
         }else{
             throw new Error(`System alias "${name}" not found.`);
         }
     }
 
-    public static create(name: string, connection: Connection, login: Login): SystemAlias {
+    public static create(name: string, type: SystemConnectorType, connection: RFCConnection | RESTConnection, login: Login): SystemAlias {
         if(!name){
             throw new Error(`Invalid alias name.`);
         }
@@ -88,12 +120,13 @@ export class SystemAlias {
         }else{
             aAlias.push({
                 alias: name,
+                type,
                 connection,
                 login
             });
             this.generateFile(aAlias);
         }
-        return new SystemAlias(connection, login);
+        return new SystemAlias(type, connection, login);
     }
 
     public static delete(name: string): void {
