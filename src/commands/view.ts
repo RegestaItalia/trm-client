@@ -1,5 +1,5 @@
 import { ViewArguments } from "./arguments";
-import { Logger, SystemConnector, TrmManifestDependency, TrmPackage } from "trm-core";
+import { Logger, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandRegistry, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
@@ -28,15 +28,16 @@ const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) =
     if(!systemPackage && !registryView){
         return;
     }
-    const oSystemManifest = systemPackage.manifest.get();
+    var oSystemManifest: TrmManifest;
     Logger.log(''); //new line
     if(systemPackage){
+        oSystemManifest = systemPackage.manifest.get();
         Logger.success(`Installed on ${SystemConnector.getDest()}: Yes`);
         Logger.info(`Installed version: ${oSystemManifest.version}`);
     }else{
         Logger.info(`Installed on ${SystemConnector.getDest()}: No`);
     }
-    if(registryView.release){
+    if(registryView && registryView.release){
         Logger.info(`Latest version available: ${registryView.release.version}`);
         if(oSystemManifest){
             if(eq(oSystemManifest.version, registryView.release.version)){
