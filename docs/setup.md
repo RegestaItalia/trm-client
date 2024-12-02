@@ -45,13 +45,56 @@ To sum up the installation:
 
     4. Create an enviroment variable named `SAPNWRFC_HOME`, with the path `C:\nwrfcsdk`
 
-    5. Add `C:\nwrfcsdk\bin` to the PATH variable (same procedure done earlier for checking the npm install)
+    5. Add `C:\nwrfcsdk\bin` to the PATH environment variable
     
     6. Run the command `npm install node-rfc -g`
     
 ## ICU common library
 
-If you installed the [SAP NW RFC SDK](#SAP-NW-RFC-SDK-Optional) you can skip this step, as the library should be already provided with the SDK.
+If you installed the [SAP NW RFC SDK](#SAP-NW-RFC-SDK-Optional) you can **skip this step**, as the library should be already provided with the SDK.
+
+Start by downloading **SAPCAR** (for more information refer to SAP Note [212876](https://me.sap.com/notes/212876)), which will be used for unpacking SAPEXE.
+
+> SAPCAR is a utility used by SAP to compress and/or uncompress SAP archive files (SAR: SAP Archive)
+
+1. Go to [Software downloads in SAP for Me](https://me.sap.com/softwarecenter)
+2. Click the **SUPPORT PACKAGES & PATCHES** section
+3. Expand the **By Alphabetical Index (A-Z)** section
+4. Click the **S** letter
+5. Click the **SAPCAR** element of the list
+6. Select the highest available version
+7. Select your operating system
+8. Click the element you want to download
+
+Now, download **SAPEXE**
+
+1. Go to [Software downloads in SAP for Me](https://me.sap.com/softwarecenter)
+2. Click the **SUPPORT PACKAGES & PATCHES** section
+3. Expand the **By Alphabetical Index (A-Z)** section
+4. Click the **K** letter
+5. Select a 64bit kernel
+6. Select your operating system
+7. Click on the SAPEXE element you want to download
+
+After downloading SAPCAR and SAPEXE, unpack its content with the command
+
+`sapcar -xvf <SAPEXE file>.SAR`
+
+- On Windows
+
+    1. Create the folder `C:\ICU`
+
+    2. Move the ICU common library dlls (icuuc5*x*.dll, icudt5*x*.dll, icuin5*x*.dll) into that folder
+
+    3. Add `C:\ICU` to the PATH environment variable
+    
+- On Linux
+
+    1. Create the folder `C:\ICU`
+
+    2. Move the ICU common library files (libicuuc5*x*.so, libicudata5*x*.so, libicui18n5*x*.so) into that folder
+
+    3. Create an enviroment variable named `LD_LIBRARY_PATH`, with the path `C:\ICU`
 
 ## R3trans program
 
