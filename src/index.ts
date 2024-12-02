@@ -188,7 +188,7 @@ registerCommand(list, {
 /*CHECK TOOLS*/
 const check = program.command(`check <package>`)
     .description(`Analyze installed package status on a system.`)
-    .option(`-at, --analysisType`, `Analysis type.`);
+    .option(`-at, --analysisType`, `Analysis type (DEPENDENCIES, SAPENTRIES or ALL).`);
 registerCommand(check, {
     requiresConnection: true,
     requiresRegistry: true,
@@ -197,6 +197,7 @@ registerCommand(check, {
 const findDependencies = program.command(`findDependencies <devclass>`)
     .description(`Find SAP package dependencies with custom packages/trm packages/SAP entries/objects.`)
     .option(`-se, --sapEntries`, `Show list of required SAP entries/objects.`, false)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
 registerCommand(findDependencies, {
     requiresConnection: true
 });

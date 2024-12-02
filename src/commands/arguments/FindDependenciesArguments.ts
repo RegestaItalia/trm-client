@@ -1,4 +1,5 @@
 export type FindDependenciesArguments = {
     devclass: string,
-    sapEntries: boolean
+    sapEntries: boolean,
+    noPrompts: boolean
 }
