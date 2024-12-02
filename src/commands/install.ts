@@ -1,7 +1,7 @@
 import { InstallArguments } from "./arguments";
 import { InstallPackageReplacements, Logger, install as action } from "trm-core";
-import { CommandRegistry } from "./commons";
-import { getTempFolder, TrmDependencies } from "../utils";
+import { getTempFolder } from "../utils";
+import { CommandContext } from "./commons";
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
     if(arg){
@@ -27,15 +27,15 @@ export async function install(commandArgs: InstallArguments) {
                 r3transDirPath: commandArgs.r3transPath
             },
             noInquirer: commandArgs.noPrompts,
-            systemPackages: TrmDependencies.getInstance().getSystemPackages(),
-            noR3transInfo: false
+            systemPackages: CommandContext.systemPackages,
+            noR3transInfo: false //fixed to false
         },
         packageData: {
             name: commandArgs.package,
             version: commandArgs.version,
             overwrite: commandArgs.overwrite,
             integrity: commandArgs.integrity,
-            registry: CommandRegistry.get()
+            registry: CommandContext.getRegistry()
         },
         installData: {
             checks: {

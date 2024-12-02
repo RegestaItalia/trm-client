@@ -5,8 +5,8 @@ import { checkTrmDependencies } from "./checkTrmDependencies";
 import { checkCliUpdate } from "./checkCliUpdate";
 import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, Registry, SystemConnector } from "trm-core";
 import { getLogFolder } from "./getLogFolder";
-import { CommandRegistry } from "../commands/commons";
 import { RegistryAlias } from "../registryAlias";
+import { CommandContext } from "../commands/commons";
 
 export enum LoggerType {
     CLI = 'CLI',
@@ -105,7 +105,7 @@ export async function executeCommand(args: any) {
                     Logger.warning(`Registry "${registry.name}" login failed.`);
                 }
             }
-            CommandRegistry.registry = registry;
+            CommandContext.registry = registry;
         }
 
         if (commands[args.command]) {

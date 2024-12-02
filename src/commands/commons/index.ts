@@ -1,2 +1,2 @@
 export * from "./viewRegistryPackage";
-export * from "./CommandRegistry";
+export * from "./CommandContext";

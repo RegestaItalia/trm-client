@@ -1,8 +1,8 @@
 import { Logger, TrmManifestDependency, publish as action } from "trm-core";
 import { PublishArguments } from "./arguments";
 import * as fs from "fs";
-import { getTempFolder, TrmDependencies } from "../utils";
-import { CommandRegistry } from "./commons";
+import { getTempFolder } from "../utils";
+import { CommandContext } from "./commons";
 
 const _parseDependenciesArg = (arg: string): TrmManifestDependency[] => {
     if(arg){
@@ -42,7 +42,7 @@ export async function publish(commandArgs: PublishArguments) {
     const result = await action({
         contextData: {
             logTemporaryFolder: getTempFolder(),
-            systemPackages: TrmDependencies.getInstance().getSystemPackages(),
+            systemPackages: CommandContext.systemPackages,
             noInquirer: commandArgs.noPrompts
         },
         packageData: {
@@ -60,7 +60,7 @@ export async function publish(commandArgs: PublishArguments) {
                 dependencies: _parseDependenciesArg(commandArgs.dependencies),
                 sapEntries: _parseSapEntriesArg(commandArgs.sapEntries)
             },
-            registry: CommandRegistry.get()
+            registry: CommandContext.getRegistry()
         },
         publishData: {
             private: commandArgs.private,
@@ -76,6 +76,6 @@ export async function publish(commandArgs: PublishArguments) {
             transportTarget: commandArgs.transportTarget
         }
     });
-    const sOutput = `+ ${result.trmPackage.manifest.get().name} ${result.trmPackage.manifest.get().version} on ${CommandRegistry.get().name}`;
+    const sOutput = `+ ${result.trmPackage.manifest.get().name} ${result.trmPackage.manifest.get().version} on ${CommandContext.getRegistry().name}`;
     Logger.success(sOutput);
 }

@@ -1,6 +1,6 @@
 import { ViewArguments } from "./arguments";
 import { Logger, SystemConnector, TrmManifestDependency, TrmPackage } from "trm-core";
-import { CommandRegistry, viewRegistryPackage } from "./commons";
+import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
 import { RegistryAlias } from "../registryAlias";
@@ -21,7 +21,7 @@ type PrintManifest = {
 
 const _printHeaderSection = (packageName: string) => {
     Logger.info(`Package name: ${packageName}`);
-    Logger.info(`Registry: ${CommandRegistry.get().name}`);
+    Logger.info(`Registry: ${CommandContext.getRegistry().name}`);
 }
 
 const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) => {
@@ -127,7 +127,7 @@ export async function view(commandArgs: ViewArguments) {
 
     Logger.loading(`Reading system data...`);
     const aSystemPackages = await SystemConnector.getInstalledPackages(true);
-    const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(CommandRegistry.registry));
+    const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(CommandContext.getRegistry()));
     const oRegistryView = await viewRegistryPackage(packageName, true);
     var authors: string;
     var keywords: string;

@@ -1,10 +1,10 @@
 import { Logger } from "trm-core";
 import { WhoAmIArguments } from "./arguments";
-import { CommandRegistry } from "./commons";
+import { CommandContext } from "./commons";
 
 export async function whoami(commandArgs: WhoAmIArguments) {
     try {
-        const whoAmI = await CommandRegistry.get().whoAmI();
+        const whoAmI = await CommandContext.getRegistry().whoAmI();
         Logger.info(`Username: ${whoAmI.username}`);
         if (whoAmI.logonMessage) {
             Logger.registryResponse(whoAmI.logonMessage);

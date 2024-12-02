@@ -1,12 +1,13 @@
 import { Logger, SystemConnector, TreeLog } from "trm-core";
-import { TrmDependencies, getClientDependencies, getClientVersion, getTrmDependencies } from "../utils";
+import { getClientDependencies, getClientVersion, getTrmDependencies } from "../utils";
 import { InfoArguments } from "./arguments";
+import { CommandContext } from "./commons";
 
 export async function info(commandArgs: InfoArguments) {
     const clientVersion = getClientVersion();
     const clientDependencies = getClientDependencies() || {};
     const trmDependencies = getTrmDependencies() || {};
-    const trmDependenciesInstances = TrmDependencies.getInstance().getAll();
+    const trmDependenciesInstances = CommandContext.trmDependencies;
 
     var clientDependenciesTree: TreeLog[] = [];
     if(clientDependencies){

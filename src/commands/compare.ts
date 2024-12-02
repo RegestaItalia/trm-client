@@ -3,7 +3,7 @@ import { CompareArguments } from "./arguments";
 import * as fs from "fs";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
-import { CommandRegistry, viewRegistryPackage } from "./commons";
+import { CommandContext, viewRegistryPackage } from "./commons";
 import { Inquirer, ISystemConnector, Logger, RESTConnection, RFCConnection } from "trm-core";
 import { getSystemConnector, SystemConnectorType } from "../utils";
 
@@ -76,7 +76,7 @@ const _promptConnections = async (aConnections: ISystemConnector[]) => {
 
 export async function compare(commandArgs: CompareArguments) {
     const packageName = commandArgs.package;
-    const registry = CommandRegistry.get();
+    const registry = CommandContext.getRegistry();
 
     var inputConnections = commandArgs.connections;
     var aConnections: ISystemConnector[] = [];
