@@ -62,14 +62,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             value: 'alias', name: 'System Alias'
         });
     }
-    if (aSapLogonConnections.length > 0) {
-        aInputType.push({
-            value: 'logon', name: 'SAP Logon Connection (Uses node-rfc - deprecated)'
-        });
-    }
     aInputType.push({
         value: 'input', name: 'Manual input'
     });
+    if (aSapLogonConnections.length > 0) {
+        aInputType.push({
+            value: 'logon', name: 'SAP Logon Connection (Uses node-rfc)'
+        });
+    }
 
     var result: ConnectArguments;
     var inputType: string;
@@ -124,13 +124,31 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             name: `type`,
             message: `Connection type`,
             choices: [{
-                value: 'RFC',
-                name: 'RFC (Uses node-rfc - deprecated)'
-            }, {
                 value: 'REST',
                 name: 'REST (Requires trm-rest)'
+            }, {
+                value: 'RFC',
+                name: 'RFC (Uses node-rfc)'
             }],
             when: (type ? false : true) || force
+        },
+        //REST
+        {
+            type: `input`,
+            name: `endpoint`,
+            message: `System endpoint`,
+            default: commandArgs.endpoint,
+            when: (hash) => {
+                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force)
+            }
+        }, {
+            type: `input`,
+            name: `forwardRfcDest`,
+            message: `Forward RFC Destination`,
+            default: commandArgs.forwardRfcDest,
+            when: (hash) => {
+                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force)
+            }
         },
         //RFC
         {
@@ -179,7 +197,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon User`,
             default: commandArgs.user,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.user ? false : true) || force)
+                return (commandArgs.user ? false : true) || force
             }
         }, {
             type: `password`,
@@ -187,7 +205,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Password`,
             default: commandArgs.passwd,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.passwd ? false : true) || force)
+                return (commandArgs.passwd ? false : true) || force
             }
         }, {
             type: `list`,
@@ -195,33 +213,16 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Language`,
             default: commandArgs.lang || 'EN', //default to english
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.lang ? false : true) || force)
+                return (commandArgs.lang ? false : true) || force
             },
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
             },
             choices: languageList
-        },
-        //REST
-        {
-            type: `input`,
-            name: `endpoint`,
-            message: `System endpoint`,
-            default: commandArgs.endpoint,
-            when: (hash) => {
-                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force)
-            }
-        }, {
-            type: `input`,
-            name: `forwardRfcDest`,
-            message: `Forward RFC Destination`,
-            default: commandArgs.forwardRfcDest,
-            when: (hash) => {
-                return hash.type === 'REST' && ((commandArgs.forwardRfcDest ? false : true) || force)
-            }
         }]);
     }
 
+    type = result.type || type;
     result.user = result.user || commandArgs.user;
     result.passwd = result.passwd || commandArgs.passwd;
     result.lang = result.lang || commandArgs.lang;

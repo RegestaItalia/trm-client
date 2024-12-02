@@ -1,4 +1,5 @@
 import { ISystemConnector, Login, RESTSystemConnector, RFCSystemConnector } from "trm-core";
+import { getTempFolder } from "./getTempFolder";
 
 export enum SystemConnectorType {
     RFC = 'RFC',
@@ -13,7 +14,7 @@ export function getSystemConnector(type: SystemConnectorType, args: {
     switch(type){
         case SystemConnectorType.RFC:
             try{
-                return new RFCSystemConnector(args.connection, args.login);
+                return new RFCSystemConnector(args.connection, args.login, getTempFolder());
             }catch(e){
                 throw parsingError;
             }
