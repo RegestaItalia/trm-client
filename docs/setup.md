@@ -59,7 +59,7 @@ For this step, installing [SAP NW RFC SDK](#SAP-NW-RFC-SDK-Optional) or having t
 
 The R3trans program is used by TRM Client to unpack the packages downloaded from a registry.
 
-Start by downloading **SAPCAR** (for more information refer to SAP Note [212876](https://me.sap.com/notes/212876), which will be used for unpacking the R3trans program.
+Start by downloading **SAPCAR** (for more information refer to SAP Note [212876](https://me.sap.com/notes/212876)), which will be used for unpacking the R3trans program.
 
 > SAPCAR is a utility used by SAP to compress and/or uncompress SAP archive files (SAR: SAP Archive)
 
