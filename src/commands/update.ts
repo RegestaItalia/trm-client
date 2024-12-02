@@ -3,6 +3,6 @@ import { install } from "./install";
 
 export async function update(commandArgs: UpdateArguments) {
     var installArguments = commandArgs as InstallArguments;
-    installArguments.replaceAllowed = true;
+    installArguments.overwrite = true;
     await install(installArguments);
 }

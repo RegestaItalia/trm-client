@@ -1,8 +1,9 @@
 import { TrmPackage } from "trm-core";
 
 export class TrmDependencies {
-    private static _instance: TrmDependencies = null;
+    private static _instance: TrmDependencies = undefined;
     private _dependencies: TrmPackage[] = [];
+    private _systemPackages: TrmPackage[] = undefined;
 
     constructor(){}
 
@@ -16,6 +17,14 @@ export class TrmDependencies {
 
     public getAll(): TrmPackage[] {
         return this._dependencies;
+    }
+
+    public setSystemPackages(systemPackages: TrmPackage[]): void {
+        this._systemPackages = systemPackages;
+    }
+
+    public getSystemPackages(): TrmPackage[] | undefined {
+        return this._systemPackages;
     }
 
     public static getInstance(): TrmDependencies {

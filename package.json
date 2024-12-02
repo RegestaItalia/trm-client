@@ -30,7 +30,7 @@
   },
   "license": "MIT",
   "trmDependencies": {
-    "trm-server": "^1.1.0"
+    "trm-server": "^2.0.0"
   },
   "dependencies": {
     "commander": "^11.0.0",
@@ -39,8 +39,8 @@
     "get-root-path": "^2.0.2",
     "ini": "^4.1.1",
     "semver": "^7.5.4",
-    "trm-core": "^5.0.0",
-    "trm-registry-types": "^1.0.3",
+    "trm-core": "^6.1.9",
+    "trm-registry-types": "^1.2.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

@@ -1,18 +1,28 @@
 export type PublishArguments = {
     package: string,
     version?: string,
+    
+    noPrompts: boolean,
+    private: boolean,
+    keepLatestReleaseManifestValues: boolean,
+    noLanguageTransport: boolean,
+    noDependenciesDetection: boolean,
+    skipCustomizingTransports: boolean,
+    releaseTimeout: string,
+
     devclass?: string,
-    target?: string,
-    manifest?: string,
-    readme?: string,
-    forceManifest: boolean,
-    skipLang: boolean,
-    skipCustomizing: boolean,
     customizingTransports?: string,
-    skipDependencies: boolean,
-    skipEditSapEntries: boolean,
-    skipEditDependencies: boolean,
-    skipReadme: boolean,
-    silent: boolean,
-    releaseTimeout: string
+    readme?: string
+    transportTarget?: string
+
+    //manifest values//
+    backwardsCompatible: boolean,
+    description?: string,
+    git?: string,
+    website?: string,
+    license?: string,
+    authors?: string,
+    keywords?: string,
+    dependencies?: string,
+    sapEntries?: string,
 }
