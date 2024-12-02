@@ -44,7 +44,7 @@ export async function executeCommand(args: any) {
     var exitCode: number;
     try {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
-        Logger.logger = _getLogger(args.logType, args.verbose, args.logOutputFolder);
+        Logger.logger = _getLogger(args.logType, args.debug, args.logOutputFolder);
 
         if (!/^win/i.test(process.platform)) {
             Logger.warning(`Running on untested OS ${process.platform}! Some features aren't tested yet.`);

@@ -98,6 +98,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         });
         const alias = aAlias.find(o => o.alias === inq2.aliasName);
         result = { ...alias.connection, ...alias.login };
+        type = alias.type;
     } else {
         if (inputType === 'logon') {
             const inq3 = await Inquirer.prompt({
@@ -272,6 +273,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 lang: result.lang
             }
         });
+    }else{
+        throw new Error(`Unknown connection type "${type}".`);
     }
 
     return result;

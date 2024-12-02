@@ -26,6 +26,7 @@ export class SystemAlias {
         content.forEach(o => {
             if(o.type === SystemConnectorType.RFC){
                 oContent[o.alias] = {
+                    type: o.type,
                     dest: (o.connection as RFCConnection).dest,
                     ashost: (o.connection as RFCConnection).ashost,
                     sysnr: (o.connection as RFCConnection).sysnr,
@@ -36,6 +37,7 @@ export class SystemAlias {
                 };
             }else if(o.type === SystemConnectorType.REST){
                 oContent[o.alias] = {
+                    type: o.type,
                     endpoint: (o.connection as RESTConnection).endpoint,
                     rfcdest: (o.connection as RESTConnection).rfcdest,
                     client: o.login.client,
@@ -62,7 +64,7 @@ export class SystemAlias {
         const sIni = fs.readFileSync(filePath).toString();
         const oIni = ini.decode(sIni);
         Object.keys(oIni).forEach(sAlias => {
-            if(oIni[sAlias].type === SystemConnectorType.RFC || oIni[sAlias].type === ''){ //blank defaults to RFC (for backwards compatibility)
+            if(oIni[sAlias].type === SystemConnectorType.RFC || !oIni[sAlias].type){ //blank defaults to RFC (for backwards compatibility)
                 aAlias.push({
                     alias: sAlias,
                     type: SystemConnectorType.RFC,

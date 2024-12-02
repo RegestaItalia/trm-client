@@ -30,10 +30,12 @@ export function registerCommand(command: Command, args?: {
             .option(`-us, --user <user>`, `System User Logon.`)
             .option(`-pw, --passwd <passwd>`, `System User Logon Password.`)
             .option(`-cl, --client <client>`, `System Logon Client.`)
-            .option(`-la, --lang <lang>`, `System User Logon Language.`, 'EN')
+            .option(`-la, --lang <lang>`, `System User Logon Language.`)
             .option(`-ah, --ashost <ashost>`, `System application server address.`)
             .option(`-sr, --saprouter <sapRouter>`, `System SAP Router string.`)
-            .option(`-sn, --sysnr <sysnr>`, `System instance number.`);
+            .option(`-sn, --sysnr <sysnr>`, `System instance number.`)
+            .option(`-ep, --endpoint <endpoint>`, `System REST endpoint.`)
+            .option(`-fd, --forwardRfcDest <forwardRfcDest>`, `System REST forward destination.`, `NONE`);
         if (!noSystemAlias) {
             command.option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
         }
@@ -42,7 +44,7 @@ export function registerCommand(command: Command, args?: {
         command.option(`-r, --registry <registry>`, `Registry name.`);
     }
     command.option(`-log, --logType <logType>`, `Log type.`, defaultLogger);
-    command.option(`-v, --verbose`, `Verbose logging.`, false);
+    command.option(`-dbg, --debug`, `Debug logging.`, false);
 
     command.action(async (arg1, arg2) => {
         var args = {...{

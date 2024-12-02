@@ -23,7 +23,7 @@ where `logType` can be one of the following values:
 
 To enable logging of debug data, add this option
 
-`-v, --verbose`
+`-dbg, --debug`
 
 to any command.
 
