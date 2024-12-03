@@ -42,6 +42,7 @@ export async function info(commandArgs: InfoArguments) {
     const clientDependencies = getClientDependencies() || {};
     const trmDependencies = getTrmDependencies() || {};
     const trmDependenciesInstances = CommandContext.trmDependencies;
+    const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
     const trmRest = CommandContext.systemPackages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
 
@@ -64,17 +65,33 @@ export async function info(commandArgs: InfoArguments) {
     var serverDependenciesTree: TreeLog[] = [];
     if(trmDependencies){
         Object.keys(trmDependencies).forEach(d => {
+            var installedVersion = ``;
             const oTrmPackage = trmDependenciesInstances.find(o => o.compareName(d));
-            var installedVersion;
-            try{
-                installedVersion = oTrmPackage.manifest.get().version;
-            }catch(e){
-                //
-            }
-            if(installedVersion){
-                installedVersion = ` -> ${installedVersion}`;
+            if(oTrmPackage){
+                try{
+                    installedVersion = ` -> ${oTrmPackage.manifest.get().version}`;
+                }catch(e){
+                    installedVersion = ` -> ${e.message}`;
+                }
             }else{
-                installedVersion = ``;
+                const missingDependency = trmMissingDependencies.find(o => {
+                    if(typeof(o) === 'string'){
+                        if(o === d){
+                            return o;
+                        }
+                    }else{
+                        if(o.compareName(d)){
+                            return o;
+                        }
+                    }
+                });
+                if(missingDependency){
+                    try{
+                        installedVersion = ` -> ${chalk.bgRed((missingDependency as any).manifest.get().version)}`;
+                    }catch(e){
+                        installedVersion = ` -> ${chalk.bgRed('Not found')}`;
+                    }
+                }
             }
             serverDependenciesTree.push({
                 text: `${d} ${trmDependencies[d]}${installedVersion}`,
