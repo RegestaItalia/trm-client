@@ -2,6 +2,7 @@ import { Inquirer, ISystemConnector, RESTConnection, RFCConnection } from "trm-c
 import { SystemAlias } from "../../systemAlias";
 import { getSapLogonConnections, getSystemConnector, SystemConnectorType } from "../../utils";
 import { ConnectArguments } from "../arguments";
+import normalizeUrl from "@esm2cjs/normalize-url";
 
 const languageList = [
     { value: 'AR', name: 'AR (Arabic)' },
@@ -44,6 +45,10 @@ const languageList = [
     { value: 'UK', name: 'UK (Ukrainian)' },
     { value: 'VI', name: 'VI (Vietnamese)' }
 ];
+
+const _createAliasIfNotExists = () => {
+
+}
 
 export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
@@ -99,6 +104,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         const alias = aAlias.find(o => o.alias === inq2.aliasName);
         result = { ...alias.connection, ...alias.login };
         type = alias.type;
+        createAliasIfNotExist = false; //force to false
     } else {
         if (inputType === 'logon') {
             const inq3 = await Inquirer.prompt({
@@ -261,6 +267,9 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         if(result.forwardRfcDest){
             result.forwardRfcDest = result.forwardRfcDest.toUpperCase();
         }
+        result.endpoint = normalizeUrl(result.endpoint, {
+            removeTrailingSlash: true
+        });
 
         result.connection = getSystemConnector(SystemConnectorType.REST, {
             connection: {
@@ -277,20 +286,9 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         throw new Error(`Unknown connection type "${type}".`);
     }
 
+    if(createAliasIfNotExist){
+        await SystemAlias.createIfNotExists(result);
+    }
+
     return result;
-
-    /*if(createAliasIfNotExist){
-        const aliasExists = aAlias.find(o => {
-            return o.connection.ashost.trim().toUpperCase() === result.ashost.trim().toUpperCase() &&
-                    o.connection.dest.trim().toUpperCase() === result.dest.trim().toUpperCase() &&
-                    o.connection.sysnr.trim().toUpperCase() === result.sysnr.trim().toUpperCase() &&
-                    o.login.client.trim().toUpperCase() === result.client.trim().toUpperCase() &&
-                    o.login.user.trim().toUpperCase() === result.user.trim().toUpperCase() &&
-                    o.login.passwd.trim().toUpperCase() === result.passwd.trim().toUpperCase() &&
-                    o.login.lang.trim().toUpperCase() === result.lang.trim().toUpperCase()
-        });
-        if(!aliasExists){
-
-        }
-    }*/
 }
