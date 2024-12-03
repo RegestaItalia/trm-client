@@ -2,6 +2,7 @@ import { Logger, Registry, SystemConnector } from "trm-core";
 import { satisfies } from "semver";
 import { getTrmDependencies } from "./getTrmDependencies";
 import { CommandContext } from "../commands/commons";
+import chalk from "chalk";
 
 export async function checkTrmDependencies(commandArgs: any) {
     const trmDependencies = getTrmDependencies();
@@ -26,7 +27,7 @@ export async function checkTrmDependencies(commandArgs: any) {
                     if (commandArgs.command === 'info') {
                         CommandContext.missingTrmDependencies.push(installedPackage);
                     } else if (!((commandArgs.command === 'install' || commandArgs.command === 'update') && commandArgs.package === packageName)) {
-                        throw new Error(`Package "${packageName}", version ${installedVersion} installed on ${SystemConnector.getDest()}, but does not satisfy dependency version ${versionRange}.`);
+                        throw new Error(`Package "${packageName}" version ${installedVersion} is installed on ${SystemConnector.getDest()}, but does not satisfy dependency version ${versionRange}. Update with command ${chalk.italic('trm update ' + packageName)}`);
                     }
                 } else {
                     CommandContext.trmDependencies.push(installedPackage);
