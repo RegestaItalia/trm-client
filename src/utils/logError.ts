@@ -15,7 +15,9 @@ export async function logError(err: any) {
         originalException = err;
     }
     var sError = originalException.message;
-    if(originalException.name === 'TrmRegistryError'){
+    if(originalException.name === 'ExitPromptError'){
+        return;
+    }else if(originalException.name === 'TrmRegistryError'){
         if(originalException.status){
             sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
