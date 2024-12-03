@@ -1,9 +1,9 @@
-import { Logger, Registry, SystemConnector, TrmPackage } from "trm-core";
+import { Logger, Registry, SystemConnector } from "trm-core";
 import { satisfies } from "semver";
 import { getTrmDependencies } from "./getTrmDependencies";
 import { CommandContext } from "../commands/commons";
 
-export async function checkTrmDependencies() {
+export async function checkTrmDependencies(commandArgs: any) {
     const trmDependencies = getTrmDependencies();
     if(trmDependencies && Object.keys(trmDependencies).length > 0){
         const oPublicRegistry = new Registry('public');
@@ -19,7 +19,9 @@ export async function checkTrmDependencies() {
             }else{
                 const installedVersion = installedPackage.manifest.get().version;
                 if(!satisfies(installedVersion, versionRange)){
-                    throw new Error(`Package "${packageName}", version ${installedVersion} installed on ${SystemConnector.getDest()}, but does not satisfy dependency version ${versionRange}.`);
+                    if(!((commandArgs.command === 'install' || commandArgs.command === 'update') && commandArgs.package === packageName)){
+                        throw new Error(`Package "${packageName}", version ${installedVersion} installed on ${SystemConnector.getDest()}, but does not satisfy dependency version ${versionRange}.`);
+                    }
                 }else{
                     CommandContext.trmDependencies.push(installedPackage);
                 }
