@@ -40,8 +40,7 @@ export class SystemAlias {
                 oContent[o.alias] = {
                     type: o.type,
                     endpoint: (o.connection as RESTConnection).endpoint,
-                    rfcdest: (o.connection as RESTConnection).rfcdest,
-                    client: o.login.client,
+                    rfcdest: (o.connection as RESTConnection).rfcdest || 'NONE',
                     user: o.login.user,
                     passwd: o.login.passwd,
                     lang: o.login.lang

@@ -1,6 +1,7 @@
 import { Logger, SystemConnector } from "trm-core";
 import { inspect } from "util";
 import chalk from "chalk";
+import { parse as htmlParser } from 'node-html-parser';
 
 export async function logError(err: any) {
     var originalException: any;
@@ -14,7 +15,8 @@ export async function logError(err: any) {
         Logger.error(inspect(err, { breakLength: Infinity, compact: true }), true);
         originalException = err;
     }
-    var sError = originalException.message;
+    var sError = (originalException.message || 'Unknown error.').trim();
+    var aError = [];
     if(originalException.name === 'ExitPromptError'){
         return;
     }else if(originalException.name === 'TrmRegistryError'){
@@ -25,17 +27,24 @@ export async function logError(err: any) {
         if(originalException.rfcError && originalException.rfcError){
             sError = `${chalk.bgRed(originalException.rfcError.key)} ${sError}`;
             if(originalException.rfcError.key === "TRM_RFC_UNAUTHORIZED"){
-                sError += `\n`;
-                sError += chalk.bgRed(`User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`);
+                aError.push(chalk.bgRed(`\nUser "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`));
             }
         }
     }else if(originalException.name === 'TrmRestServerError'){
+        if(sError[0] === '<'){
+            try{
+                sError = htmlParser(sError).querySelector('title').innerText;
+            }catch(e){ }
+        }
         if(originalException.status){
             if(originalException.status === 404){
-                sError = `Service cannot be reached (Check if trm-rest is installed and activated correctly).`;
+                aError.push(`Service cannot be reached (Check if trm-rest is installed and activated correctly).`);
             }
             sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
     }
-    Logger.error(sError);
+    aError.push(sError);
+    aError.forEach(message => {
+        Logger.error(sError);
+    })
 }
