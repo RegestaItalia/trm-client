@@ -30,7 +30,7 @@ export async function logError(err: any) {
     }else if(originalException.name === 'TrmRestServerError'){
         if(originalException.status){
             if(originalException.status === 404){
-                sError = `Service cannot be reached (Check if trm-rest is installed and activated correctly)`;
+                sError = `Service cannot be reached (Check if trm-rest is installed and activated correctly).`;
             }
             sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
