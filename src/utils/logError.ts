@@ -45,6 +45,6 @@ export async function logError(err: any) {
     }
     aError.push(sError);
     aError.forEach(message => {
-        Logger.error(sError);
-    })
+        Logger.error(message);
+    });
 }
