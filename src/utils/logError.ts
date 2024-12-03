@@ -20,9 +20,19 @@ export async function logError(err: any) {
             sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
     }else if(originalException.name === 'TrmRFCClient') {
-        if(originalException.rfcError && originalException.rfcError.key === "TRM_RFC_UNAUTHORIZED"){
-            sError += `\n`;
-            sError += chalk.bgRed(`User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions.`);
+        if(originalException.rfcError && originalException.rfcError){
+            sError = `${chalk.bgRed(originalException.rfcError.key)} ${sError}`;
+            if(originalException.rfcError.key === "TRM_RFC_UNAUTHORIZED"){
+                sError += `\n`;
+                sError += chalk.bgRed(`User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`);
+            }
+        }
+    }else if(originalException.name === 'TrmRestServerError'){
+        if(originalException.status){
+            if(originalException.status === 404){
+                sError = `Service cannot be reached (Check if trm-rest is installed and activated correctly)`;
+            }
+            sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
     }
     Logger.error(sError);
