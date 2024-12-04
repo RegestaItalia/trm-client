@@ -1,54 +1,50 @@
 import { Logger, SystemConnector } from "trm-core";
 import { inspect } from "util";
+import chalk from "chalk";
+import { parse as htmlParser } from 'node-html-parser';
 
 export async function logError(err: any) {
-    var e: Error;
+    var originalException: any;
     if(err.originalException){
-        e = err;
-        while((e as any).originalException){
-            Logger.error(inspect(e, { breakLength: Infinity, compact: true }), true);
-            e = (e as any).originalException;
+        originalException = err;
+        while(originalException.originalException){
+            Logger.error(inspect(originalException, { breakLength: Infinity, compact: true }), true);
+            originalException = originalException.originalException;
         }
     }else{
         Logger.error(inspect(err, { breakLength: Infinity, compact: true }), true);
-        e = err;
+        originalException = err;
     }
-    var sError = e.toString();
-    if (e.name === 'TrmRegistryError') {
-        const status = e['status'];
-        const message = e.message;
-        sError = `${status}: ${message}`;
-        if (status === 401) {
-            sError += `\nYou may need to log in.`;
+    var sError = (originalException.message || 'Unknown error.').trim();
+    var aError = [];
+    if(originalException.name === 'ExitPromptError'){
+        return;
+    }else if(originalException.name === 'TrmRegistryError'){
+        if(originalException.status){
+            sError = `${chalk.bgRed(originalException.status)} ${sError}`;
         }
-    }
-    if (e.name === 'ABAPError') {
-        if(e['key'] === 'TRM_RFC_UNAUTHORIZED'){
-            sError = `You are not authorized to access TRM RFC functions.`;
-            if(SystemConnector.systemConnector){
-                sError += ` Ask to enable user "${SystemConnector.getLogonUser()}" on ${SystemConnector.getDest()}.`;
-            }
-        }else{
-            if(e['abapMsgClass'] && e['abapMsgNumber']){
-                try {
-                    sError = await SystemConnector.getMessage({
-                        class: e['abapMsgClass'],
-                        no: e['abapMsgNumber'],
-                        v1: e['abapMsgV1'],
-                        v2: e['abapMsgV2'],
-                        v3: e['abapMsgV3'],
-                        v4: e['abapMsgV4']
-                    });
-                } catch (exc) {
-                    sError = `${e['key']} - ${e['message']}`;
-                }
-            }else{
-                sError = `${e['key']} - ${e['message']}`;
+    }else if(originalException.name === 'TrmRFCClient') {
+        if(originalException.rfcError && originalException.rfcError){
+            sError = `${chalk.bgRed(originalException.rfcError.key)} ${sError}`;
+            if(originalException.rfcError.key === "TRM_RFC_UNAUTHORIZED"){
+                aError.push(chalk.bgRed(`\nUser "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`));
             }
         }
+    }else if(originalException.name === 'TrmRestServerError'){
+        if(sError[0] === '<'){
+            try{
+                sError = htmlParser(sError).querySelector('title').innerText;
+            }catch(e){ }
+        }
+        if(originalException.status){
+            if(originalException.status === 404){
+                aError.push(`Service cannot be reached (Check if trm-rest is installed and activated correctly).`);
+            }
+            sError = `${chalk.bgRed(originalException.status)} ${sError}`;
+        }
     }
-    if(e.name === 'RfcLibError'){
-        sError = e.message;
-    }
-    Logger.error(sError);
+    aError.push(sError);
+    aError.forEach(message => {
+        Logger.error(message);
+    });
 }

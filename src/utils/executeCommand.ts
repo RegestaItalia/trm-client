@@ -3,10 +3,10 @@ import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
 import { checkCliUpdate } from "./checkCliUpdate";
-import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ServerSystemConnector, Registry, SystemConnector } from "trm-core";
+import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, Registry, SystemConnector } from "trm-core";
 import { getLogFolder } from "./getLogFolder";
-import { CommandRegistry } from "../commands/commons";
 import { RegistryAlias } from "../registryAlias";
+import { CommandContext } from "../commands/commons";
 
 export enum LoggerType {
     CLI = 'CLI',
@@ -44,7 +44,7 @@ export async function executeCommand(args: any) {
     var exitCode: number;
     try {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
-        Logger.logger = _getLogger(args.logType, args.verbose, args.logOutputFolder);
+        Logger.logger = _getLogger(args.logType, args.debug, args.logOutputFolder);
 
         if (!/^win/i.test(process.platform)) {
             Logger.warning(`Running on untested OS ${process.platform}! Some features aren't tested yet.`);
@@ -58,30 +58,19 @@ export async function executeCommand(args: any) {
 
         await checkCliUpdate();
 
-        var system: ServerSystemConnector;
+        var system: ISystemConnector;
         var registry: Registry;
         if (requiresConnection) {
             if (args.systemAlias) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
                 const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
-                const connectionArgs = await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command));
-                system = new ServerSystemConnector({
-                    ashost: connectionArgs.ashost,
-                    dest: connectionArgs.dest,
-                    sysnr: connectionArgs.sysnr,
-                    saprouter: connectionArgs.saprouter
-                }, {
-                    client: connectionArgs.client,
-                    lang: connectionArgs.lang,
-                    passwd: connectionArgs.passwd,
-                    user: connectionArgs.user
-                });
+                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command))).connection;
             }
             await system.connect();
             SystemConnector.systemConnector = system;
             if (requiresTrmDependencies) {
-                await checkTrmDependencies();
+                await checkTrmDependencies(args);
             }
         }
 
@@ -116,7 +105,7 @@ export async function executeCommand(args: any) {
                     Logger.warning(`Registry "${registry.name}" login failed.`);
                 }
             }
-            CommandRegistry.registry = registry;
+            CommandContext.registry = registry;
         }
 
         if (commands[args.command]) {

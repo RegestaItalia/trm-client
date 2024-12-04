@@ -61,7 +61,7 @@ registerCommand(logout, {
 
 /*PING*/
 const ping = program.command(`ping`)
-    .description(`Test trm-server with ping RFC function.`);
+    .description(`Ping trm-server.`);
 registerCommand(ping, {
     requiresConnection: true,
     requiresTrmDependencies: true
@@ -71,27 +71,32 @@ registerCommand(ping, {
 const publish = program.command(`publish <package> [version]`)
     .description(`Publish package to registry.`)
     .addHelpText(`before`, `When no version is defined, it will automatically set to:
-- When it's the first release ever: 1.0.0
-- When it's already published: the latest available released with patch increased by 1
-When it's the first publish, full manifest definition is asked (unless running with flags that will disable it).
-When a release is already published, the latest available manifest is used and no overwrite is expected (unless specified by flags).
-Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flags).
-Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flags).
+- When it's the first publish: 1.0.0
+- When it's already published: the latest available release with patch increased by 1
+When it's the first publish, full manifest definition is asked.
+When a release is already published, the latest available manifest is used but can be overwritten.
+Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
+Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
 If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
-    .option(`-d, --devclass <devclass>`, `Devclass (SAP package) that contains user custom developments to publish.`)
-    .option(`-t, --target <target>`, `TMS Target (Used for transport release).`)
-    .option(`-m, --manifest <manifestJson>`, `Path to JSON file or JSON string containing manifest publish default values.`)
-    .option(`-rm, -readme <readme>`, `Path to or text containing the package default value for the readme.`)
-    .option(`-fm, --forceManifest`, `Force manifest prompt even when it's not required.`, false)
-    .option(`-sl, --skipLang`, `Skip translation transport.`, false)
-    .option(`-sc, --skipCustomizing`, `Skip customizing transport.`, false)
-    .option(`-ct, --customizingTransports`, `Customizing transports to include, separated by comma. Only root transports are required, tasks are automatically included.`)
-    .option(`-sd, --skipDependencies`, `Skip automatic dependencies search.`, false)
-    .option(`-ses, --skipEditSapEntries`, `Skip SAP entries edit prompt.`, false)
-    .option(`-sed, --skipEditDependencies`, `Skip dependencies edit prompt.`, false)
-    .option(`-srm, --skipReadme`, `Skip readme prompt.`, false)
-    .option(`-s, --silent`, `No manual inputs.`, false)
-    .option(`-to, --releaseTimeout <timeout>`, `Release timeout (in seconds).`, '180');
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-km, --keepLatestReleaseManifestValues`, `Keep the latest release (if exists) manifest values as defaults.`, true)
+    .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
+    .option(`-nd, --noDependenciesDetection`, `Skip automatic dependencies detection.`, false)
+    .option(`-sc, --skipCustomizingTransports`, `Skip customizing transports input.`, false)
+    .option(`-to, --releaseTimeout <timeout>`, `Publish transports release timeout (in seconds).`, '180')
+    .option(`-d, --devclass <devclass>`, `ABAP package to publish.`)
+    .option(`-cust, --customizingTransports <customizingTransports>`, `Customizing transports (separated by comma).`)
+    .option(`-rm, --readme <readme>`, `Path to file or value of readme.`)
+    .option(`-tt, --transportTarget <transportTarget>`, `Publish transports target.`)
+    .option(`-bc, --backwardsCompatible`, `Indicates backwards compatibility with older releases.`, true)
+    .option(`-sd, --description`, `Short description of the package.`)
+    .option(`-gl, --git <link>`, `Git link.`)
+    .option(`-wl, --website <link>`, `Website link.`)
+    .option(`-pl, --license <license>`, `Package license.`)
+    .option(`-pa, --authors <authors>`, `Package authors (separated by comma).`)
+    .option(`-pk, --keywords <keywords>`, `Package keywords (separated by comma).`)
+    .option(`-pd, --dependencies <JSON>`, `Package dependencies (in JSON format).`)
+    .option(`-ps, --sapEntries <JSON>`, `Package SAP entries (in JSON format).`);
 registerCommand(publish, {
     requiresConnection: true,
     requiresRegistry: true,
@@ -99,7 +104,7 @@ registerCommand(publish, {
 });
 
 /*UNPUBLISH*/
-const unpublish = program.command(`unpublish <package> <version>`)
+const unpublish = program.command(`unpublish <package> [version]`)
     .description(`Unpublish a package release from registry.`);
 registerCommand(unpublish, {
     requiresRegistry: true
@@ -107,23 +112,24 @@ registerCommand(unpublish, {
 
 /*INSTALL*/
 const install = program.command(`install <package> [version]`)
-    .description(`Install package from registry to system.`)
-    .addHelpText(`before`, `When no version is specified, the latest will be installed.
-This command won't let you update/downgrade a package unless specified differently with the appropriate flag.`)
-    .option(`-tl, --transportLayer <transportLayer>`,`Transport layer used for package generation. (default: System default)`)
-    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists.`, false)
-    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists).`, false)
-    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
-    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape.`, true)
-    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force).`, false)
-    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force).`, false)
-    .option(`-sl, --skipLang`, `Skip translation transport.`, false)
-    .option(`-sc, --skipCustomizing`, `Skip customizing transport.`, false)
-    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force).`, false)
-    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate. (default: None)`)
-    .option(`-s, --silent`, `No manual inputs.`, false)
-    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map.`)
-    .option(`-ra, --replaceAllowed`, `Allow package update/downgrade  (has no effect with flag force).`, false);
+    .description(`Install package from registry into system.`)
+    .addHelpText(`before`, `When no version is specified, the latest will be installed.`)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-ow, --overwrite`, `Overwrite installation (allow re-install).`, false)
+    .option(`-sf, --safe`, `Safe install (needs package integrity).`, false)
+    .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
+    .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
+    .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
+    .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
+    .option(`-kd, --keepOriginalPackages`, `Keep original ABAP packages names.`, false)
+    .option(`-it, --createInstallTransport`, `Create/update install transport (used for landscape transports).`, true)
+    .option(`-r3, --r3transPath <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`)
+    .option(`-sha, --integrity <sha>`, `Package integrity.`)
+    .option(`-tl, --transportLayer <transportLayer>`, `ABAP packages transport layer. (default: System default)`)
+    .option(`-tl, --packageReplacements <JSON>`, `ABAP package replacements in JSON format.`)
+    .option(`-itt, --installTransportTargetSys <transportTarget>`, `Install transport target system.`)
 registerCommand(install, {
     requiresConnection: true,
     requiresRegistry: true,
@@ -131,21 +137,24 @@ registerCommand(install, {
 });
 /*UPDATE*/
 const update = program.command(`update <package> [version]`)
-    .description(`Update package from registry to system.`)
+    .description(`Update package from registry into system.`)
+    .description(`Install package from registry into system.`)
     .addHelpText(`before`, `When no version is specified, the latest will be installed.`)
-    .option(`-tl, --transportLayer <transportLayer>`,`Transport layer used for package generation. (default: System default)`)
-    .option(`-f, --force`, `Force install of the package: no checks on dependencies/SAP Entries or object types, overwrites if already exists.`, false)
-    .option(`-k, --keepOriginals`, `Keep original package names (no checks if a package with the same name already exists).`, false)
-    .option(`-to, --importTimeout <timeout>`, `Import timeout (in seconds).`, '180')
-    .option(`-wg, --workbenchGen`, `Generate a workbench transport containing the package for later transport in the landscape.`, true)
-    .option(`-ss, --skipSapEntries`, `Skip SAP Entries check  (has no effect with flag force).`, false)
-    .option(`-so, --skipObjectsCheck`, `Skip object types check  (has no effect with flag force).`, false)
-    .option(`-sl, --skipLang`, `Skip translation transport.`, false)
-    .option(`-sc, --skipCustomizing`, `Skip customizing transport.`, false)
-    .option(`-sd, --skipDependencies`, `Skip dependencies (has no effect with flag force).`, false)
-    .option(`-wt, --workbenchTarget <target>`, `Workbench transport target system. Only used if workbench transport is set to generate. (default: None)`)
-    .option(`-s, --silent`, `No manual inputs.`, false)
-    .option(`-pr, --packageReplacements <mapJson>`, `Path to JSON file or JSON string containing package replacement map.`);
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-sf, --safe`, `Safe install (needs package integrity).`, false)
+    .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
+    .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
+    .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
+    .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
+    .option(`-kd, --keepOriginalPackages`, `Keep original ABAP packages names.`, false)
+    .option(`-it, --createInstallTransport`, `Create/update install transport (used for landscape transports).`, true)
+    .option(`-r3, --r3transPath <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`)
+    .option(`-sha, --integrity <sha>`, `Package integrity.`)
+    .option(`-tl, --transportLayer <transportLayer>`, `ABAP packages transport layer. (default: System default)`)
+    .option(`-tl, --packageReplacements <JSON>`, `ABAP package replacements in JSON format.`)
+    .option(`-itt, --installTransportTargetSys <transportTarget>`, `Install transport target system.`)
 registerCommand(update, {
     requiresConnection: true,
     requiresRegistry: true,
@@ -179,15 +188,16 @@ registerCommand(list, {
 /*CHECK TOOLS*/
 const check = program.command(`check <package>`)
     .description(`Analyze installed package status on a system.`)
-    .option(`-at, --analysisType`, `Analysis type.`);
+    .option(`-at, --analysisType`, `Analysis type (DEPENDENCIES, SAPENTRIES or ALL).`);
 registerCommand(check, {
     requiresConnection: true,
     requiresRegistry: true,
     ignoreRegistryUnreachable: true
 });
 const findDependencies = program.command(`findDependencies <devclass>`)
-    .description(`Find SAP package dependencies with custom packages/trm packages/SAP Entries.`)
-    .option(`-se, --sapEntries`, `Show list of required SAP Entries.`, false)
+    .description(`Find SAP package dependencies with custom packages/trm packages/SAP entries/objects.`)
+    .option(`-se, --sapEntries`, `Show list of required SAP entries/objects.`, false)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
 registerCommand(findDependencies, {
     requiresConnection: true
 });

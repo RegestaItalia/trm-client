@@ -1,14 +1,14 @@
 import { Inquirer, Logger } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
 import { LoginArguments } from "./arguments";
-import { CommandRegistry } from "./commons";
 import { whoami } from "./whoami";
+import { CommandContext } from "./commons";
 
 export async function login(commandArgs: LoginArguments) {
     var continueLogin = false;
     if(!commandArgs.force){
         try {
-            const whoami = await CommandRegistry.get().whoAmI();
+            const whoami = await CommandContext.getRegistry().whoAmI();
             const inq1 = await Inquirer.prompt({
                 type: "confirm",
                 name: "continue",
@@ -34,10 +34,10 @@ export async function login(commandArgs: LoginArguments) {
         }else{
             oAuth = undefined;
         }
-        await CommandRegistry.get().authenticate(oAuth);
-        oAuth = CommandRegistry.get().getAuthData();
+        await CommandContext.getRegistry().authenticate(oAuth);
+        oAuth = CommandContext.getRegistry().getAuthData();
         Logger.success('Logged in.');
-        RegistryAlias.update(CommandRegistry.get().name, oAuth);
+        RegistryAlias.update(CommandContext.getRegistry().name, oAuth);
         await whoami({ });
     }
 }

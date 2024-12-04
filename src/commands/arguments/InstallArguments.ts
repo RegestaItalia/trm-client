@@ -1,18 +1,22 @@
 export type InstallArguments = {
     package: string,
-    version: string,
-    force: boolean,
-    keepOriginals: boolean,
+    version?: string,
+    
+    noPrompts: boolean,
+    overwrite: boolean,
+    safe: boolean,
+    noDependencies: boolean,
+    noObjectTypes: boolean,
+    noSapEntries: boolean,
+    noLanguageTransport: boolean,
+    noCustomizingTransport: boolean,
     importTimeout: string,
-    workbenchGen: boolean,
-    skipSapEntries: boolean,
-    skipObjectsCheck: boolean,
-    skipLang: boolean,
-    skipCustomizing: boolean,
-    skipDependencies: boolean,
-    silent: boolean,
-    replaceAllowed: boolean,
+    keepOriginalPackages: boolean,
+    createInstallTransport: boolean,
+
+    r3transPath?: string,
+    integrity?: string,
     transportLayer?: string,
-    workbenchTarget?: string,
-    packageReplacements?: string
+    packageReplacements?: string,
+    installTransportTargetSys?: string
 }

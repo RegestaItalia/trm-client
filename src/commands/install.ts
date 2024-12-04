@@ -1,27 +1,14 @@
 import { InstallArguments } from "./arguments";
 import { InstallPackageReplacements, Logger, install as action } from "trm-core";
-import { CommandRegistry } from "./commons";
-import * as fs from 'fs';
 import { getTempFolder } from "../utils";
+import { CommandContext } from "./commons";
 
-const _parsePackageReplacementsArgument = (packageReplacements: string): InstallPackageReplacements[] => {
-    var returnValue: InstallPackageReplacements[] = [];
-    if (packageReplacements) {
-        //this could be the json file path or the json itself
-        packageReplacements = packageReplacements.trim();
-        var sInput;
-        if (packageReplacements[0] === '[') {
-            sInput = packageReplacements;
-        } else {
-            sInput = fs.readFileSync(packageReplacements);
-        }
-        try {
-            returnValue = JSON.parse(sInput);
-        } catch (e) {
-            throw new Error('Input package replacements map: invalid JSON format.');
-        }
+const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
+    if(arg){
+        try{
+            return JSON.parse(arg);
+        }catch(e){ }
     }
-    return returnValue;
 }
 
 const _parseImportTimeoutArg = (arg: string): number => {
@@ -33,53 +20,49 @@ const _parseImportTimeoutArg = (arg: string): number => {
 }
 
 export async function install(commandArgs: InstallArguments) {
-    const registry = CommandRegistry.get();
-    const packageName = commandArgs.package;
-    const packageVersion = commandArgs.version || 'latest';
-    const transportLayer = commandArgs.transportLayer;
-    const force = commandArgs.force;
-    const keepOriginalDevclass = commandArgs.keepOriginals ? true : false;
-    const importTimeout = _parseImportTimeoutArg(commandArgs.importTimeout);
-    const generateTransport = commandArgs.workbenchGen;
-    const skipSapEntriesCheck = commandArgs.skipSapEntries;
-    const skipObjectTypesCheck = commandArgs.skipObjectsCheck;
-    const skipLangImport = commandArgs.skipLang;
-    const skipCustImport = commandArgs.skipCustomizing;
-    const ignoreDependencies = commandArgs.skipDependencies;
-    const wbTrTargetSystem = commandArgs.workbenchTarget;
-    const silent = commandArgs.silent;
-    const packageReplacements = _parsePackageReplacementsArgument(commandArgs.packageReplacements);
-    const allowReplace = commandArgs.replaceAllowed;
-    
-    const tmpFolder = getTempFolder(); 
-    const output = await action({
-        packageName: packageName,
-        registry: registry,
-        version: packageVersion,
-        r3transOptions: {
-            //r3transDirPath: '',
-            tempDirPath: tmpFolder
+    const result = await action({
+        contextData: {
+            r3transOptions: {
+                tempDirPath: getTempFolder(),
+                r3transDirPath: commandArgs.r3transPath
+            },
+            noInquirer: commandArgs.noPrompts,
+            systemPackages: CommandContext.systemPackages,
+            noR3transInfo: false //fixed to false
         },
-        transportLayer,
-        force,
-        keepOriginalDevclass,
-        importTimeout,
-        generateTransport,
-        skipSapEntriesCheck,
-        skipObjectTypesCheck,
-        skipLangImport,
-        skipCustImport,
-        ignoreDependencies,
-        wbTrTargetSystem,
-        silent,
-        packageReplacements,
-        allowReplace
+        packageData: {
+            name: commandArgs.package,
+            version: commandArgs.version,
+            overwrite: commandArgs.overwrite,
+            integrity: commandArgs.integrity,
+            registry: CommandContext.getRegistry()
+        },
+        installData: {
+            checks: {
+                safe: commandArgs.safe,
+                noDependencies: commandArgs.noDependencies,
+                noObjectTypes: commandArgs.noObjectTypes,
+                noSapEntries: commandArgs.noSapEntries
+            },
+            import: {
+                noLang: commandArgs.noLanguageTransport,
+                noCust: commandArgs.noCustomizingTransport,
+                timeout: _parseImportTimeoutArg(commandArgs.importTimeout)
+            },
+            installDevclass: {
+                keepOriginal: commandArgs.keepOriginalPackages,
+                transportLayer: commandArgs.transportLayer,
+                replacements: _parsePackageReplacementsArgument(commandArgs.packageReplacements)
+            },
+            installTransport: {
+                create: commandArgs.createInstallTransport,
+                targetSystem: commandArgs.installTransportTargetSys
+            }
+        }
     });
-    var sOutput = `${output.trmPackage.packageName} installed`;
-    if(output.wbTransport){
-        sOutput += `, use ${output.wbTransport.trkorr} transport.`;
-    }else{
-        sOutput += `.`;
+    var sOutput = `${result.trmPackage.packageName} installed`;
+    if(result.installTransport){
+        sOutput += `, use ${result.installTransport.trkorr} transport in landscape`;
     }
     Logger.success(sOutput);
 }

@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "3.1.6",
+  "version": "4.0.0",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,17 +30,20 @@
   },
   "license": "MIT",
   "trmDependencies": {
-    "trm-server": "^1.1.0"
+    "trm-server": "^2.0.0"
   },
   "dependencies": {
+    "@esm2cjs/normalize-url": "^8.0.0",
+    "chalk": "^4.1.2",
     "commander": "^11.0.0",
     "dotenv": "^16.3.1",
     "get-latest-version": "^5.1.0",
     "get-root-path": "^2.0.2",
     "ini": "^4.1.1",
+    "node-html-parser": "^6.1.13",
     "semver": "^7.5.4",
-    "trm-core": "^4.1.0",
-    "trm-registry-types": "^1.0.3",
+    "trm-core": "^6.1.14",
+    "trm-registry-types": "^1.2.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

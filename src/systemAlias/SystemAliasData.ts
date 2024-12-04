@@ -1,7 +1,9 @@
-import { Connection, Login } from "trm-core";
+import { Login, RESTConnection, RFCConnection } from "trm-core";
+import { SystemConnectorType } from "../utils";
 
 export type SystemAliasData = {
     alias: string,
-    connection: Connection,
+    type: SystemConnectorType,
+    connection: RESTConnection | RFCConnection,
     login: Login
 }
