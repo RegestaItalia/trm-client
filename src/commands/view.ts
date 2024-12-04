@@ -1,5 +1,5 @@
 import { ViewArguments } from "./arguments";
-import { Logger, SystemConnector, TrmManifestDependency, TrmPackage } from "trm-core";
+import { Logger, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
