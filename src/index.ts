@@ -78,6 +78,7 @@ When a release is already published, the latest available manifest is used but c
 Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
 Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
 If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
+    .option(`-p, --private`, `Publish package with private visibility.`)
     .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
     .option(`-km, --keepLatestReleaseManifestValues`, `Keep the latest release (if exists) manifest values as defaults.`, true)
     .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
