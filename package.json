@@ -12,7 +12,8 @@
     "trm": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "cleanBuild": "rimraf dist/",
+    "build": "npm run cleanBuild && tsc --sourceMap false",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -50,6 +51,7 @@
     "@types/ini": "^1.3.31",
     "@types/node": "^20.4.8",
     "@types/semver": "^7.5.3",
-    "@types/xml2js": "^0.4.11"
+    "@types/xml2js": "^0.4.11",
+    "rimraf": "^6.0.1"
   }
 }
