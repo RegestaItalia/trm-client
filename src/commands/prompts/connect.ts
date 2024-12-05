@@ -229,14 +229,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         }]);
     }
 
-    type = result.type || type;
+    result.type = result.type || type;
     result.user = result.user || commandArgs.user;
     result.passwd = result.passwd || commandArgs.passwd;
     result.lang = result.lang || commandArgs.lang;
     result.user = result.user.toUpperCase();
     result.lang = result.lang.toUpperCase();
 
-    if(type === SystemConnectorType.RFC){
+    if(result.type === SystemConnectorType.RFC){
         result.ashost = result.ashost || commandArgs.ashost;
         result.dest = result.dest || commandArgs.dest;
         result.saprouter = result.saprouter || commandArgs.saprouter;
@@ -260,7 +260,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 client: result.client
             }
         });
-    }else if(type === SystemConnectorType.REST){
+    }else if(result.type === SystemConnectorType.REST){
         result.endpoint = result.endpoint || commandArgs.endpoint;
         result.forwardRfcDest = result.forwardRfcDest || commandArgs.forwardRfcDest;
 
@@ -283,7 +283,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             }
         });
     }else{
-        throw new Error(`Unknown connection type "${type}".`);
+        throw new Error(`Unknown connection type "${result.type}".`);
     }
 
     if(createAliasIfNotExist){
