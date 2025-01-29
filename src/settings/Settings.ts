@@ -8,7 +8,9 @@ const SETTINGS_FILE_NAME = "settings.ini";
 
 const defaultData: SettingsData = {
     loggerType: 'CLI',
-    logOutputFolder: 'default'
+    logOutputFolder: 'default',
+    saveRegistryData: true,
+    saveConnectionData: true
 }
 
 export class Settings {
@@ -35,15 +37,18 @@ export class Settings {
 
     private getSettings(): SettingsData {
         const filePath = this.getFilePath();
+        var data: SettingsData;
         if (fs.existsSync(filePath)) {
             try {
                 const sIni = fs.readFileSync(filePath).toString();
-                const settingsData = ini.decode(sIni) as SettingsData;
-                return settingsData;
+                var fileData = ini.decode(sIni) || {};
+                data = {...defaultData, ...fileData};
             } catch (e) { }
+        }else{
+            data = defaultData;
         }
-        this.generateFile(defaultData, filePath);
-        return defaultData;
+        this.generateFile(data, filePath);
+        return data;
     }
 
     private generateFile(data: SettingsData, filePath: string): void {

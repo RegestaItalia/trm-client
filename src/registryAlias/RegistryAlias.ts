@@ -3,7 +3,8 @@ import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { RegistryAliasData } from "./RegistryAliasData";
-import { Logger, Registry } from "trm-core";
+import { Registry } from "trm-core";
+import { Settings } from "../settings";
 
 const REGISTRY_FILE_NAME = "registry.ini";
 
@@ -35,11 +36,11 @@ export class RegistryAlias {
             const auth = o.auth;
             var sAuth: string;
             //miw
-            if(typeof(auth) === 'string'){
+            if (typeof (auth) === 'string') {
                 sAuth = auth;
-            }else if(typeof(auth) === "object"){
+            } else if (typeof (auth) === "object") {
                 sAuth = JSON.stringify(o.auth);
-            }else{
+            } else {
                 sAuth = null;
             }
             oContent[o.alias] = {
@@ -84,12 +85,15 @@ export class RegistryAlias {
                 alias.alias = 'public';
             }
             return new RegistryAlias(alias.endpointUrl, alias.alias).setAuthData(alias.auth);
-        }else{
+        } else {
             throw new Error(`Registry "${name}" not found.`);
         }
     }
 
     public static create(name: string, endpointUrl: string, auth: any = {}): RegistryAlias {
+        if (!Settings.getInstance().data.saveConnectionData) {
+            throw new Error(`Registry data save is disabled (check settings).`);
+        }
         var aAlias = this.getAll();
         const alreadyExists = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase()) ? true : false;
         if (alreadyExists) {
@@ -106,12 +110,18 @@ export class RegistryAlias {
     }
 
     public static delete(name: string): void {
+        if (!Settings.getInstance().data.saveConnectionData) {
+            throw new Error(`Registry data delete is disabled (check settings).`);
+        }
         var aAlias = this.getAll();
         aAlias = aAlias.filter(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         this.generateFile(aAlias);
     }
 
     public static update(name: string, auth: any = {}): void {
+        if (!Settings.getInstance().data.saveConnectionData) {
+            throw new Error(`Registry data save is disabled (check settings).`);
+        }
         var aAlias = this.getAll();
         const alreadyExists = aAlias.findIndex(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if (alreadyExists < 0) {
@@ -124,7 +134,7 @@ export class RegistryAlias {
 
     public static generatePublicRegistryAlias(): void {
         const allRegistries = this.getAll();
-        if(!allRegistries.find(o => o.alias.trim().toLowerCase() === 'public')){
+        if (!allRegistries.find(o => o.alias.trim().toLowerCase() === 'public')) {
             RegistryAlias.create('public', 'public', null);
         }
     }

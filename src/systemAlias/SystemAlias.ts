@@ -5,6 +5,7 @@ import * as ini from "ini";
 import { SystemAliasData } from "./SystemAliasData";
 import { Inquirer, ISystemConnector, Login, RESTConnection, RFCConnection } from "trm-core";
 import { ConnectArguments } from "../commands";
+import { Settings } from "../settings";
 
 const SYSTEM_FILE_NAME = "systems.ini";
 
@@ -114,6 +115,9 @@ export class SystemAlias {
         if (!name) {
             throw new Error(`Invalid alias name.`);
         }
+        if (!Settings.getInstance().data.saveConnectionData) {
+            throw new Error(`Connection alias creation is disabled (check settings).`);
+        }
         var aAlias = this.getAll();
         const alreadyExists = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase()) ? true : false;
         if (alreadyExists) {
@@ -131,6 +135,9 @@ export class SystemAlias {
     }
 
     public static delete(name: string): void {
+        if (!Settings.getInstance().data.saveConnectionData) {
+            throw new Error(`Connection alias delete is disabled (check settings).`);
+        }
         var aAlias = this.getAll();
         aAlias = aAlias.filter(o => o.alias.trim().toUpperCase() !== name.trim().toUpperCase());
         this.generateFile(aAlias);
@@ -184,7 +191,7 @@ export class SystemAlias {
                     return hash.create;
                 }
             }])).alias;
-            if(aliasName){
+            if (aliasName) {
                 this.create(aliasName, connArgs.type, connArgs as any, connArgs as any);
             }
         }

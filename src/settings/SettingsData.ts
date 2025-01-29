@@ -1,4 +1,6 @@
 export type SettingsData = {
     loggerType: string,
-    logOutputFolder: string
+    logOutputFolder: string,
+    saveRegistryData: boolean,
+    saveConnectionData: boolean
 }
