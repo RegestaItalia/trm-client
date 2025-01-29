@@ -1,4 +1,3 @@
-import { Logger } from "trm-core";
 import { SettingsArguments } from "./arguments";
 import { Settings } from "../settings";
 
@@ -15,6 +14,6 @@ export async function settings(commandArgs: SettingsArguments) {
     }
     const settingsData = Settings.getInstance().data;
     Object.keys(settingsData).forEach(k => {
-        Logger.log(`${k}: ${settingsData[k]}`);
+        console.log(`- ${k}: ${settingsData[k]}`);
     });
 }
