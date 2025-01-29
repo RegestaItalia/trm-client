@@ -14,3 +14,4 @@ export * from "./getLogFolder";
 export * from "./getClientDependencies";
 export * from "./getTrmDependencies";
 export * from "./getSystemConnector";
+export * from "./NoConnection";

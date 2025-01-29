@@ -56,7 +56,7 @@ export async function executeCommand(args: any) {
         const registryAuthBlacklist = args.registryAuthBlacklist;
         const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable;
 
-        await checkCliUpdate();
+        await checkCliUpdate(true);
 
         var system: ISystemConnector;
         var registry: Registry;
@@ -65,7 +65,7 @@ export async function executeCommand(args: any) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
                 const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
-                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command))).connection;
+                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command), args.addNoConnection)).connection;
             }
             await system.connect();
             SystemConnector.systemConnector = system;

@@ -1,5 +1,5 @@
 import { getNpmGlobalPath, Logger, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector, TreeLog } from "trm-core";
-import { getClientDependencies, getClientVersion, getTrmDependencies } from "../utils";
+import { checkCliUpdate, getClientDependencies, getClientVersion, getTrmDependencies, NoConnection } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { readFileSync } from "fs";
@@ -36,15 +36,18 @@ const _getNodeRfcVersion = (npmGlobal: string) => {
 }
 
 export async function info(commandArgs: InfoArguments) {
-    const npmGlobal = await getNpmGlobalPath();
+    Logger.loading(`Reading data...`);
 
+    const npmGlobal = await getNpmGlobalPath();
+    const clientLatest = await checkCliUpdate(false);
     const clientVersion = getClientVersion();
     const clientDependencies = getClientDependencies() || {};
     const trmDependencies = getTrmDependencies() || {};
     const trmDependenciesInstances = CommandContext.trmDependencies;
     const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
-    const trmRest = CommandContext.systemPackages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
+    const packages = await CommandContext.getSystemPackages();
+    const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
 
     var clientDependenciesTree: TreeLog[] = [];
     if(clientDependencies){
@@ -106,8 +109,9 @@ export async function info(commandArgs: InfoArguments) {
         });
     }
 
+    //build client tree
     var clientChildrenTree: TreeLog[] = [{
-        text: `trm-client ${clientVersion}`,
+        text: `trm-client ${clientVersion} ${clientLatest.newRelease ? chalk.bold('New release available') : chalk.bgGreen('LATEST')}`,
         children: clientDependenciesTree
     }];
     if(nodeRfcVersion){
@@ -122,9 +126,12 @@ export async function info(commandArgs: InfoArguments) {
     };
     Logger.tree(clientTree);
 
+    //build server tree
     const serverTree: TreeLog = {
         text: chalk.bold(`Server (${SystemConnector.getDest()})`),
         children: serverDependenciesTree
     };
-    Logger.tree(serverTree);
+    if(!(SystemConnector.systemConnector instanceof NoConnection)){
+        Logger.tree(serverTree);
+    }
 }

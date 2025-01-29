@@ -20,6 +20,7 @@ const _parseImportTimeoutArg = (arg: string): number => {
 }
 
 export async function install(commandArgs: InstallArguments) {
+    const packages = await CommandContext.getSystemPackages();
     const result = await action({
         contextData: {
             r3transOptions: {
@@ -27,7 +28,7 @@ export async function install(commandArgs: InstallArguments) {
                 r3transDirPath: commandArgs.r3transPath
             },
             noInquirer: commandArgs.noPrompts,
-            systemPackages: CommandContext.systemPackages,
+            systemPackages: packages,
             noR3transInfo: false //fixed to false
         },
         packageData: {
