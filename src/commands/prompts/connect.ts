@@ -205,7 +205,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Client`,
             default: commandArgs.client,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.client ? false : true) || force)
+                return ( hash.type === 'RFC' || inputType === 'logon' ) && ((commandArgs.client ? false : true) || force)
             }
         }, {
             type: `input`,

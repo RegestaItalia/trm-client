@@ -1,18 +1,17 @@
 import { Logger } from 'trm-core';
-import * as getLatestVersion from 'get-latest-version';
 import { diff, gt } from "semver";
 import { getClientVersion } from './getClientVersion';
 import chalk from 'chalk';
+import { getNpmPackageLatestVersion } from './getNpmPackageLatestVersion';
 
 export async function checkCliUpdate(print: boolean): Promise<{
-    newRelease: boolean,
-    version: string
+    localVersion: string,
+    latestVersion: string
 }> {
     try {
-        const latestVersion = await getLatestVersion.default('trm-client');
+        const latestVersion = await getNpmPackageLatestVersion('trm-client');
         const localVersion = getClientVersion();
         const versionDiff = diff(localVersion, latestVersion);
-        var newRelease = false;
         if ((versionDiff === 'minor' || versionDiff === 'major') && gt(latestVersion, localVersion)) {
             if (print) {
                 Logger.warning(`A newer release of trm-client (v${chalk.bold(latestVersion)}) is available.`);
@@ -21,11 +20,10 @@ export async function checkCliUpdate(print: boolean): Promise<{
                 Logger.warning(`    npm update trm-client --global`);
                 Logger.warning(` `);
             }
-            newRelease = true;
         }
         return {
-            newRelease,
-            version: latestVersion
+            latestVersion,
+            localVersion
         }
     } catch (e) {
         Logger.error(e, true);
