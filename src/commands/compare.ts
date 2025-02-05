@@ -4,7 +4,7 @@ import * as fs from "fs";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
 import { CommandContext, viewRegistryPackage } from "./commons";
-import { Inquirer, ISystemConnector, Logger, RESTConnection, RFCConnection } from "trm-core";
+import { Inquirer, ISystemConnector, Logger, RESTConnection, RFCConnection, SystemConnector } from "trm-core";
 import { getSystemConnector, SystemConnectorType } from "../utils";
 
 const _compareConnectionData = (a: RESTConnection | RFCConnection, b: RESTConnection | RFCConnection): boolean => {
@@ -127,12 +127,13 @@ export async function compare(commandArgs: CompareArguments) {
     Logger.loading(`Reading system data...`);
 
     for (const oConnection of aConnections) {
-        const system = oConnection.getDest() || '';
+        SystemConnector.systemConnector = oConnection;
+        const system = SystemConnector.getDest() || '';
         var installed;
         var version;
         var devclass;
         var importTransport;
-        const aSystemPackages = await oConnection.getInstalledPackages(true);
+        const aSystemPackages = await SystemConnector.getInstalledPackages(true);
         const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
         if(oSystemView && oSystemView.manifest){
             installed = 'Yes';
