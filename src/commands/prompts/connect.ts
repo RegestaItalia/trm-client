@@ -1,6 +1,6 @@
 import { Inquirer, ISystemConnector, RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias } from "../../systemAlias";
-import { getSapLogonConnections, getSystemConnector, SystemConnectorType } from "../../utils";
+import { getSapLogonConnections, getSystemConnector, NoConnection, SystemConnectorType } from "../../utils";
 import { ConnectArguments } from "../arguments";
 import normalizeUrl from "@esm2cjs/normalize-url";
 
@@ -50,7 +50,7 @@ const _createAliasIfNotExists = () => {
 
 }
 
-export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true): Promise<ConnectArguments> {
+export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<ConnectArguments> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     const force = commandArgs.force ? true : false;
     var type = commandArgs.type;
@@ -61,6 +61,11 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         aSapLogonConnections = await getSapLogonConnections();
     }catch(e){
         aSapLogonConnections = [];
+    }
+    if(addNoConnection){
+        aInputType.push({
+            value: 'none', name: 'No connection'
+        });
     }
     if (aAlias.length > 0 && !noSystemAlias) {
         aInputType.push({
@@ -90,7 +95,11 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         inputType = 'input';
     }
 
-    if (inputType === 'alias') {
+    if (inputType === 'none'){
+        return {
+            connection: new NoConnection()
+        };
+    }else if (inputType === 'alias') {
         const inq2 = await Inquirer.prompt({
             type: `list`,
             name: `aliasName`,
@@ -196,7 +205,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Client`,
             default: commandArgs.client,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.client ? false : true) || force)
+                return ( hash.type === 'RFC' || inputType === 'logon' ) && ((commandArgs.client ? false : true) || force)
             }
         }, {
             type: `input`,

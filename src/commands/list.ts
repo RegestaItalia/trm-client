@@ -1,10 +1,11 @@
 import { Logger, RegistryType, SystemConnector } from "trm-core";
 import { ListArguments } from "./arguments";
+import { CommandContext } from "./commons";
 
 export async function list(commandArgs: ListArguments) {
     Logger.loading(`Reading packages...`);
     const dest = SystemConnector.getDest();
-    const aPackages = await SystemConnector.getInstalledPackages(true);
+    const aPackages = await CommandContext.getSystemPackages();
     if (aPackages.length > 0) {
         const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `Import transport`];
         var tableData = [];

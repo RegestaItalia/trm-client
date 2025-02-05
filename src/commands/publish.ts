@@ -39,10 +39,11 @@ const _parseReleaseTimeoutArg = (arg: string): number => {
 }
 
 export async function publish(commandArgs: PublishArguments) {
+    const packages = await CommandContext.getSystemPackages();
     const result = await action({
         contextData: {
             logTemporaryFolder: getTempFolder(),
-            systemPackages: CommandContext.systemPackages,
+            systemPackages: packages,
             noInquirer: commandArgs.noPrompts
         },
         packageData: {

@@ -9,12 +9,10 @@ export async function checkTrmDependencies(commandArgs: any) {
     if (trmDependencies && Object.keys(trmDependencies).length > 0) {
         const oPublicRegistry = new Registry('public');
         Logger.loading(`Reading system data...`);
-        if (!CommandContext.systemPackages) {
-            CommandContext.systemPackages = await SystemConnector.getInstalledPackages(true);
-        }
+        const packages = await CommandContext.getSystemPackages();
         Object.keys(trmDependencies).forEach(packageName => {
             const versionRange = trmDependencies[packageName];
-            const installedPackage = CommandContext.systemPackages.find(o => o.packageName === packageName && o.compareRegistry(oPublicRegistry));
+            const installedPackage = packages.find(o => o.packageName === packageName && o.compareRegistry(oPublicRegistry));
             if (!installedPackage || !installedPackage.manifest) {
                 if (commandArgs.command === 'info') {
                     CommandContext.missingTrmDependencies.push(packageName);

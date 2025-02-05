@@ -1,4 +1,4 @@
-import { Inquirer, Logger, SystemConnector, TrmPackage, checkPackageDependencies, checkSapEntries } from "trm-core";
+import { Inquirer, Logger, TrmPackage, checkPackageDependencies, checkSapEntries } from "trm-core";
 import { CheckArguments } from "./arguments";
 import { CommandContext } from "./commons";
 
@@ -6,9 +6,10 @@ var systemPackages: TrmPackage[] = [];
 
 const _dependencies = async (oPackage: TrmPackage) => {
     Logger.loading(`Analyzing package dependencies...`);
+    const packages = await CommandContext.getSystemPackages();
     await checkPackageDependencies({
         contextData: {
-            systemPackages: CommandContext.systemPackages
+            systemPackages: packages
         },
         packageData: {
             package: oPackage
@@ -56,7 +57,7 @@ export async function check(commandArgs: CheckArguments) {
         analysisType = inq1.analysisType;
     }
     Logger.loading(`Searching package "${packageName}"...`);
-    systemPackages = await SystemConnector.getInstalledPackages(true);
+    systemPackages = await CommandContext.getSystemPackages();
     const oPackage = systemPackages.find(o => o.compareName(packageName) && o.compareRegistry(CommandContext.getRegistry()));
     if (!oPackage) {
         throw new Error(`Package "${packageName}" not found.`);
