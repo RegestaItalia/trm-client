@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "files": [
     "/dist",
+    "!dist/test.*",
     "!dist/*rfc.log"
   ],
   "bin": {
@@ -43,7 +44,7 @@
     "ini": "^4.1.1",
     "node-html-parser": "^6.1.13",
     "semver": "^7.5.4",
-    "trm-core": "^6.2.0",
+    "trm-core": "^6.2.2",
     "trm-registry-types": "^1.2.0",
     "xml2js": "^0.6.2"
   },
