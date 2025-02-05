@@ -4,6 +4,8 @@ import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
 import { RegistryAlias } from "../registryAlias";
+import { NoConnection } from "../utils";
+import chalk from "chalk";
 
 type PrintManifest = {
     devclass?: string,
@@ -20,80 +22,82 @@ type PrintManifest = {
 }
 
 const _printHeaderSection = (packageName: string) => {
-    Logger.info(`Package name: ${packageName}`);
+    Logger.info(`Package name: ${chalk.bold(packageName)}`);
     Logger.info(`Registry: ${CommandContext.getRegistry().name}`);
 }
 
 const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) => {
-    if(!systemPackage && !registryView){
+    if (!systemPackage && !registryView) {
         return;
     }
     var oSystemManifest: TrmManifest;
-    Logger.log(''); //new line
-    if(systemPackage){
-        oSystemManifest = systemPackage.manifest.get();
-        Logger.success(`Installed on ${SystemConnector.getDest()}: Yes`);
-        Logger.info(`Installed version: ${oSystemManifest.version}`);
-    }else{
-        Logger.info(`Installed on ${SystemConnector.getDest()}: No`);
+    if (!(SystemConnector.systemConnector instanceof NoConnection)) {
+        console.log(''); //new line
+        if (systemPackage) {
+            oSystemManifest = systemPackage.manifest.get();
+            Logger.success(`Installed on ${SystemConnector.getDest()}: Yes`);
+            console.log(`Installed version: ${oSystemManifest.version}`);
+        } else {
+            Logger.error(`Installed on ${SystemConnector.getDest()}: No`);
+        }
     }
-    if(registryView && registryView.release){
-        Logger.info(`Latest version available: ${registryView.release.version}`);
-        if(oSystemManifest){
-            if(eq(oSystemManifest.version, registryView.release.version)){
+    if (registryView && registryView.release) {
+        console.log(`Latest version available: ${registryView.release.version}`);
+        if (oSystemManifest) {
+            if (eq(oSystemManifest.version, registryView.release.version)) {
                 Logger.success(`Latest version installed: Yes`);
-            }else{
-                Logger.info(`Latest version installed: No`);
+            } else {
+                Logger.error(`Latest version installed: No`);
             }
         }
     }
 }
 
 const _printManifestSection = (manifest: PrintManifest) => {
-    Logger.log(''); //new line
-    if(manifest.devclass !== undefined){
-        Logger.info(`Devclass (SAP Package): ${manifest.devclass}`);
+    console.log(''); //new line
+    if (manifest.devclass !== undefined) {
+        console.log(`SAP Package: ${manifest.devclass}`);
     }
-    if(manifest.importTransport !== undefined){
-        Logger.info(`Import transport: ${manifest.importTransport}`);
+    if (manifest.importTransport !== undefined) {
+        console.log(`Import transport: ${manifest.importTransport}`);
     }
-    if(manifest.workbenchTransport !== undefined){
-        Logger.info(`Workbench transport: ${manifest.workbenchTransport}`);
+    if (manifest.workbenchTransport !== undefined) {
+        console.log(`Workbench transport: ${manifest.workbenchTransport}`);
     }
-    if(manifest.private !== undefined){
-        if(manifest.private){
-            Logger.info(`Private: Yes`);
-        }else{
-            Logger.info(`Private: No`);
+    if (manifest.private !== undefined) {
+        if (manifest.private) {
+            console.log(`Private: Yes`);
+        } else {
+            console.log(`Private: No`);
         }
     }
-    if(manifest.description !== undefined){
-        Logger.info(`Short description: ${manifest.description}`);
+    if (manifest.description !== undefined) {
+        console.log(`Short description: ${manifest.description}`);
     }
-    if(manifest.backwardsCompatible !== undefined){
-        if(manifest.backwardsCompatible){
-            Logger.info(`Backwards compatible: Yes`);
-        }else{
-            Logger.info(`Backwards compatible: No`);
+    if (manifest.backwardsCompatible !== undefined) {
+        if (manifest.backwardsCompatible) {
+            console.log(`Backwards compatible: Yes`);
+        } else {
+            console.log(`Backwards compatible: No`);
         }
     }
-    if(manifest.website !== undefined){
-        Logger.info(`Website: ${manifest.website}`);
+    if (manifest.website !== undefined) {
+        console.log(`Website: ${manifest.website}`);
     }
-    if(manifest.git !== undefined){
-        Logger.info(`Git: ${manifest.git}`);
+    if (manifest.git !== undefined) {
+        console.log(`Git: ${manifest.git}`);
     }
-    if(manifest.authors !== undefined){
-        Logger.info(`Authors: ${manifest.authors}`);
+    if (manifest.authors !== undefined) {
+        console.log(`Authors: ${manifest.authors}`);
     }
-    if(manifest.license !== undefined){
-        Logger.info(`License: ${manifest.license}`);
+    if (manifest.license !== undefined) {
+        console.log(`License: ${manifest.license}`);
     }
 }
 
 const _printDependenciesSection = (dependencies: TrmManifestDependency[]) => {
-    if(dependencies.length > 0){
-        Logger.log(''); //new line
+    if (dependencies.length > 0) {
+        console.log(''); //new line
         Logger.info(`This package has a total of ${dependencies.length} dependencies.`);
         const registryAliases = RegistryAlias.getAll();
         const tableHead = [`Name`, `Version`, `Registry`];
@@ -102,13 +106,13 @@ const _printDependenciesSection = (dependencies: TrmManifestDependency[]) => {
             const dependencyName = o.name;
             const dependencyVersion = o.version;
             var dependencyRegistry;
-            if(!o.registry || o.registry.trim().toLowerCase() === 'public'){
+            if (!o.registry || o.registry.trim().toLowerCase() === 'public') {
                 dependencyRegistry = 'public';
-            }else{
+            } else {
                 const oRegistryAlias = registryAliases.find(k => k.endpointUrl === o.registry);
-                if(oRegistryAlias){
+                if (oRegistryAlias) {
                     dependencyRegistry = oRegistryAlias.alias;
-                }else{
+                } else {
                     dependencyRegistry = o.registry;
                 }
             }
@@ -126,47 +130,47 @@ export async function view(commandArgs: ViewArguments) {
     const packageName = commandArgs.package;
     const dest = SystemConnector.getDest();
 
-    Logger.loading(`Reading system data...`);
-    const aSystemPackages = await SystemConnector.getInstalledPackages(true);
+    Logger.loading(`Searching package ${packageName}...`);
+    const aSystemPackages = await CommandContext.getSystemPackages();
     const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(CommandContext.getRegistry()));
     const oRegistryView = await viewRegistryPackage(packageName, true);
     var authors: string;
     var keywords: string;
     var printManifest: PrintManifest;
     var dependencies: TrmManifestDependency[];
-    if(oSystemView){
-        if(!oSystemView.manifest){
+    if (oSystemView) {
+        if (!oSystemView.manifest) {
             throw new Error(`Package "${packageName}" found, but manifest is missing on ${dest}!`);
         }
         const oSystemManifest = oSystemView.manifest.get();
-        if(Array.isArray(oSystemManifest.authors)){
+        if (Array.isArray(oSystemManifest.authors)) {
             authors = oSystemManifest.authors.map(o => {
                 var sAuthor;
-                if(o.email){
-                    if(o.name){
+                if (o.email) {
+                    if (o.name) {
                         sAuthor = `${o.name} <${o.email}>`
-                    }else{
+                    } else {
                         sAuthor = o.email;
                     }
-                }else if(o.name){
+                } else if (o.name) {
                     sAuthor = o.name;
-                }else{
+                } else {
                     return undefined;
                 }
                 return sAuthor;
             }).join(', ');
-        }else{
+        } else {
             authors = oSystemManifest.authors;
         }
-        if(Array.isArray(oSystemManifest.keywords)){
+        if (Array.isArray(oSystemManifest.keywords)) {
             keywords = oSystemManifest.keywords.join(', ');
-        }else{
+        } else {
             keywords = oSystemManifest.keywords;
         }
         var importTransport: string;
-        try{
+        try {
             importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
-        }catch(e){ }
+        } catch (e) { }
         dependencies = oSystemManifest.dependencies || [];
         printManifest = {
             devclass: oSystemView.getDevclass(),
@@ -180,7 +184,7 @@ export async function view(commandArgs: ViewArguments) {
             keywords,
             importTransport
         };
-    }else if(oRegistryView){
+    } else if (oRegistryView) {
         dependencies = [];
         printManifest = {
             private: oRegistryView.private,
@@ -189,7 +193,7 @@ export async function view(commandArgs: ViewArguments) {
             website: oRegistryView.website,
             license: oRegistryView.license
         };
-    }else{
+    } else {
         throw new Error(`Package "${packageName}" does not exist or insufficient view permissions.`);
     }
 

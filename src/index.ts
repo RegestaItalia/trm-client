@@ -169,6 +169,7 @@ const view = program.command(`view <package>`)
 If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
 registerCommand(view, {
     requiresConnection: true,
+    addNoConnection: true, //view registry release only
     requiresRegistry: true,
     ignoreRegistryUnreachable: true
 });
@@ -208,6 +209,7 @@ const info = program.command(`info`)
     .description(`TRM Client/Server Info.`);
 registerCommand(info, {
     requiresConnection: true,
+    addNoConnection: true, //client info only
     requiresTrmDependencies: true
 });
 

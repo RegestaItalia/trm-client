@@ -5,11 +5,12 @@ import { Settings } from "../settings";
 
 export function registerCommand(command: Command, args?: {
     requiresConnection?: boolean, //sets connection arguments
-    requiresTrmDependencies?: boolean,
-    requiresRegistry?: boolean,
-    registryAuthBlacklist?: AuthenticationType[],
+    addNoConnection?: boolean, //add no connection option (needs connection)
+    requiresTrmDependencies?: boolean, //don't execute if trm dependencies arent met (needs connection)
+    requiresRegistry?: boolean, //don't execute without connection to registry
+    registryAuthBlacklist?: AuthenticationType[], //skip registry requirement if matches authentication type
     noSystemAlias?: boolean, //skips alias creation during connection
-    ignoreRegistryUnreachable?: boolean
+    ignoreRegistryUnreachable?: boolean, //allow execution if connection to the registry fails (needs registry)
 }) {
     const commandName = command.name();
 
@@ -17,6 +18,7 @@ export function registerCommand(command: Command, args?: {
         args = {};
     }
     const requiresConnection = args.requiresConnection ? true : false;
+    const addNoConnection = args.addNoConnection ? true : false;
     const requiresTrmDependencies = args.requiresTrmDependencies ? true : false;
     const requiresRegistry = args.requiresRegistry ? true : false;
     const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable ? true : false;
@@ -50,6 +52,7 @@ export function registerCommand(command: Command, args?: {
         var args = {...{
             command: commandName,
             requiresConnection,
+            addNoConnection,
             requiresTrmDependencies,
             requiresRegistry,
             registryAuthBlacklist,

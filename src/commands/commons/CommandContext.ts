@@ -1,8 +1,8 @@
-import { Registry, TrmPackage } from "trm-core";
+import { Registry, SystemConnector, TrmPackage } from "trm-core";
 
 export namespace CommandContext {
+    var _systemPackages: TrmPackage[] = undefined;
     export var registry: Registry = undefined;
-    export var systemPackages: TrmPackage[] = undefined;
     export var trmDependencies: TrmPackage[] = [];
     export var missingTrmDependencies: (TrmPackage | string)[] = [];
     
@@ -12,6 +12,13 @@ export namespace CommandContext {
         }else{
             return registry;
         }
+    }
+
+    export async function getSystemPackages(): Promise<TrmPackage[]> {
+        if(!this._systemPackages){
+            this._systemPackages = await SystemConnector.getInstalledPackages(true);
+        }
+        return this._systemPackages;
     }
 
 }
