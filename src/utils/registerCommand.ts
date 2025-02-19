@@ -44,6 +44,8 @@ export function registerCommand(command: Command, args?: {
     }
     if(requiresRegistry){
         command.option(`-r, --registry <registry>`, `Registry name.`);
+        command.option(`-re, --registryEndpoint <endpoint>`, `Registry endpoint.`);
+        command.option(`-ra, --registryAuth <authentication>`, `Registry authentication.`);
     }
     command.option(`-log, --logType <logType>`, `Log type.`, defaultLogger);
     command.option(`-dbg, --debug`, `Debug logging.`, false);
