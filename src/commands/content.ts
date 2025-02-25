@@ -69,31 +69,35 @@ export async function content(commandArgs: ContentArguments) {
             node.content.forEach(record => {
                 var sRecord = [];
                 Object.keys(record).filter(k => !k.startsWith('__')).forEach(field => {
-                    if(field && record[field]){
-                        //remove property srcsystem of tadir
-                        if(field === 'SRCSYSTEM' && node.tableName === 'TADIR'){
-                            return;
+                    var fieldValue = record[field];
+                    if (field && fieldValue) {
+                        if (node.tableName === 'TADIR') {
+                            if (field === 'SRCSYSTEM') {
+                                fieldValue = chalk.strikethrough(fieldValue);
+                            } else if (field === 'DEVCLASS') {
+                                fieldValue = chalk.italic(fieldValue);
+                            }
                         }
-                        sRecord.push(`${chalk.bold(field)}: ${record[field]}`);
+                        sRecord.push(`${chalk.bold(field)}: ${fieldValue}`);
                     }
                 });
-                if(sRecord.length > 0){
-                    if(record.__isDevc){
+                if (sRecord.length > 0) {
+                    if (record.__isDevc) {
                         tableNode.children.push({
                             text: chalk.bgGrey(sRecord.join(', ')),
                             children: []
                         });
-                    }else if(record.__isLang){
+                    } else if (record.__isLang) {
                         tableNode.children.push({
                             text: chalk.bgBlueBright(sRecord.join(', ')),
                             children: []
                         });
-                    }else if(record.__isCust){
+                    } else if (record.__isCust) {
                         tableNode.children.push({
                             text: chalk.bgCyanBright(sRecord.join(', ')),
                             children: []
                         });
-                    }else{
+                    } else {
                         tableNode.children.push({
                             text: sRecord.join(', '),
                             children: []
@@ -105,11 +109,11 @@ export async function content(commandArgs: ContentArguments) {
         }
     });
     Logger.tree(tree);
-    if(remoteManifest.get().namespace){
+    if (remoteManifest.get().namespace) {
         Logger.info(`ABAP package namespace repair license: ${chalk.bold(remoteManifest.get().namespace.replicense)}`);
     }
     Object.keys(packageContent).forEach(transportIdentifier => {
-        switch(transportIdentifier){
+        switch (transportIdentifier) {
             case 'DEVC':
                 Logger.info(chalk.bgGrey(`ABAP package transport: ${packageContent[transportIdentifier].trkorr}, ${chalk.bgGrey('package records are highlited')}`));
                 break;
@@ -124,7 +128,7 @@ export async function content(commandArgs: ContentArguments) {
                 break;
         }
     });
-    if(iOtherEntries > 0){
+    if (iOtherEntries > 0) {
         Logger.warning(`There are ${iOtherEntries} other records to show. Run with option --all in order to see them.`);
     }
 }
