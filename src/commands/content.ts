@@ -70,6 +70,10 @@ export async function content(commandArgs: ContentArguments) {
                 var sRecord = [];
                 Object.keys(record).filter(k => !k.startsWith('__')).forEach(field => {
                     if(field && record[field]){
+                        //remove property srcsystem of tadir
+                        if(field === 'SRCSYSTEM' && node.tableName === 'TADIR'){
+                            return;
+                        }
                         sRecord.push(`${chalk.bold(field)}: ${record[field]}`);
                     }
                 });
