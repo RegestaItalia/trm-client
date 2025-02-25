@@ -1,4 +1,4 @@
-import { Logger, SystemConnector, TreeLog, TrmArtifact, TrmPackage, TrmTransportIdentifier } from "trm-core";
+import { Logger, TreeLog, TrmPackage } from "trm-core";
 import { ContentArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { getTempFolder } from "../utils";
@@ -89,12 +89,12 @@ export async function content(commandArgs: ContentArguments) {
                         });
                     } else if (record.__isLang) {
                         tableNode.children.push({
-                            text: chalk.bgBlueBright(sRecord.join(', ')),
+                            text: chalk.bgGreen(sRecord.join(', ')),
                             children: []
                         });
                     } else if (record.__isCust) {
                         tableNode.children.push({
-                            text: chalk.bgCyanBright(sRecord.join(', ')),
+                            text: chalk.bgYellow(sRecord.join(', ')),
                             children: []
                         });
                     } else {
@@ -109,25 +109,51 @@ export async function content(commandArgs: ContentArguments) {
         }
     });
     Logger.tree(tree);
+
+    var header = ['Namespace', 'ABAP Package', 'TRM Transport', 'Customizing', 'Translations'];
+    var row1 = [];
+    var row2 = [];
     if (remoteManifest.get().namespace) {
-        Logger.info(`ABAP package namespace repair license: ${chalk.bold(remoteManifest.get().namespace.replicense)}`);
+        row1.push(`\u2714`);
+        row2.push(remoteManifest.get().namespace.replicense);
+    }else{
+        row1.push(`\u274C`);
+        row2.push(``);
     }
-    Object.keys(packageContent).forEach(transportIdentifier => {
-        switch (transportIdentifier) {
-            case 'DEVC':
-                Logger.info(chalk.bgGrey(`ABAP package transport: ${packageContent[transportIdentifier].trkorr}, ${chalk.bgGrey('package records are highlited')}`));
-                break;
-            case 'TADIR':
-                Logger.info(`TRM transport: ${packageContent[transportIdentifier].trkorr}`);
-                break;
-            case 'CUST':
-                Logger.info(`Has customizing transport? Yes (${packageContent[transportIdentifier].trkorr}), ${chalk.bgCyanBright('customizing records are highlited')}`);
-                break;
-            case 'LANG':
-                Logger.info(`Has translation transport? Yes (${packageContent[transportIdentifier].trkorr}), ${chalk.bgBlueBright('translation records are highlited')}`);
-                break;
-        }
-    });
+    if(Object.keys(packageContent).includes('DEVC')){
+        row1.push(`\u2714 ${packageContent['DEVC'].trkorr}`);
+        row2.push(`${chalk.bgGrey('Highlight')}`);
+    }else{
+        row1.push(`\u274C`);
+        row2.push(``);
+    }
+    if(Object.keys(packageContent).includes('TADIR')){
+        row1.push(`\u2714 ${packageContent['TADIR'].trkorr}`);
+        row2.push(``);
+    }else{
+        row1.push(`\u274C`);
+        row2.push(``);
+    }
+    if(Object.keys(packageContent).includes('CUST')){
+        row1.push(`\u2714 ${packageContent['CUST'].trkorr}`);
+        row2.push(`${chalk.bgYellow('Highlight')}`);
+    }else{
+        row1.push(`\u274C`);
+        row2.push(``);
+    }
+    if(Object.keys(packageContent).includes('LANG')){
+        row1.push(`\u2714 ${packageContent['LANG'].trkorr}`);
+        row2.push(`${chalk.bgGreen('Highlight')}`);
+    }else{
+        row1.push(`\u274C`);
+        row2.push(``);
+    }
+    if(row2.filter(s => s.length > 0).length > 0){
+        Logger.table(header, [row1, row2]);
+    }else{
+        Logger.table(header, [row1]);
+    }
+    
     if (iOtherEntries > 0) {
         Logger.warning(`There are ${iOtherEntries} other records to show. Run with option --all in order to see them.`);
     }
