@@ -5,9 +5,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "/dist",
-    "!dist/test.*",
-    "!dist/*rfc.log"
+    "changelog.txt",
+    "dist",
+    "!dist/test.js",
+    "!dist/test.js.map",
+    "!dist/*.log"
   ],
   "bin": {
     "trm": "dist/index.js"
