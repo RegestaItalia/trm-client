@@ -2,7 +2,7 @@ import * as fs from "fs";
 import path from "path";
 import { rootPath } from 'get-root-path';
 
-export function getClientPackage(): any {
+export function getNodePackage(): any {
     var file: Buffer;
     try{
         file = fs.readFileSync(path.join(rootPath, "/node_modules/trm-client/package.json"));
