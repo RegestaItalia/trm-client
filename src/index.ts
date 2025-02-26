@@ -181,6 +181,14 @@ registerCommand(compare, {
     requiresRegistry: true,
     ignoreRegistryUnreachable: true
 });
+/*CONTENT*/
+const content = program.command(`content <package> [version]`)
+    .description(`List content of a package.`)
+    .option(`-a, --all`, `List all content`, false)
+    .option(`-r3, --r3transPath <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`);
+registerCommand(content, {
+    requiresRegistry: true
+});
 /*LIST*/
 const list = program.command(`list`)
     .description(`List packages installed on a system.`);
