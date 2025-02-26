@@ -128,4 +128,9 @@ export class RegistryAlias {
             RegistryAlias.create('public', 'public', null);
         }
     }
+
+    public static getTemporaryInstance(endpoint: string, auth?: any) : RegistryAlias {
+        return new RegistryAlias(endpoint, endpoint).setAuthData(auth);
+    }
+    
 }
