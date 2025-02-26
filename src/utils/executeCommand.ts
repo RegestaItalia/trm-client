@@ -21,7 +21,7 @@ export enum InquirerType {
 }
 
 const _getLogger = (type: LoggerType, debug: boolean, logOutputFolder?: string): any => {
-    if(!logOutputFolder || logOutputFolder.trim().toLowerCase() === 'default'){
+    if (!logOutputFolder || logOutputFolder.trim().toLowerCase() === 'default') {
         logOutputFolder = getLogFolder();
     }
     switch (type) {
@@ -79,6 +79,8 @@ export async function executeCommand(args: any) {
             var registry: Registry;
             if (args.registry) {
                 registryAlias = RegistryAlias.get(args.registry);
+            } else if (args.registryEndpoint) {
+                registryAlias = RegistryAlias.getTemporaryInstance(args.registryEndpoint, args.registryAuth);
             } else {
                 registryAlias = await commands.pickRegistry();
             }
@@ -86,7 +88,7 @@ export async function executeCommand(args: any) {
             try {
                 const registryPing = await registry.ping();
                 if (registryPing.wallMessage) {
-                    if(registryAuthBlacklist.includes(registryPing.authenticationType)){
+                    if (registryAuthBlacklist.includes(registryPing.authenticationType)) {
                         throw new Error(`This command is not supported by registry "${registry.name}".`);
                     }
                     Logger.registryResponse(registryPing.wallMessage);
@@ -97,10 +99,10 @@ export async function executeCommand(args: any) {
                     throw new Error(`Registry "${registry.name}" is unreachable.`);
                 }
             }
-            if(registryAlias.authData){
-                try{
+            if (registryAlias.authData) {
+                try {
                     await registry.authenticate(registryAlias.authData);
-                }catch(e){
+                } catch (e) {
                     Logger.error(e, true);
                     Logger.warning(`Registry "${registry.name}" login failed.`);
                 }
@@ -111,7 +113,7 @@ export async function executeCommand(args: any) {
         if (commands[args.command]) {
             await commands[args.command](args);
             //force loading clear in case it was left hanging
-            if(Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger){
+            if (Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger) {
                 Logger.logger.forceStop();
             }
         } else {
@@ -124,7 +126,7 @@ export async function executeCommand(args: any) {
         await logError(e);
         exitCode = 1;
     } finally {
-        if(Logger.logger instanceof CliLogFileLogger){
+        if (Logger.logger instanceof CliLogFileLogger) {
             const sessionId = Logger.logger.getSessionId();
             const logFilePath = Logger.logger.getFilePath();
             console.log(`Log output "${logFilePath}" for session ID ${sessionId}.`);
