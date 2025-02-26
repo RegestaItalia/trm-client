@@ -1,6 +1,6 @@
-import { getClientPackage } from "./getClientPackage";
+import { getNodePackage } from "./getNodePackage";
 
 export function getClientVersion(): string {
-    const trmClientPackage = getClientPackage();
+    const trmClientPackage = getNodePackage();
     return trmClientPackage.version;
 }

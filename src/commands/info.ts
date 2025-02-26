@@ -1,5 +1,5 @@
-import { getNpmGlobalPath, Logger, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector, TreeLog } from "trm-core";
-import { checkCliUpdate, getClientDependencies, getClientVersion, getNpmPackageLatestVersion, getTrmDependencies, NoConnection } from "../utils";
+import { getCoreTrmDependencies, getNpmGlobalPath, Logger, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector, TreeLog } from "trm-core";
+import { checkCliUpdate, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion, NoConnection } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { readFileSync } from "fs";
@@ -56,11 +56,12 @@ export async function info(commandArgs: InfoArguments) {
     const npmGlobal = await getNpmGlobalPath();
     const clientLatest = await checkCliUpdate(false);
     const clientVersion = getClientVersion();
-    const clientDependencies = getClientDependencies() || {};
-    const trmDependencies = getTrmDependencies() || {};
+    const clientDependencies = getClientNodeDependencies();
+    const trmDependencies = getCoreTrmDependencies();
     const trmDependenciesInstances = CommandContext.trmDependencies;
     const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
+    const nodeR3transVersion = _getDependencyVersion("node-r3trans");
     const packages = await CommandContext.getSystemPackages();
     const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
 
@@ -146,6 +147,12 @@ export async function info(commandArgs: InfoArguments) {
     if(nodeRfcVersion){
         clientChildrenTree.push({
             text: await _getNpmLatestForText('node-rfc', nodeRfcVersion, `node-rfc ${nodeRfcVersion}`),
+            children: []
+        });
+    }
+    if(nodeR3transVersion){
+        clientChildrenTree.push({
+            text: await _getNpmLatestForText('node-r3trans', nodeR3transVersion, `node-r3trans ${nodeR3transVersion}`),
             children: []
         });
     }

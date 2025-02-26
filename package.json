@@ -31,9 +31,6 @@
     "email": "simone.gaffurini@regestaitalia.it"
   },
   "license": "MIT",
-  "trmDependencies": {
-    "trm-server": "^2.1.0"
-  },
   "dependencies": {
     "@esm2cjs/normalize-url": "^8.0.0",
     "chalk": "^4.1.2",
