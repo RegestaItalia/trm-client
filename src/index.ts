@@ -103,6 +103,35 @@ registerCommand(publish, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+/*PACK*/
+const pack = program.command(`pack <package> [version]`)
+    .description(`Save package locally.`)
+    .addHelpText(`before`, `When no version is defined, it will automatically set to 1.0.0.
+Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
+Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
+If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
+    .option(`-o, --output <<outputPath>>`, `Output path.`)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
+    .option(`-nd, --noDependenciesDetection`, `Skip automatic dependencies detection.`, false)
+    .option(`-sc, --skipCustomizingTransports`, `Skip customizing transports input.`, false)
+    .option(`-to, --releaseTimeout <timeout>`, `Publish transports release timeout (in seconds).`, '180')
+    .option(`-d, --devclass <devclass>`, `ABAP package to publish.`)
+    .option(`-cust, --customizingTransports <customizingTransports>`, `Customizing transports (separated by comma).`)
+    .option(`-tt, --transportTarget <transportTarget>`, `Publish transports target.`)
+    .option(`-bc, --backwardsCompatible`, `Indicates backwards compatibility with older releases.`, true)
+    .option(`-sd, --description`, `Short description of the package.`)
+    .option(`-gl, --git <link>`, `Git link.`)
+    .option(`-wl, --website <link>`, `Website link.`)
+    .option(`-pl, --license <license>`, `Package license.`)
+    .option(`-pa, --authors <authors>`, `Package authors (separated by comma).`)
+    .option(`-pk, --keywords <keywords>`, `Package keywords (separated by comma).`)
+    .option(`-pd, --dependencies <JSON>`, `Package dependencies (in JSON format).`)
+    .option(`-ps, --sapEntries <JSON>`, `Package SAP entries (in JSON format).`);
+registerCommand(pack, {
+    requiresConnection: true,
+    requiresTrmDependencies: true
+});
 
 /*UNPUBLISH*/
 const unpublish = program.command(`unpublish <package> [version]`)
