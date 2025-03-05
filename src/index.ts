@@ -220,7 +220,8 @@ registerCommand(content, {
 });
 /*LIST*/
 const list = program.command(`list`)
-    .description(`List packages installed on a system.`);
+    .description(`List packages installed on a system.`)
+    .option(`-l, --locals`, `List imported/exported local packages`, false);
 registerCommand(list, {
     requiresConnection: true
 });

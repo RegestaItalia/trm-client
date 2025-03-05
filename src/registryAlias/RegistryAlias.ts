@@ -3,7 +3,7 @@ import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { RegistryAliasData } from "./RegistryAliasData";
-import { Logger, Registry } from "trm-core";
+import { PUBLIC_RESERVED_KEYWORD, Registry } from "trm-core";
 
 const REGISTRY_FILE_NAME = "registry.ini";
 
@@ -79,9 +79,9 @@ export class RegistryAlias {
         const aAlias = this.getAll();
         var alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if (alias) {
-            if (name.trim().toLowerCase() === 'public') {
-                alias.endpointUrl = 'public';
-                alias.alias = 'public';
+            if (name.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD) {
+                alias.endpointUrl = PUBLIC_RESERVED_KEYWORD;
+                alias.alias = PUBLIC_RESERVED_KEYWORD;
             }
             return new RegistryAlias(alias.endpointUrl, alias.alias).setAuthData(alias.auth);
         }else{
@@ -97,7 +97,7 @@ export class RegistryAlias {
         } else {
             aAlias.push({
                 alias: name,
-                endpointUrl: endpointUrl.trim().toLowerCase() === 'public' ? null : endpointUrl,
+                endpointUrl: endpointUrl.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD ? null : endpointUrl,
                 auth
             });
             this.generateFile(aAlias);
@@ -124,8 +124,8 @@ export class RegistryAlias {
 
     public static generatePublicRegistryAlias(): void {
         const allRegistries = this.getAll();
-        if(!allRegistries.find(o => o.alias.trim().toLowerCase() === 'public')){
-            RegistryAlias.create('public', 'public', null);
+        if(!allRegistries.find(o => o.alias.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD)){
+            RegistryAlias.create(PUBLIC_RESERVED_KEYWORD, PUBLIC_RESERVED_KEYWORD, null);
         }
     }
 

@@ -1,5 +1,5 @@
 import { ViewArguments } from "./arguments";
-import { Logger, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
+import { Logger, PUBLIC_RESERVED_KEYWORD, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
@@ -106,8 +106,8 @@ const _printDependenciesSection = (dependencies: TrmManifestDependency[]) => {
             const dependencyName = o.name;
             const dependencyVersion = o.version;
             var dependencyRegistry;
-            if (!o.registry || o.registry.trim().toLowerCase() === 'public') {
-                dependencyRegistry = 'public';
+            if (!o.registry || o.registry.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD) {
+                dependencyRegistry = PUBLIC_RESERVED_KEYWORD;
             } else {
                 const oRegistryAlias = registryAliases.find(k => k.endpointUrl === o.registry);
                 if (oRegistryAlias) {

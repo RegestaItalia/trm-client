@@ -1,4 +1,4 @@
-import { Inquirer, Logger } from "trm-core";
+import { Inquirer, LOCAL_RESERVED_KEYWORD, Logger, PUBLIC_RESERVED_KEYWORD } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
 import { AddRegistryArguments } from "./arguments";
 
@@ -7,8 +7,11 @@ export async function addRegistry(commandArgs: AddRegistryArguments) {
     const auth = commandArgs.authentication;
     var endpoint = commandArgs.endpoint;
     var oAuth;
-    if(registryName.toLowerCase() === 'public'){
-        throw new Error(`Registry name "public" is a reserved keyword.`);
+    if(registryName.toLowerCase() === PUBLIC_RESERVED_KEYWORD){
+        throw new Error(`Registry name "${PUBLIC_RESERVED_KEYWORD}" is a reserved keyword.`);
+    }
+    if(registryName.toLowerCase() === LOCAL_RESERVED_KEYWORD){
+        throw new Error(`Registry name "${LOCAL_RESERVED_KEYWORD}" is a reserved keyword.`);
     }
     if(auth){
         try{

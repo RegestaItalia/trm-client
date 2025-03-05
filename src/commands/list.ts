@@ -1,11 +1,16 @@
 import { Logger, RegistryType, SystemConnector } from "trm-core";
 import { ListArguments } from "./arguments";
 import { CommandContext } from "./commons";
+import chalk from "chalk";
 
 export async function list(commandArgs: ListArguments) {
     Logger.loading(`Reading packages...`);
     const dest = SystemConnector.getDest();
-    const aPackages = await CommandContext.getSystemPackages();
+    var aPackages = await CommandContext.getSystemPackages();
+    var iLocals = aPackages.filter(o => o.registry.getRegistryType() === RegistryType.LOCAL).length;
+    if(!commandArgs.locals){
+        aPackages = aPackages.filter(o => o.registry.getRegistryType() !== RegistryType.LOCAL);
+    }
     if (aPackages.length > 0) {
         const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `Import transport`];
         var tableData = [];
@@ -13,10 +18,13 @@ export async function list(commandArgs: ListArguments) {
             try{
                 const packageName = oPackage.packageName || '';
                 const version = oPackage.manifest.get().version || '';
-                const registry = oPackage.registry.getRegistryType() === RegistryType.PUBLIC ? 'public' : oPackage.registry.endpoint;
+                const registry = oPackage.registry.getRegistryType() === RegistryType.LOCAL ? chalk.bold(oPackage.registry.name) : oPackage.registry.name;
                 const devclass = oPackage.getDevclass() || '';
                 const linkedTransport = oPackage.manifest.getLinkedTransport();
-                const importTransport = linkedTransport ? linkedTransport.trkorr : '';
+                var importTransport = '';
+                if(linkedTransport && (await linkedTransport.isImported())){
+                    importTransport = linkedTransport.trkorr;
+                }
                 tableData.push([
                     packageName,
                     version,
@@ -32,8 +40,12 @@ export async function list(commandArgs: ListArguments) {
             Logger.warning(`${aPackages.length - tableData.length} packages couldn't be printed (check logs).`);
         }
         Logger.info(`${dest} has ${aPackages.length} packages.`);
-        Logger.log(`\n`);
+        //Logger.log(`\n`);
         Logger.table(tableHead, tableData);
+        if(iLocals > 0 && !commandArgs.locals){
+            //Logger.log(`\n`);
+            Logger.warning(`There ${iLocals === 1 ? 'is' : 'are'} ${iLocals} local package${iLocals === 1 ? '' : 's'}. Run with option -l (--locals) to list ${iLocals === 1 ? 'it' : 'them'}.`);
+        }
     } else {
         Logger.info(`${dest} has 0 packages.`);
     }

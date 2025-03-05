@@ -17,7 +17,7 @@ export namespace CommandContext {
     export async function getSystemPackages(): Promise<TrmPackage[]> {
         if(!this._systemPackages){
             Logger.loading(`Reading system packages...`);
-            this._systemPackages = await SystemConnector.getInstalledPackages(true);
+            this._systemPackages = await SystemConnector.getInstalledPackages(true, true, true);
         }
         return this._systemPackages;
     }
