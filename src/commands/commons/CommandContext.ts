@@ -1,12 +1,12 @@
-import { Logger, Registry, SystemConnector, TrmPackage } from "trm-core";
+import { AbstractRegistry, Logger, SystemConnector, TrmPackage } from "trm-core";
 
 export namespace CommandContext {
     var _systemPackages: TrmPackage[] = undefined;
-    export var registry: Registry = undefined;
+    export var registry: AbstractRegistry = undefined;
     export var trmDependencies: TrmPackage[] = [];
     export var missingTrmDependencies: (TrmPackage | string)[] = [];
     
-    export function getRegistry(): Registry {
+    export function getRegistry(): AbstractRegistry {
         if(!registry) {
             throw new Error('Registry not initialized.');
         }else{

@@ -3,7 +3,7 @@ import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { RegistryAliasData } from "./RegistryAliasData";
-import { PUBLIC_RESERVED_KEYWORD, Registry } from "trm-core";
+import { AbstractRegistry, PUBLIC_RESERVED_KEYWORD, Registry } from "trm-core";
 
 const REGISTRY_FILE_NAME = "registry.ini";
 
@@ -22,7 +22,7 @@ export class RegistryAlias {
         return this;
     }
 
-    public getRegistry(): Registry {
+    public getRegistry(): AbstractRegistry {
         return new Registry(this._endpoint, this._name);
     }
 
