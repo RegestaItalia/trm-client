@@ -109,15 +109,17 @@ export async function executeCommand(args: any) {
             }
             CommandContext.registry = registry;
         }
-
-        if (commands[args.command]) {
-            await commands[args.command](args);
-            //force loading clear in case it was left hanging
-            if (Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger) {
-                Logger.logger.forceStop();
+        var commandFn = args.command;
+        if (!commands[commandFn]) {
+            commandFn = `_${commandFn}`;
+            if (!commands[commandFn]) {
+                throw new Error(`Command "${args.command}" doesn't exist.`);
             }
-        } else {
-            throw new Error(`Command "${args.command}" doesn't exist.`);
+        }
+        await commands[commandFn](args);
+        //force loading clear in case it was left hanging
+        if (Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger) {
+            Logger.logger.forceStop();
         }
 
         //Disappear like man was never here!

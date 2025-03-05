@@ -190,6 +190,29 @@ registerCommand(update, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+/*IMPORT*/
+const _import = program.command(`import <file>`)
+    .description(`Import a package (as a file) into system.`)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-ow, --overwrite`, `Overwrite installation (allow re-install).`, false)
+    .option(`-sf, --safe`, `Safe install (needs package integrity).`, false)
+    .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
+    .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
+    .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
+    .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
+    .option(`-kd, --keepOriginalPackages`, `Keep original ABAP packages names.`, false)
+    .option(`-it, --createInstallTransport`, `Create/update install transport (used for landscape transports).`, true)
+    .option(`-r3, --r3transPath <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`)
+    .option(`-sha, --integrity <sha>`, `Package integrity.`)
+    .option(`-tl, --transportLayer <transportLayer>`, `ABAP packages transport layer. (default: System default)`)
+    .option(`-tl, --packageReplacements <JSON>`, `ABAP package replacements in JSON format.`)
+    .option(`-itt, --installTransportTargetSys <transportTarget>`, `Install transport target system.`)
+registerCommand(_import, {
+    requiresConnection: true,
+    requiresTrmDependencies: true
+});
 
 /*VIEW*/
 const view = program.command(`view <package>`)
