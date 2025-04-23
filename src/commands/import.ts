@@ -21,11 +21,6 @@ const _parseImportTimeoutArg = (arg: string): number => {
 }
 
 export async function _import(commandArgs: ImportArguments) {
-    //var packageName: string;
-    //const filePath = commandArgs.file;
-    //const trmArtifact = new TrmArtifact(readFileSync(filePath));
-    //trmArtifact.getManifest().get().name
-    
     const registry = new FileSystem(commandArgs.file);
     const packages = await CommandContext.getSystemPackages();
     const result = await action({
