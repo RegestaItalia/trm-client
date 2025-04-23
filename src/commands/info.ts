@@ -8,10 +8,10 @@ import { rootPath } from 'get-root-path';
 import chalk from "chalk";
 import { gte } from "semver";
 
-const _getDependencyVersion = (moduleName: string) => {
+const _getDependencyVersion = (moduleName: string, rootModule: string = 'trm-client') => {
     var file: Buffer;
     try{
-        file = readFileSync(path.join(rootPath, `/node_modules/trm-client/node_modules/${moduleName}/package.json`));
+        file = readFileSync(path.join(rootPath, `/node_modules/${rootModule}/node_modules/${moduleName}/package.json`));
     }catch(e){
         file = readFileSync(path.join(rootPath, `/node_modules/${moduleName}/package.json`));
     }
@@ -61,7 +61,7 @@ export async function info(commandArgs: InfoArguments) {
     const trmDependenciesInstances = CommandContext.trmDependencies;
     const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
-    const nodeR3transVersion = _getDependencyVersion("node-r3trans");
+    const nodeR3transVersion = _getDependencyVersion("node-r3trans", "trm-core");
     const packages = await CommandContext.getSystemPackages();
     const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
 
