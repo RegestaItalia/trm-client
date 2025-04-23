@@ -3,7 +3,7 @@ import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
 import { checkCliUpdate } from "./checkCliUpdate";
-import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, Registry, SystemConnector } from "trm-core";
+import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, SystemConnector, RegistryProvider, AbstractRegistry } from "trm-core";
 import { getLogFolder } from "./getLogFolder";
 import { RegistryAlias } from "../registryAlias";
 import { CommandContext } from "../commands/commons";
@@ -58,9 +58,8 @@ export async function executeCommand(args: any) {
 
         await checkCliUpdate(true);
 
-        var system: ISystemConnector;
-        var registry: Registry;
         if (requiresConnection) {
+            var system: ISystemConnector;
             if (args.systemAlias) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
@@ -76,7 +75,7 @@ export async function executeCommand(args: any) {
 
         if (requiresRegistry) {
             var registryAlias: RegistryAlias;
-            var registry: Registry;
+            var registry: AbstractRegistry;
             if (args.registry) {
                 registryAlias = RegistryAlias.get(args.registry);
             } else if (args.registryEndpoint) {
@@ -108,16 +107,31 @@ export async function executeCommand(args: any) {
                 }
             }
             CommandContext.registry = registry;
+            RegistryProvider.registry.push(registry);
+            RegistryAlias.getAll().forEach(o => {
+                var append = true;
+                var aliasRegistry = RegistryAlias.get(o.alias).getRegistry();
+                RegistryProvider.registry.forEach(k => {
+                    if(append){
+                        append = !k.compare(aliasRegistry);
+                    }
+                });
+                if(append){
+                    RegistryProvider.registry.push(aliasRegistry);
+                }
+            });
         }
-
-        if (commands[args.command]) {
-            await commands[args.command](args);
-            //force loading clear in case it was left hanging
-            if (Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger) {
-                Logger.logger.forceStop();
+        var commandFn = args.command;
+        if (!commands[commandFn]) {
+            commandFn = `_${commandFn}`;
+            if (!commands[commandFn]) {
+                throw new Error(`Command "${args.command}" doesn't exist.`);
             }
-        } else {
-            throw new Error(`Command "${args.command}" doesn't exist.`);
+        }
+        await commands[commandFn](args);
+        //force loading clear in case it was left hanging
+        if (Logger.logger instanceof CliLogger || Logger.logger instanceof CliLogFileLogger) {
+            Logger.logger.forceStop();
         }
 
         //Disappear like man was never here!

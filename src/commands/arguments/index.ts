@@ -20,3 +20,4 @@ export * from "./FindDependenciesArguments";
 export * from "./SettingsArgument";
 export * from "./UpdateArguments";
 export * from "./ContentArguments";
+export * from "./PackArguments";

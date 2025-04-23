@@ -14,3 +14,4 @@ Legend
 ! connect to registry via option
 - trm dependencies on client
 + content command
++ pack/import command

@@ -1,1 +1,3 @@
-export type ListArguments = {}
+export type ListArguments = {
+    locals: boolean
+}

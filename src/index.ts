@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion, registerCommand } from "./utils";
 import { AuthenticationType } from 'trm-registry-types';
+
+//dotenv.config();
 
 const program = new Command();
 
@@ -103,6 +105,35 @@ registerCommand(publish, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+/*PACK*/
+const pack = program.command(`pack <package> [version]`)
+    .description(`Save package locally.`)
+    .addHelpText(`before`, `When no version is defined, it will automatically set to 1.0.0.
+Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
+Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
+If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
+    .option(`-o, --output <<outputPath>>`, `Output path.`)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
+    .option(`-nd, --noDependenciesDetection`, `Skip automatic dependencies detection.`, false)
+    .option(`-sc, --skipCustomizingTransports`, `Skip customizing transports input.`, false)
+    .option(`-to, --releaseTimeout <timeout>`, `Publish transports release timeout (in seconds).`, '180')
+    .option(`-d, --devclass <devclass>`, `ABAP package to publish.`)
+    .option(`-cust, --customizingTransports <customizingTransports>`, `Customizing transports (separated by comma).`)
+    .option(`-tt, --transportTarget <transportTarget>`, `Publish transports target.`)
+    .option(`-bc, --backwardsCompatible`, `Indicates backwards compatibility with older releases.`, true)
+    .option(`-sd, --description`, `Short description of the package.`)
+    .option(`-gl, --git <link>`, `Git link.`)
+    .option(`-wl, --website <link>`, `Website link.`)
+    .option(`-pl, --license <license>`, `Package license.`)
+    .option(`-pa, --authors <authors>`, `Package authors (separated by comma).`)
+    .option(`-pk, --keywords <keywords>`, `Package keywords (separated by comma).`)
+    .option(`-pd, --dependencies <JSON>`, `Package dependencies (in JSON format).`)
+    .option(`-ps, --sapEntries <JSON>`, `Package SAP entries (in JSON format).`);
+registerCommand(pack, {
+    requiresConnection: true,
+    requiresTrmDependencies: true
+});
 
 /*UNPUBLISH*/
 const unpublish = program.command(`unpublish <package> [version]`)
@@ -161,6 +192,29 @@ registerCommand(update, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+/*IMPORT*/
+const _import = program.command(`import <file>`)
+    .description(`Import a package (as a file) into system.`)
+    .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
+    .option(`-ow, --overwrite`, `Overwrite installation (allow re-install).`, false)
+    .option(`-sf, --safe`, `Safe install (needs package integrity).`, false)
+    .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
+    .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
+    .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
+    .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
+    .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
+    .option(`-kd, --keepOriginalPackages`, `Keep original ABAP packages names.`, false)
+    .option(`-it, --createInstallTransport`, `Create/update install transport (used for landscape transports).`, true)
+    .option(`-r3, --r3transPath <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`)
+    .option(`-sha, --integrity <sha>`, `Package integrity.`)
+    .option(`-tl, --transportLayer <transportLayer>`, `ABAP packages transport layer. (default: System default)`)
+    .option(`-tl, --packageReplacements <JSON>`, `ABAP package replacements in JSON format.`)
+    .option(`-itt, --installTransportTargetSys <transportTarget>`, `Install transport target system.`)
+registerCommand(_import, {
+    requiresConnection: true,
+    requiresTrmDependencies: true
+});
 
 /*VIEW*/
 const view = program.command(`view <package>`)
@@ -191,7 +245,8 @@ registerCommand(content, {
 });
 /*LIST*/
 const list = program.command(`list`)
-    .description(`List packages installed on a system.`);
+    .description(`List packages installed on a system.`)
+    .option(`-l, --locals`, `List imported/exported local packages`, false);
 registerCommand(list, {
     requiresConnection: true
 });
