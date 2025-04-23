@@ -7,7 +7,7 @@ export async function viewRegistryPackage(packageName: string, print: boolean = 
     Logger.loading(`Reading registry data...`);
     var oRegistryView: View;
     try {
-        oRegistryView = await CommandContext.getRegistry().view(packageName);
+        oRegistryView = await CommandContext.getRegistry().view(packageName, 'latest');
     } catch (e) {
         Logger.error(e, true);
         oRegistryView = null;

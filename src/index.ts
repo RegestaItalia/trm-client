@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion, registerCommand } from "./utils";
 import { AuthenticationType } from 'trm-registry-types';
+
+//dotenv.config();
 
 const program = new Command();
 
