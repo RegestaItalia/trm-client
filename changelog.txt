@@ -8,6 +8,16 @@ Legend
 + : added
 - : removed
 
+2025-04-28 v4.3.0
+-------------------
+
+! trm-core ^6.4.1
+
+2025-04-23 v4.2.1
+-------------------
+
+* node-r3trans version read
+
 2025-02-26 v4.2.0
 -------------------
 
@@ -15,8 +25,3 @@ Legend
 - trm dependencies on client
 + content command
 + pack/import command
-
-2025-04-23 v4.2.1
--------------------
-
-* node-r3trans version read
