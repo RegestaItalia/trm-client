@@ -4,8 +4,9 @@ import * as fs from "fs";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
 import { CommandContext, viewRegistryPackage } from "./commons";
-import { Inquirer, ISystemConnector, Logger, RESTConnection, RFCConnection, SystemConnector } from "trm-core";
+import { ISystemConnector, RESTConnection, RFCConnection, SystemConnector } from "trm-core";
 import { getSystemConnector, SystemConnectorType } from "../utils";
+import { Inquirer, Logger } from "trm-commons";
 
 const _compareConnectionData = (a: RESTConnection | RFCConnection, b: RESTConnection | RFCConnection): boolean => {
     /*return a.dest === b.dest &&

@@ -1,8 +1,8 @@
 
 import { UnpublishArguments } from "./arguments";
 import * as semver from "semver";
-import { Logger } from "trm-core";
 import { CommandContext } from "./commons";
+import { Logger } from "trm-commons";
 
 export async function unpublish(commandArgs: UnpublishArguments) {
     const packageName = commandArgs.package;

@@ -1,4 +1,5 @@
-import { AbstractRegistry, Logger, SystemConnector, TrmPackage } from "trm-core";
+import { Logger } from "trm-commons";
+import { AbstractRegistry, SystemConnector, TrmPackage } from "trm-core";
 
 export namespace CommandContext {
     var _systemPackages: TrmPackage[] = undefined;

@@ -1,6 +1,7 @@
-import { Inquirer, LOCAL_RESERVED_KEYWORD, Logger, PUBLIC_RESERVED_KEYWORD } from "trm-core";
+import { LOCAL_RESERVED_KEYWORD, PUBLIC_RESERVED_KEYWORD } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
 import { AddRegistryArguments } from "./arguments";
+import { Inquirer, Logger } from "trm-commons";
 
 export async function addRegistry(commandArgs: AddRegistryArguments) {
     const registryName = commandArgs.registryName.trim();

@@ -1,6 +1,7 @@
-import { Inquirer, Logger, TrmPackage, checkPackageDependencies, checkSapEntries } from "trm-core";
+import { TrmPackage, checkPackageDependencies, checkSapEntries } from "trm-core";
 import { CheckArguments } from "./arguments";
 import { CommandContext } from "./commons";
+import { Inquirer, Logger } from "trm-commons";
 
 var systemPackages: TrmPackage[] = [];
 

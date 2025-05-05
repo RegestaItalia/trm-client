@@ -1,8 +1,8 @@
-import { Logger } from "trm-core";
 import { SystemAlias } from "../systemAlias";
 import { CreateAliasArguments } from "./arguments";
 import { connect } from "./prompts";
 import { SystemConnectorType } from "../utils";
+import { Logger } from "trm-commons";
 
 export async function createAlias(commandArgs: CreateAliasArguments,) {
     const connectionArgs = await connect({

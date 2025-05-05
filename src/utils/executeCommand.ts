@@ -3,10 +3,11 @@ import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
 import { checkCliUpdate } from "./checkCliUpdate";
-import { Inquirer, CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Logger, ISystemConnector, SystemConnector, RegistryProvider, AbstractRegistry } from "trm-core";
+import { ISystemConnector, SystemConnector, RegistryProvider, AbstractRegistry } from "trm-core";
 import { getLogFolder } from "./getLogFolder";
 import { RegistryAlias } from "../registryAlias";
 import { CommandContext } from "../commands/commons";
+import { CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Inquirer, Logger } from "trm-commons";
 
 export enum LoggerType {
     CLI = 'CLI',

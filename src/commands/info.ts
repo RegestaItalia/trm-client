@@ -1,4 +1,4 @@
-import { getCoreTrmDependencies, getNpmGlobalPath, Logger, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector, TreeLog } from "trm-core";
+import { getCoreTrmDependencies, getNpmGlobalPath, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector } from "trm-core";
 import { checkCliUpdate, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion, NoConnection } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
@@ -7,6 +7,7 @@ import path from "path";
 import { rootPath } from 'get-root-path';
 import chalk from "chalk";
 import { gte } from "semver";
+import { Logger, TreeLog } from "trm-commons";
 
 const _getDependencyVersion = (moduleName: string, rootModule: string = 'trm-client') => {
     var file: Buffer;

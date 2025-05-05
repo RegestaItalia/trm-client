@@ -1,7 +1,8 @@
-import { Logger, SystemConnector } from "trm-core";
+import { SystemConnector } from "trm-core";
 import { inspect } from "util";
 import chalk from "chalk";
 import { parse as htmlParser } from 'node-html-parser';
+import { Logger } from "trm-commons";
 
 export async function logError(err: any) {
     var originalException: any;

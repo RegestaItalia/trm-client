@@ -1,5 +1,6 @@
+import { Logger } from "trm-commons";
 import { FindDependenciesArguments } from "./arguments";
-import { Logger, findDependencies as action } from "trm-core";
+import { findDependencies as action } from "trm-core";
 
 export async function findDependencies(commandArgs: FindDependenciesArguments) {
     Logger.loading(`Searching for dependencies in package "${commandArgs.devclass}"...`);

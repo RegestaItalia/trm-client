@@ -1,6 +1,6 @@
-import { Logger } from "trm-core";
 import { SettingsArguments } from "./arguments";
 import { Settings } from "../settings";
+import { Logger } from "trm-commons";
 
 export async function settings(commandArgs: SettingsArguments) {
     const setArgument = commandArgs.set;

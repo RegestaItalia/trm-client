@@ -1,7 +1,8 @@
 import { InstallArguments } from "./arguments";
-import { InstallPackageReplacements, Logger, install as action } from "trm-core";
+import { InstallPackageReplacements, install as action } from "trm-core";
 import { getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
+import { Logger } from "trm-commons";
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
     if(arg){

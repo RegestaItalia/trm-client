@@ -1,4 +1,4 @@
-import { Logger } from "trm-core";
+import { Logger } from "trm-commons";
 import { SystemAlias } from "../systemAlias";
 import { DeleteAliasArguments } from "./arguments";
 

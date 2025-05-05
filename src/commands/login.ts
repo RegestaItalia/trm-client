@@ -1,8 +1,8 @@
-import { Inquirer, Logger } from "trm-core";
 import { RegistryAlias } from "../registryAlias";
 import { LoginArguments } from "./arguments";
 import { whoami } from "./whoami";
 import { CommandContext } from "./commons";
+import { Inquirer, Logger } from "trm-commons";
 
 export async function login(commandArgs: LoginArguments) {
     var continueLogin = false;

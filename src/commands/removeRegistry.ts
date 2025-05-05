@@ -1,4 +1,4 @@
-import { Inquirer, Logger } from "trm-core";
+import { Inquirer, Logger } from "trm-commons";
 import { RegistryAlias } from "../registryAlias";
 import { RemoveRegistryArguments } from "./arguments";
 

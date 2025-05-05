@@ -1,8 +1,9 @@
-import { Inquirer, ISystemConnector, RESTConnection, RFCConnection } from "trm-core";
+import { RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias } from "../../systemAlias";
 import { getSapLogonConnections, getSystemConnector, NoConnection, SystemConnectorType } from "../../utils";
 import { ConnectArguments } from "../arguments";
 import normalizeUrl from "@esm2cjs/normalize-url";
+import { Inquirer } from "trm-commons";
 
 const languageList = [
     { value: 'AR', name: 'AR (Arabic)' },

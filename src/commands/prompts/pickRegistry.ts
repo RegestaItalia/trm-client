@@ -1,4 +1,4 @@
-import { Inquirer } from "trm-core";
+import { Inquirer } from "trm-commons";
 import { RegistryAlias } from "../../registryAlias";
 
 export async function pickRegistry(): Promise<RegistryAlias> {
