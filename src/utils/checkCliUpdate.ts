@@ -1,8 +1,8 @@
-import { Logger } from 'trm-core';
 import { diff, gt } from "semver";
 import { getClientVersion } from './getClientVersion';
 import chalk from 'chalk';
 import { getNpmPackageLatestVersion } from './getNpmPackageLatestVersion';
+import { Logger } from "trm-commons";
 
 export async function checkCliUpdate(print: boolean): Promise<{
     localVersion: string,

@@ -1,7 +1,8 @@
-import { Logger, RegistryType, SystemConnector } from "trm-core";
+import { RegistryType, SystemConnector } from "trm-core";
 import { ListArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import chalk from "chalk";
+import { Logger } from "trm-commons";
 
 export async function list(commandArgs: ListArguments) {
     Logger.loading(`Reading packages...`);

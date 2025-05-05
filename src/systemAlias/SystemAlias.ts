@@ -3,8 +3,9 @@ import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { SystemAliasData } from "./SystemAliasData";
-import { Inquirer, ISystemConnector, Login, RESTConnection, RFCConnection } from "trm-core";
+import { ISystemConnector, Login, RESTConnection, RFCConnection } from "trm-core";
 import { ConnectArguments } from "../commands";
+import { Inquirer } from "trm-commons";
 
 const SYSTEM_FILE_NAME = "systems.ini";
 

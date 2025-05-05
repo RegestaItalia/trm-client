@@ -1,7 +1,7 @@
-import { Logger } from "trm-core";
 import { View } from "trm-registry-types";
 import { CommandContext } from "./CommandContext";
 import chalk from "chalk";
+import { Logger } from "trm-commons";
 
 export async function viewRegistryPackage(packageName: string, print: boolean = true): Promise<View> {
     Logger.loading(`Reading registry data...`);

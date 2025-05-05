@@ -1,10 +1,11 @@
-import { Inquirer, Logger, RESTConnection, RFCConnection } from "trm-core";
+import { RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias, SystemAliasData } from "../systemAlias";
 import { AliasArguments, ConnectArguments } from "./arguments";
 import { createAlias } from "./createAlias";
 import { deleteAlias } from "./deleteAlias";
 import { connect } from "./prompts";
 import { SystemConnectorType } from "../utils";
+import { Inquirer, Logger } from "trm-commons";
 
 const _create = async () => {
     const inq1 = await Inquirer.prompt({

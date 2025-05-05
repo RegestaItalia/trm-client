@@ -1,11 +1,12 @@
 import { ViewArguments } from "./arguments";
-import { Logger, PUBLIC_RESERVED_KEYWORD, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
+import { PUBLIC_RESERVED_KEYWORD, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
 import { RegistryAlias } from "../registryAlias";
 import { NoConnection } from "../utils";
 import chalk from "chalk";
+import { Logger } from "trm-commons";
 
 type PrintManifest = {
     devclass?: string,

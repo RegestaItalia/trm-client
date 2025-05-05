@@ -1,8 +1,9 @@
-import { Logger, TrmManifestDependency, publish as action } from "trm-core";
+import { TrmManifestDependency, publish as action } from "trm-core";
 import { PublishArguments } from "./arguments";
 import * as fs from "fs";
 import { getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
+import { Logger } from "trm-commons";
 
 const _parseDependenciesArg = (arg: string): TrmManifestDependency[] => {
     if(arg){

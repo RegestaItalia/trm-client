@@ -1,8 +1,9 @@
-import { Logger, TreeLog, TrmPackage } from "trm-core";
+import { TrmPackage } from "trm-core";
 import { ContentArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { getTempFolder } from "../utils";
 import chalk from "chalk";
+import { Logger, TreeLog } from "trm-commons";
 
 export async function content(commandArgs: ContentArguments) {
     //search package

@@ -1,8 +1,8 @@
-import { FileSystem, InstallPackageReplacements, Logger, TrmArtifact, install as action } from "trm-core";
+import { FileSystem, InstallPackageReplacements, install as action } from "trm-core";
 import { getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
 import { ImportArguments } from "./arguments/ImportArguments";
-import { readFileSync } from "fs";
+import { Logger } from "trm-commons";
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
     if(arg){

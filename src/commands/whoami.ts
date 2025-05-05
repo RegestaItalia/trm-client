@@ -1,4 +1,4 @@
-import { Logger } from "trm-core";
+import { Logger } from "trm-commons";
 import { WhoAmIArguments } from "./arguments";
 import { CommandContext } from "./commons";
 
