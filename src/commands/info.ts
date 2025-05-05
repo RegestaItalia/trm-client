@@ -17,7 +17,7 @@ const _getDependencyVersion = (moduleName: string, rootModule: string = 'trm-cli
         file = readFileSync(path.join(rootPath, `/node_modules/${moduleName}/package.json`));
     }
     if(!file){
-        Logger.warning(`Library ${moduleName} was not found!`, true);
+        Logger.warning(`Library ${moduleName} (root ${rootModule}) was not found!`, true);
     }else{
         return JSON.parse(file.toString()).version;
     }
@@ -62,9 +62,19 @@ export async function info(commandArgs: InfoArguments) {
     const trmDependenciesInstances = CommandContext.trmDependencies;
     const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
-    const nodeR3transVersion = _getDependencyVersion("node-r3trans", "trm-core");
     const packages = await CommandContext.getSystemPackages();
     const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
+    
+    //MIW: root changed!
+    var nodeR3transVersion;
+    try{
+        nodeR3transVersion = _getDependencyVersion("node-r3trans", "trm-core");
+        if(!nodeR3transVersion){
+            throw new Error();
+        }
+    }catch(e){
+        nodeR3transVersion = _getDependencyVersion("node-r3trans");
+    }
 
     var clientDependenciesTree: TreeLog[] = [];
     if(clientDependencies){
