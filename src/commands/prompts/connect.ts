@@ -156,7 +156,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `System endpoint`,
             default: commandArgs.endpoint,
             when: (hash) => {
-                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force)
+                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -164,7 +164,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Forward RFC Destination`,
             default: commandArgs.forwardRfcDest,
             when: (hash) => {
-                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force)
+                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force);
             }
         },
         //RFC
@@ -174,7 +174,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Application server`,
             default: commandArgs.ashost,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -182,7 +182,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `System ID`,
             default: commandArgs.dest,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -190,7 +190,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Instance number`,
             default: commandArgs.sysnr,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -198,7 +198,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `SAProuter`,
             default: commandArgs.saprouter,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -206,7 +206,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Client`,
             default: commandArgs.client,
             when: (hash) => {
-                return ( hash.type === 'RFC' || inputType === 'logon' ) && ((commandArgs.client ? false : true) || force)
+                return (commandArgs.client ? false : true) || force;
             }
         }, {
             type: `input`,
@@ -214,7 +214,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon User`,
             default: commandArgs.user,
             when: (hash) => {
-                return (commandArgs.user ? false : true) || force
+                return (commandArgs.user ? false : true) || force;
             }
         }, {
             type: `password`,
@@ -222,7 +222,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Password`,
             default: commandArgs.passwd,
             when: (hash) => {
-                return (commandArgs.passwd ? false : true) || force
+                return (commandArgs.passwd ? false : true) || force;
             }
         }, {
             type: `list`,
@@ -230,7 +230,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Language`,
             default: commandArgs.lang || 'EN', //default to english
             when: (hash) => {
-                return (commandArgs.lang ? false : true) || force
+                return (commandArgs.lang ? false : true) || force;
             },
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
@@ -273,6 +273,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }else if(result.type === SystemConnectorType.REST){
         result.endpoint = result.endpoint || commandArgs.endpoint;
         result.forwardRfcDest = result.forwardRfcDest || commandArgs.forwardRfcDest;
+        result.client = result.client || commandArgs.client;
 
         if(result.forwardRfcDest){
             result.forwardRfcDest = result.forwardRfcDest.toUpperCase();
@@ -280,6 +281,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         result.endpoint = normalizeUrl(result.endpoint, {
             removeTrailingSlash: true
         });
+        //TODO: move to core
+        result.endpoint += `?sap-client=${result.client}`;
 
         result.connection = getSystemConnector(SystemConnectorType.REST, {
             connection: {
