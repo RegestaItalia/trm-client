@@ -185,7 +185,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force);
             },
             validate: (val) => {
-                if(val && /\w{3}/.test(val)){
+                if(val && /^\w{3}$/.test(val)){
                     return true;
                 }else{
                     return `Invalid input: expected length 3, only letters allowed`;
@@ -200,7 +200,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force);
             },
             validate: (val) => {
-                if(val && /\d{2}/.test(val)){
+                if(val && /^\d{2}$/.test(val)){
                     return true;
                 }else{
                     return `Invalid input: expected length 2, only numbers allowed`;
@@ -223,7 +223,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 return (commandArgs.client ? false : true) || force;
             },
             validate: (val) => {
-                if(val && /\d{3}/.test(val)){
+                if(val && /^\d{3}$/.test(val)){
                     return true;
                 }else{
                     return `Invalid input: expected length 3, only numbers allowed`;
