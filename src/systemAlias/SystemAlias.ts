@@ -32,12 +32,14 @@ export class SystemAlias {
                     dest: (o.connection as RFCConnection).dest,
                     ashost: (o.connection as RFCConnection).ashost,
                     sysnr: (o.connection as RFCConnection).sysnr,
-                    saprouter: (o.connection as RFCConnection).saprouter,
                     client: o.login.client,
                     user: o.login.user,
                     passwd: o.login.passwd,
                     lang: o.login.lang
                 };
+                if((o.connection as RFCConnection).saprouter){
+                    oContent[o.alias].saprouter = (o.connection as RFCConnection).saprouter;
+                }
             } else if (o.type === SystemConnectorType.REST) {
                 oContent[o.alias] = {
                     type: o.type,
