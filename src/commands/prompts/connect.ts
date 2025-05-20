@@ -162,7 +162,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             type: `input`,
             name: `forwardRfcDest`,
             message: `Forward RFC Destination`,
-            default: commandArgs.forwardRfcDest,
+            default: commandArgs.forwardRfcDest || 'NONE',
             when: (hash) => {
                 return hash.type === 'REST' && (commandArgs.forwardRfcDest || force);
             }
@@ -183,6 +183,13 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             default: commandArgs.dest,
             when: (hash) => {
                 return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force);
+            },
+            validate: (val) => {
+                if(val && /\w{3}/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 3, only letters allowed`;
+                }
             }
         }, {
             type: `input`,
@@ -191,6 +198,13 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             default: commandArgs.sysnr,
             when: (hash) => {
                 return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force);
+            },
+            validate: (val) => {
+                if(val && /\d{2}/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 2, only numbers allowed`;
+                }
             }
         }, {
             type: `input`,
@@ -207,6 +221,13 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             default: commandArgs.client,
             when: (hash) => {
                 return (commandArgs.client ? false : true) || force;
+            },
+            validate: (val) => {
+                if(val && /\d{3}/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 3, only numbers allowed`;
+                }
             }
         }, {
             type: `input`,

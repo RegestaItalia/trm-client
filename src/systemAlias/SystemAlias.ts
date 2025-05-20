@@ -32,6 +32,7 @@ export class SystemAlias {
                     dest: (o.connection as RFCConnection).dest,
                     ashost: (o.connection as RFCConnection).ashost,
                     sysnr: (o.connection as RFCConnection).sysnr,
+                    saprouter: (o.connection as RFCConnection).saprouter,
                     client: o.login.client,
                     user: o.login.user,
                     passwd: o.login.passwd,
@@ -42,6 +43,7 @@ export class SystemAlias {
                     type: o.type,
                     endpoint: (o.connection as RESTConnection).endpoint,
                     rfcdest: (o.connection as RESTConnection).rfcdest || 'NONE',
+                    client: o.login.client,
                     user: o.login.user,
                     passwd: o.login.passwd,
                     lang: o.login.lang
