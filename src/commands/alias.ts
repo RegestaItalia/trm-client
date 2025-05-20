@@ -19,10 +19,11 @@ const _create = async () => {
 }
 
 const _view = (alias: SystemAliasData) => {
+    const client = alias.login.client;
     const lang = alias.login.lang;
     const user = alias.login.user;
     const hasPassword = alias.login.passwd ? true : false;
-    if(alias.type === SystemConnectorType.RFC){
+    if (alias.type === SystemConnectorType.RFC) {
         const dest = (alias.connection as RFCConnection).dest;
         const ashost = (alias.connection as RFCConnection).ashost;
         const sysnr = (alias.connection as RFCConnection).sysnr;
@@ -51,7 +52,7 @@ const _view = (alias: SystemAliasData) => {
         } else {
             Logger.warning(`Logon client: Unknown`);
         }
-    }else if(alias.type === SystemConnectorType.REST){
+    } else if (alias.type === SystemConnectorType.REST) {
         const endpoint = (alias.connection as RESTConnection).endpoint;
         const rfcdest = (alias.connection as RESTConnection).rfcdest;
         if (endpoint) {
@@ -59,7 +60,7 @@ const _view = (alias: SystemAliasData) => {
         } else {
             Logger.warning(`System endpoint: Unknown`);
         }
-        if(rfcdest){
+        if (rfcdest) {
             Logger.info(`RFC Forward: ${rfcdest}`);
         }
     }
@@ -68,13 +69,18 @@ const _view = (alias: SystemAliasData) => {
     } else {
         Logger.warning(`Logon language: Unknown`);
     }
+    if (client) {
+        Logger.info(`Logon client: ${client}`);
+    } else {
+        Logger.warning(`Logon client: Unknown`);
+    }
     if (user) {
         Logger.info(`Logon user: ${user}`);
     } else {
         Logger.warning(`Logon user: Unknown`);
     }
     if (hasPassword) {
-        Logger.info(`Logon password: Saved`);
+        Logger.info(`Logon password: SAVED IN PLAIN TEXT`);
     } else {
         Logger.warning(`Logon password: Unknown`);
     }
@@ -106,7 +112,7 @@ const _edit = async (alias: SystemAliasData) => {
     try {
         SystemAlias.delete(alias.alias);
         var updatedAlias: SystemAlias;
-        if(connectionArgs.type === SystemConnectorType.RFC){
+        if (connectionArgs.type === SystemConnectorType.RFC) {
             updatedAlias = SystemAlias.create(alias.alias, connectionArgs.type, {
                 ashost: connectionArgs.ashost,
                 dest: connectionArgs.dest,
@@ -118,14 +124,15 @@ const _edit = async (alias: SystemAliasData) => {
                 passwd: connectionArgs.passwd,
                 user: connectionArgs.user
             });
-        }else if(connectionArgs.type === SystemConnectorType.REST){
+        } else if (connectionArgs.type === SystemConnectorType.REST) {
             updatedAlias = SystemAlias.create(alias.alias, connectionArgs.type, {
                 endpoint: connectionArgs.endpoint,
                 rfcdest: connectionArgs.forwardRfcDest
             }, {
                 lang: connectionArgs.lang,
                 passwd: connectionArgs.passwd,
-                user: connectionArgs.user
+                user: connectionArgs.user,
+                client: connectionArgs.client
             });
         }
         await updatedAlias.getConnection().connect();
@@ -138,7 +145,7 @@ const _edit = async (alias: SystemAliasData) => {
         } else {
             Logger.error(`Alias "${alias.alias}" couldn't be updated.`);
             SystemAlias.delete(alias.alias);
-            if(alias.type === SystemConnectorType.RFC){
+            if (alias.type === SystemConnectorType.RFC) {
                 SystemAlias.create(alias.alias, alias.type, {
                     ashost: (alias.connection as RFCConnection).ashost,
                     dest: (alias.connection as RFCConnection).dest,
@@ -150,14 +157,15 @@ const _edit = async (alias: SystemAliasData) => {
                     passwd: alias.login.passwd,
                     user: alias.login.user
                 });
-            }else if(alias.type === SystemConnectorType.REST){
+            } else if (alias.type === SystemConnectorType.REST) {
                 SystemAlias.create(alias.alias, alias.type, {
                     endpoint: (alias.connection as RESTConnection).endpoint,
                     rfcdest: (alias.connection as RESTConnection).rfcdest
                 }, {
                     lang: alias.login.lang,
                     passwd: alias.login.passwd,
-                    user: alias.login.user
+                    user: alias.login.user,
+                    client: alias.login.client
                 });
             }
         }
@@ -172,34 +180,37 @@ const _delete = async (alias: SystemAliasData) => {
 
 export async function alias(commandArgs: AliasArguments) {
     const aAlias = SystemAlias.getAll();
-    var aliasPick: string;
-    if (commandArgs.systemAlias) {
-        if (!aAlias.find(o => o.alias === commandArgs.systemAlias)) {
-            Logger.warning(`Alias "${commandArgs.systemAlias}" not found.`);
+    var aliasPick: string = '';
+    var inq1Choices = [];
+    if (commandArgs.alias) {
+        if (!aAlias.find(o => o.alias === commandArgs.alias)) {
+            Logger.warning(`Alias "${commandArgs.alias}" not found.`);
+            inq1Choices.push({
+                name: `Create alias`,
+                value: `create`
+            });
         } else {
-            aliasPick = commandArgs.systemAlias;
+            aliasPick = commandArgs.alias;
         }
     }
+    inq1Choices = inq1Choices.concat([{
+        name: aliasPick ? `View "${aliasPick}"` : `View alias`,
+        value: `pick_view`
+    }, {
+        name: aliasPick ? `Check "${aliasPick}" connection` : `Check alias connection`,
+        value: `pick_check`
+    }, {
+        name: aliasPick ? `Edit "${aliasPick}"` : `Edit alias`,
+        value: `pick_edit`
+    }, {
+        name: aliasPick ? `Delete "${aliasPick}"` : `Delete alias`,
+        value: `pick_delete`
+    }]);
     const inq1 = await Inquirer.prompt({
         name: `action`,
         message: `Action`,
         type: `list`,
-        choices: [{
-            name: `Create alias`,
-            value: `create`
-        }, {
-            name: `View alias`,
-            value: `pick_view`
-        }, {
-            name: `Check alias connection`,
-            value: `pick_check`
-        }, {
-            name: `Edit alias`,
-            value: `pick_edit`
-        }, {
-            name: `Delete alias`,
-            value: `pick_delete`
-        }]
+        choices: inq1Choices
     });
     if (inq1.action.startsWith(`pick_`) && !aliasPick) {
         const inq2 = await Inquirer.prompt({

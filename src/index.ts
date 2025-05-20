@@ -16,15 +16,12 @@ program
 /*SYSTEM ALIAS*/
 const createAlias = program.command(`createAlias <alias>`)
     .description(`Create a new system alias.`);
-registerCommand(createAlias, {
-    noSystemAlias: true,
-});
+registerCommand(createAlias);
 const deleteAlias = program.command(`deleteAlias <alias>`)
     .description(`Delete a system alias.`);
 registerCommand(deleteAlias);
-const manageAliases = program.command(`alias`)
-    .description(`List and manage aliases.`)
-    .option(`-a, --systemAlias <systemAlias>`, `System Alias.`);
+const manageAliases = program.command(`alias [alias]`)
+    .description(`List and manage aliases.`);
 registerCommand(manageAliases);
 
 /*REGISTRY*/

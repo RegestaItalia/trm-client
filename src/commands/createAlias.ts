@@ -9,6 +9,7 @@ export async function createAlias(commandArgs: CreateAliasArguments,) {
         noSystemAlias: true,
         force: true
     }, false);
+    Logger.loading(`Connecting to "${commandArgs.alias}"...`);
     var alias: SystemAlias;
     if(connectionArgs.type === SystemConnectorType.RFC){
         alias = SystemAlias.create(commandArgs.alias, connectionArgs.type, {
@@ -29,7 +30,8 @@ export async function createAlias(commandArgs: CreateAliasArguments,) {
         }, {
             lang: connectionArgs.lang,
             passwd: connectionArgs.passwd,
-            user: connectionArgs.user
+            user: connectionArgs.user,
+            client: connectionArgs.client
         });
     }
     if(alias){

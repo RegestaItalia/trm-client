@@ -59,21 +59,6 @@ export async function executeCommand(args: any) {
 
         await checkCliUpdate(true);
 
-        if (requiresConnection) {
-            var system: ISystemConnector;
-            if (args.systemAlias) {
-                system = SystemAlias.get(args.systemAlias).getConnection();
-            } else {
-                const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
-                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command), args.addNoConnection)).connection;
-            }
-            await system.connect();
-            SystemConnector.systemConnector = system;
-            if (requiresTrmDependencies) {
-                await checkTrmDependencies(args);
-            }
-        }
-
         if (requiresRegistry) {
             var registryAlias: RegistryAlias;
             var registry: AbstractRegistry;
@@ -122,6 +107,22 @@ export async function executeCommand(args: any) {
                 }
             });
         }
+        
+        if (requiresConnection) {
+            var system: ISystemConnector;
+            if (args.systemAlias) {
+                system = SystemAlias.get(args.systemAlias).getConnection();
+            } else {
+                const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
+                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command), args.addNoConnection)).connection;
+            }
+            await system.connect();
+            SystemConnector.systemConnector = system;
+            if (requiresTrmDependencies) {
+                await checkTrmDependencies(args);
+            }
+        }
+
         var commandFn = args.command;
         if (!commands[commandFn]) {
             commandFn = `_${commandFn}`;

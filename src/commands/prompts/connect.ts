@@ -156,15 +156,15 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `System endpoint`,
             default: commandArgs.endpoint,
             when: (hash) => {
-                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force)
+                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force);
             }
         }, {
             type: `input`,
             name: `forwardRfcDest`,
             message: `Forward RFC Destination`,
-            default: commandArgs.forwardRfcDest,
+            default: commandArgs.forwardRfcDest || 'NONE',
             when: (hash) => {
-                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force)
+                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force);
             }
         },
         //RFC
@@ -174,7 +174,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Application server`,
             default: commandArgs.ashost,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -182,7 +182,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `System ID`,
             default: commandArgs.dest,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force);
+            },
+            validate: (val) => {
+                if(val && /^\w{3}$/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 3, only letters allowed`;
+                }
             }
         }, {
             type: `input`,
@@ -190,7 +197,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Instance number`,
             default: commandArgs.sysnr,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force);
+            },
+            validate: (val) => {
+                if(val && /^\d{2}$/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 2, only numbers allowed`;
+                }
             }
         }, {
             type: `input`,
@@ -198,7 +212,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `SAProuter`,
             default: commandArgs.saprouter,
             when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force)
+                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force);
             }
         }, {
             type: `input`,
@@ -206,7 +220,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Client`,
             default: commandArgs.client,
             when: (hash) => {
-                return ( hash.type === 'RFC' || inputType === 'logon' ) && ((commandArgs.client ? false : true) || force)
+                return (commandArgs.client ? false : true) || force;
+            },
+            validate: (val) => {
+                if(val && /^\d{3}$/.test(val)){
+                    return true;
+                }else{
+                    return `Invalid input: expected length 3, only numbers allowed`;
+                }
             }
         }, {
             type: `input`,
@@ -214,7 +235,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon User`,
             default: commandArgs.user,
             when: (hash) => {
-                return (commandArgs.user ? false : true) || force
+                return (commandArgs.user ? false : true) || force;
             }
         }, {
             type: `password`,
@@ -222,7 +243,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Password`,
             default: commandArgs.passwd,
             when: (hash) => {
-                return (commandArgs.passwd ? false : true) || force
+                return (commandArgs.passwd ? false : true) || force;
             }
         }, {
             type: `list`,
@@ -230,7 +251,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             message: `Logon Language`,
             default: commandArgs.lang || 'EN', //default to english
             when: (hash) => {
-                return (commandArgs.lang ? false : true) || force
+                return (commandArgs.lang ? false : true) || force;
             },
             validate: (input) => {
                 return languageList.includes(input.trim().toUpperCase());
@@ -273,6 +294,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }else if(result.type === SystemConnectorType.REST){
         result.endpoint = result.endpoint || commandArgs.endpoint;
         result.forwardRfcDest = result.forwardRfcDest || commandArgs.forwardRfcDest;
+        result.client = result.client || commandArgs.client;
 
         if(result.forwardRfcDest){
             result.forwardRfcDest = result.forwardRfcDest.toUpperCase();
@@ -289,7 +311,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             login: {
                 user: result.user,
                 passwd: result.passwd,
-                lang: result.lang
+                lang: result.lang,
+                client: result.client
             }
         });
     }else{
