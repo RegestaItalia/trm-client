@@ -281,8 +281,6 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         result.endpoint = normalizeUrl(result.endpoint, {
             removeTrailingSlash: true
         });
-        //TODO: move to core
-        result.endpoint += `?sap-client=${result.client}`;
 
         result.connection = getSystemConnector(SystemConnectorType.REST, {
             connection: {
@@ -292,7 +290,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             login: {
                 user: result.user,
                 passwd: result.passwd,
-                lang: result.lang
+                lang: result.lang,
+                client: result.client
             }
         });
     }else{

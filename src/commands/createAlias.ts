@@ -29,7 +29,8 @@ export async function createAlias(commandArgs: CreateAliasArguments,) {
         }, {
             lang: connectionArgs.lang,
             passwd: connectionArgs.passwd,
-            user: connectionArgs.user
+            user: connectionArgs.user,
+            client: connectionArgs.client
         });
     }
     if(alias){

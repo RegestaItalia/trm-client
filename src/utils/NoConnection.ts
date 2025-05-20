@@ -91,4 +91,5 @@ export class NoConnection implements ISystemConnector {
     getAbapgitSource = async () => this._throw();
     executePostActivity = async () => this._throw();
     readClassDescriptions = async () => this._throw();
+    regenProg = async () => this._throw();
 }

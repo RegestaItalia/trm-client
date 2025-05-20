@@ -93,7 +93,8 @@ export class SystemAlias {
                     login: {
                         user: oIni[sAlias].user,
                         passwd: oIni[sAlias].passwd,
-                        lang: oIni[sAlias].lang
+                        lang: oIni[sAlias].lang,
+                        client: oIni[sAlias].client
                     }
                 });
             }

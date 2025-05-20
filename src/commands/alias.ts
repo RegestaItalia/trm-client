@@ -125,7 +125,8 @@ const _edit = async (alias: SystemAliasData) => {
             }, {
                 lang: connectionArgs.lang,
                 passwd: connectionArgs.passwd,
-                user: connectionArgs.user
+                user: connectionArgs.user,
+                client: connectionArgs.client
             });
         }
         await updatedAlias.getConnection().connect();
@@ -157,7 +158,8 @@ const _edit = async (alias: SystemAliasData) => {
                 }, {
                     lang: alias.login.lang,
                     passwd: alias.login.passwd,
-                    user: alias.login.user
+                    user: alias.login.user,
+                    client: alias.login.client
                 });
             }
         }
