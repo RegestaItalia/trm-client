@@ -5,6 +5,11 @@
 [![trm-client Latest version](https://img.shields.io/npm/v/trm-client)](https://www.npmjs.com/package/trm-client)
 [![trm-client Installs](https://img.shields.io/npm/dt/trm-client)](https://www.npmjs.com/package/trm-client)
 
+| 🚀 This project is funded and maintained by 🏦 | 🔗                                                             |
+|-------------------------------------------------|----------------------------------------------------------------|
+| Regesta S.p.A.                                  | [https://www.regestaitalia.eu/](https://www.regestaitalia.eu/) |
+| Clarex S.r.l.                                   | [https://www.clarex.it/](https://www.clarex.it/)               |
+
 This is the official CLI implementation of the core functionalities of TRM.
 
 TRM is a software designed to make transports between SAP ECC/S4 systems easy.
