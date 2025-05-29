@@ -13,7 +13,7 @@ export async function list(commandArgs: ListArguments) {
         aPackages = aPackages.filter(o => o.registry.getRegistryType() !== RegistryType.LOCAL);
     }
     if (aPackages.length > 0) {
-        const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `Import transport`];
+        const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `TRM transport`, `Landscape transport`];
         var tableData = [];
         for (const oPackage of aPackages) {
             try{
@@ -22,6 +22,7 @@ export async function list(commandArgs: ListArguments) {
                 const registry = oPackage.registry.getRegistryType() === RegistryType.LOCAL ? chalk.bold(oPackage.registry.name) : oPackage.registry.name;
                 const devclass = oPackage.getDevclass() || '';
                 const linkedTransport = oPackage.manifest.getLinkedTransport();
+                const landscapeTransport = await oPackage.getWbTransport();
                 var importTransport = '';
                 if(linkedTransport && (await linkedTransport.isImported())){
                     importTransport = linkedTransport.trkorr;
@@ -31,7 +32,8 @@ export async function list(commandArgs: ListArguments) {
                     version,
                     registry,
                     devclass,
-                    importTransport
+                    importTransport,
+                    landscapeTransport ? landscapeTransport.trkorr : ''
                 ]);
             }catch(e){
                 Logger.error(e, true);
