@@ -60,10 +60,10 @@ const _printManifestSection = (manifest: PrintManifest) => {
         console.log(`SAP Package: ${manifest.devclass}`);
     }
     if (manifest.importTransport !== undefined) {
-        console.log(`Import transport: ${manifest.importTransport}`);
+        console.log(`TRM transport: ${manifest.importTransport}`);
     }
     if (manifest.workbenchTransport !== undefined) {
-        console.log(`Workbench transport: ${manifest.workbenchTransport}`);
+        console.log(`Landscape transport (Use this to transport in landscape): ${manifest.workbenchTransport}`);
     }
     if (manifest.private !== undefined) {
         if (manifest.private) {
@@ -169,8 +169,12 @@ export async function view(commandArgs: ViewArguments) {
             keywords = oSystemManifest.keywords;
         }
         var importTransport: string;
+        var workbenchTransport: string;
         try {
             importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+        } catch (e) { }
+        try {
+            workbenchTransport = (await oSystemView.getWbTransport()).trkorr;
         } catch (e) { }
         dependencies = oSystemManifest.dependencies || [];
         printManifest = {
@@ -183,7 +187,8 @@ export async function view(commandArgs: ViewArguments) {
             license: oSystemManifest.license,
             authors,
             keywords,
-            importTransport
+            importTransport,
+            workbenchTransport
         };
     } else if (oRegistryView) {
         dependencies = [];

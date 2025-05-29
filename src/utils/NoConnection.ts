@@ -1,4 +1,4 @@
-import { ISystemConnector, SEOCLASSTX, SEOCLSNAME, SYMSG, SystemConnectorSupportedBulk, TADIR } from "trm-core";
+import { ISystemConnector, SystemConnectorSupportedBulk, TADIR } from "trm-core";
 
 export class NoConnection implements ISystemConnector {
     _throw() {
@@ -91,5 +91,5 @@ export class NoConnection implements ISystemConnector {
     getAbapgitSource = async () => this._throw();
     executePostActivity = async () => this._throw();
     readClassDescriptions = async () => this._throw();
-    regenProg = async () => this._throw();
+    isServerApisAllowed = async () => this._throw();
 }
