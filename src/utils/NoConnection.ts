@@ -1,4 +1,4 @@
-import { ISystemConnector, SystemConnectorSupportedBulk, TADIR } from "trm-core";
+import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, TRKORR } from "trm-core";
 
 export class NoConnection implements ISystemConnector {
     _throw() {
@@ -92,4 +92,5 @@ export class NoConnection implements ISystemConnector {
     executePostActivity = async () => this._throw();
     readClassDescriptions = async () => this._throw();
     isServerApisAllowed = async () => this._throw();
+    changeTrOwner = async () => this._throw();
 }
