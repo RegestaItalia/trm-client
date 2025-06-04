@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2025-06-04 v4.8.0
+-------------------
+
+! trm-core ^7.2.1
+! overwrite flag in install/update ignores existing objects replace
+
 2025-06-03 v4.7.0
 -------------------
 

@@ -44,7 +44,8 @@ export async function install(commandArgs: InstallArguments) {
                 safe: commandArgs.safe,
                 noDependencies: commandArgs.noDependencies,
                 noObjectTypes: commandArgs.noObjectTypes,
-                noSapEntries: commandArgs.noSapEntries
+                noSapEntries: commandArgs.noSapEntries,
+                noExistingObjects: commandArgs.overwrite
             },
             import: {
                 noLang: commandArgs.noLanguageTransport,
