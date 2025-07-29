@@ -8,10 +8,12 @@ Legend
 + : added
 - : removed
 
-2025-06-18 vTODO
+2025-07-29 v4.9.0
 -------------------
 
 + handle registry unauthorized error
+! trm-core ^7.4.0
+! trm-commons ^1.1.0
 
 2025-06-04 v4.8.0
 -------------------
