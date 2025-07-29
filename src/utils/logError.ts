@@ -2,6 +2,7 @@ import { RESTClientError, RFCClientError, SystemConnector } from "trm-core";
 import { inspect } from "util";
 import chalk from "chalk";
 import { Logger } from "trm-commons";
+import { CommandContext } from "../commands/commons";
 
 const _getUnauthorizedError = (): string => {
     return `User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`;
@@ -27,6 +28,10 @@ export async function logError(err: any) {
     } else if (originalException.name === 'TrmRegistryError') {
         if (originalException.status) {
             sError = `${chalk.black.bgRed(originalException.status)} ${sError}`;
+            if ((originalException.status === 401 || /whoami$/.test(originalException.axiosError.request.path)) && !CommandContext.hasRegistryAuthData) {
+                aError.push(`${chalk.black.bgRed(originalException.status)} You are not logged in!`);
+                aError.push(`${chalk.black.bgRed(originalException.status)} Run command "trm login" and follow instructions.`);
+            }
         }
     } else if (originalException.name === 'TrmRFCClient') {
         const rfcClientError: RFCClientError = originalException;

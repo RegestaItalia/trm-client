@@ -93,6 +93,7 @@ export async function executeCommand(args: any) {
                 }
             }
             CommandContext.registry = registry;
+            CommandContext.hasRegistryAuthData = !!registryAlias.authData;
             RegistryProvider.registry.push(registry);
             RegistryAlias.getAll().forEach(o => {
                 var append = true;

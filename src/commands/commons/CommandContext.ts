@@ -4,6 +4,7 @@ import { AbstractRegistry, SystemConnector, TrmPackage } from "trm-core";
 export namespace CommandContext {
     var _systemPackages: TrmPackage[] = undefined;
     export var registry: AbstractRegistry = undefined;
+    export var hasRegistryAuthData: boolean = false;
     export var trmDependencies: TrmPackage[] = [];
     export var missingTrmDependencies: (TrmPackage | string)[] = [];
     
