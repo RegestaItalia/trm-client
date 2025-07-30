@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "4.9.1",
+  "version": "4.9.2",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -48,6 +48,9 @@
     "trm-core": "^7.4.1",
     "trm-registry-types": "^1.2.0",
     "xml2js": "^0.6.2"
+  },
+  "peerDependencies": {
+    "trm-commons": "^2.0.0"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
