@@ -3,6 +3,7 @@ import { getRoamingFolder } from "../utils";
 import * as fs from "fs";
 import { SettingsData } from "./SettingsData";
 import * as ini from "ini";
+import { Logger } from "trm-commons";
 
 const SETTINGS_FILE_NAME = "settings.ini";
 
@@ -18,10 +19,16 @@ export class Settings {
     constructor() {
         //load settings
         this.data = this.getSettings();
+        if (typeof (this.data.r3transDocker) !== 'boolean') {
+            if (process.platform === 'darwin') {
+                Logger.info(`R3trans defaults to docker in darwin os.`, true);
+                this.data.r3transDocker = true;
+            }
+        }
     }
 
     public set(key: string, value: string): void {
-        if(this.data[key] === undefined){
+        if (this.data[key] === undefined) {
             throw new Error(`Invalid key ${key}.`);
         }
         const filePath = this.getFilePath();

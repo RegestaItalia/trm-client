@@ -3,20 +3,21 @@ import { getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
 import { ImportArguments } from "./arguments/ImportArguments";
 import { Logger } from "trm-commons";
+import { Settings } from "../settings";
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
-    if(arg){
-        try{
+    if (arg) {
+        try {
             return JSON.parse(arg);
-        }catch(e){ }
+        } catch (e) { }
     }
 }
 
 const _parseImportTimeoutArg = (arg: string): number => {
-    if(arg){
-        try{
+    if (arg) {
+        try {
             return parseInt(arg);
-        }catch(e){ }
+        } catch (e) { }
     }
 }
 
@@ -27,7 +28,11 @@ export async function _import(commandArgs: ImportArguments) {
         contextData: {
             r3transOptions: {
                 tempDirPath: getTempFolder(),
-                r3transDirPath: commandArgs.r3transPath
+                r3transDirPath: commandArgs.r3transPath,
+                useDocker: Settings.getInstance().data.r3transDocker,
+                dockerOptions: {
+                    name: Settings.getInstance().data.r3transDockerName
+                }
             },
             noInquirer: commandArgs.noPrompts,
             systemPackages: packages,
@@ -63,7 +68,7 @@ export async function _import(commandArgs: ImportArguments) {
         }
     });
     var sOutput = `${result.trmPackage.packageName} installed`;
-    if(result.installTransport){
+    if (result.installTransport) {
         sOutput += `, use ${result.installTransport.trkorr} transport in landscape`;
     }
     Logger.success(sOutput);

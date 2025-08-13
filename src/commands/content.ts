@@ -4,6 +4,7 @@ import { CommandContext } from "./commons";
 import { getTempFolder } from "../utils";
 import chalk from "chalk";
 import { Logger, TreeLog } from "trm-commons";
+import { Settings } from "../settings";
 
 export async function content(commandArgs: ContentArguments) {
     //search package
@@ -21,7 +22,11 @@ export async function content(commandArgs: ContentArguments) {
     var iOtherEntries = 0;
     const packageContent = await remotePackage.fetchRemoteContent(commandArgs.version, {
         tempDirPath: getTempFolder(),
-        r3transDirPath: commandArgs.r3transPath
+        r3transDirPath: commandArgs.r3transPath,
+        useDocker: Settings.getInstance().data.r3transDocker,
+        dockerOptions: {
+            name: Settings.getInstance().data.r3transDockerName
+        }
     });
     if (!commandArgs.all) {
         transports.TADIR = packageContent.TADIR.trkorr;
@@ -117,44 +122,44 @@ export async function content(commandArgs: ContentArguments) {
     if (remoteManifest.get().namespace) {
         row1.push(`\u2714`);
         row2.push(remoteManifest.get().namespace.replicense);
-    }else{
+    } else {
         row1.push(`\u274C`);
         row2.push(``);
     }
-    if(Object.keys(packageContent).includes('DEVC')){
+    if (Object.keys(packageContent).includes('DEVC')) {
         row1.push(`\u2714 ${packageContent['DEVC'].trkorr}`);
         row2.push(`${chalk.bgGrey('Highlight')}`);
-    }else{
+    } else {
         row1.push(`\u274C`);
         row2.push(``);
     }
-    if(Object.keys(packageContent).includes('TADIR')){
+    if (Object.keys(packageContent).includes('TADIR')) {
         row1.push(`\u2714 ${packageContent['TADIR'].trkorr}`);
         row2.push(``);
-    }else{
+    } else {
         row1.push(`\u274C`);
         row2.push(``);
     }
-    if(Object.keys(packageContent).includes('CUST')){
+    if (Object.keys(packageContent).includes('CUST')) {
         row1.push(`\u2714 ${packageContent['CUST'].trkorr}`);
         row2.push(`${chalk.bgYellow('Highlight')}`);
-    }else{
+    } else {
         row1.push(`\u274C`);
         row2.push(``);
     }
-    if(Object.keys(packageContent).includes('LANG')){
+    if (Object.keys(packageContent).includes('LANG')) {
         row1.push(`\u2714 ${packageContent['LANG'].trkorr}`);
         row2.push(`${chalk.bgGreen('Highlight')}`);
-    }else{
+    } else {
         row1.push(`\u274C`);
         row2.push(``);
     }
-    if(row2.filter(s => s.length > 0).length > 0){
+    if (row2.filter(s => s.length > 0).length > 0) {
         Logger.table(header, [row1, row2]);
-    }else{
+    } else {
         Logger.table(header, [row1]);
     }
-    
+
     if (iOtherEntries > 0) {
         Logger.warning(`There are ${iOtherEntries} other records to show. Run with option --all in order to see them.`);
     }
