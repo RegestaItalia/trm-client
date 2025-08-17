@@ -11,7 +11,7 @@ Legend
 2025-08-13 v4.10.0
 -------------------
 
-! trm-ccore ^7.4.4
+! trm-ccore ^7.4.5
 + support for darwin os
 + support for r3trans dockerized
 
