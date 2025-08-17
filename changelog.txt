@@ -8,6 +8,13 @@ Legend
 + : added
 - : removed
 
+2025-08-13 v4.10.0
+-------------------
+
+! trm-core ^7.4.5
++ support for darwin os
++ support for r3trans dockerized
+
 2025-07-30 v4.9.2
 -------------------
 

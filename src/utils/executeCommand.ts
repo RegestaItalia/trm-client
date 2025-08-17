@@ -47,8 +47,8 @@ export async function executeCommand(args: any) {
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
         Logger.logger = _getLogger(args.logType, args.debug, args.logOutputFolder);
 
-        if (!/^win/i.test(process.platform)) {
-            Logger.warning(`Running on untested OS ${process.platform}! Some features aren't tested yet.`);
+        if (process.platform !== 'win32' && process.platform !== 'darwin') {
+            Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
         }
 
         const requiresConnection = args.requiresConnection;
