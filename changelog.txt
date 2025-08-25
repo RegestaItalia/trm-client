@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2025-08-25 v5.0.0
+-------------------
+
++ update command now self updates the client if ran without arguments
+! short flags reduced to single character
+
 2025-08-13 v4.10.0
 -------------------
 

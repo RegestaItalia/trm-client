@@ -27,7 +27,7 @@ export function registerCommand(command: Command, args?: {
     const defaultLogger = Settings.getInstance().data.loggerType;
     const logOutputFolder = Settings.getInstance().data.logOutputFolder;
 
-    if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid...
+    if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid copy or arguments...
         command.option(`-de, --dest <dest>`, `System ID.`)
             .option(`-us, --user <user>`, `System User Logon.`)
             .option(`-pw, --passwd <passwd>`, `System User Logon Password.`)
@@ -53,6 +53,7 @@ export function registerCommand(command: Command, args?: {
     command.action(async (arg1, arg2) => {
         var args = {...{
             command: commandName,
+            checkUpdate: true,
             requiresConnection,
             addNoConnection,
             requiresTrmDependencies,
@@ -80,6 +81,13 @@ export function registerCommand(command: Command, args?: {
             }
         }else{
             args = {...args, ...arg1};
+        }
+        if(args.command === 'update' && !args.package){ // hardcode to keep command update for both trm packages and self-update
+            args.command = 'selfUpdate';
+            delete args.requiresConnection;
+            delete args.requiresRegistry;
+            delete args.requiresTrmDependencies;
+            delete args.checkUpdate;
         }
         await executeCommand(args);
     });

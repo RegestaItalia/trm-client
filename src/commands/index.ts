@@ -23,3 +23,4 @@ export * from "./update";
 export * from "./content";
 export * from "./pack";
 export * from "./import";
+export * from "./selfUpdate";

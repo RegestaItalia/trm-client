@@ -57,7 +57,9 @@ export async function executeCommand(args: any) {
         const registryAuthBlacklist = args.registryAuthBlacklist;
         const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable;
 
-        await checkCliUpdate(true);
+        if(args.checkUpdate){
+            await checkCliUpdate(true);
+        }
 
         if (requiresRegistry) {
             var registryAlias: RegistryAlias;
