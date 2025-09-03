@@ -24,6 +24,7 @@ export class NoConnection implements ISystemConnector {
     connect = async () => {
         return;
     };
+    closeConnection = async () => this._throw();
     checkConnection = async () => true;
     ping = async () => 'PONG';
     getFileSystem = async () => this._throw();
