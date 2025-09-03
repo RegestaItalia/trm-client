@@ -1,5 +1,6 @@
 import * as commands from "../commands";
 import * as Core from "trm-core";
+import * as Commons from "trm-commons";
 import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
@@ -8,7 +9,7 @@ import { ISystemConnector, SystemConnector, RegistryProvider, AbstractRegistry }
 import { getLogFolder } from "./getLogFolder";
 import { RegistryAlias } from "../registryAlias";
 import { CommandContext } from "../commands/commons";
-import { CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, IInquirer, ILogger, Inquirer, Logger, Plugin } from "trm-commons";
+import { CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Inquirer, Logger, Plugin } from "trm-commons";
 import { Context } from "./Context";
 
 export enum LoggerType {
@@ -48,6 +49,7 @@ export async function executeCommand(args: any) {
     try {
         await Context.getInstance().load();
         await Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
+        await Plugin.call<{ commons: typeof Commons }>("client", "loadCommons", { commons: Commons });
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
         Logger.logger = _getLogger(args.logType, args.debug, args.logOutputFolder);
 
