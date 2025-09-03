@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { executeCommand } from "./executeCommand";
 import { AuthenticationType } from "trm-registry-types";
-import { Settings } from "../settings";
+import { Context } from "./Context";
 
 export function registerCommand(command: Command, args?: {
     requiresConnection?: boolean, //sets connection arguments
@@ -24,10 +24,10 @@ export function registerCommand(command: Command, args?: {
     const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable ? true : false;
     const noSystemAlias = args.noSystemAlias ? true : false;
     const registryAuthBlacklist = args.registryAuthBlacklist || [];
-    const defaultLogger = Settings.getInstance().data.loggerType;
-    const logOutputFolder = Settings.getInstance().data.logOutputFolder;
+    const defaultLogger = Context.getInstance().settings.loggerType;
+    const logOutputFolder = Context.getInstance().settings.logOutputFolder;
 
-    if (requiresConnection || commandName === 'createAlias') { //hardcode to avoid...
+    if (requiresConnection) {
         command.option(`-de, --dest <dest>`, `System ID.`)
             .option(`-us, --user <user>`, `System User Logon.`)
             .option(`-pw, --passwd <passwd>`, `System User Logon Password.`)

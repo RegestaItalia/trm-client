@@ -4,20 +4,10 @@ import * as fs from "fs";
 import { SystemAlias } from "../systemAlias";
 import { connect } from "./prompts";
 import { CommandContext, viewRegistryPackage } from "./commons";
-import { ISystemConnector, RESTConnection, RFCConnection, SystemConnector } from "trm-core";
-import { getSystemConnector, SystemConnectorType } from "../utils";
+import { ISystemConnector, SystemConnector } from "trm-core";
 import { Inquirer, Logger } from "trm-commons";
 
-const _compareConnectionData = (a: RESTConnection | RFCConnection, b: RESTConnection | RFCConnection): boolean => {
-    /*return a.dest === b.dest &&
-           a.ashost === b.ashost &&
-           a.sysnr === b.sysnr &&
-           a.saprouter === b.saprouter;*/
-    //TODO FIX compare
-    return false;
-}
-
-const _promptConnections = async (aConnections: ISystemConnector[]) => {
+const _promptConnections = async (aConnections: ISystemConnector[]): Promise<{ continue: boolean, connections: ISystemConnector[] }> => {
     if (aConnections.length > 0) {
         Logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
     }
@@ -31,43 +21,10 @@ const _promptConnections = async (aConnections: ISystemConnector[]) => {
     }]);
     askConnection = inq1.continue !== undefined ? inq1.continue : askConnection;
     if (askConnection) {
-        const connectArgs = await connect({}, false);
-        var oConnection: ISystemConnector;
-        if(connectArgs.type === SystemConnectorType.RFC){
-            oConnection = getSystemConnector(connectArgs.type, {
-                connection: {
-                    ashost: connectArgs.ashost,
-                    dest: connectArgs.dest,
-                    sysnr: connectArgs.sysnr,
-                    saprouter: connectArgs.saprouter
-                },
-                login: {
-                    user: connectArgs.user,
-                    passwd: connectArgs.passwd,
-                    lang: connectArgs.lang,
-                    client: connectArgs.client
-                }
-            });
-        }else if(connectArgs.type === SystemConnectorType.REST){
-            oConnection = getSystemConnector(connectArgs.type, {
-                connection: {
-                    endpoint: connectArgs.endpoint,
-                    rfcdest: connectArgs.forwardRfcDest
-                },
-                login: {
-                    user: connectArgs.user,
-                    passwd: connectArgs.passwd,
-                    lang: connectArgs.lang,
-                    client: connectArgs.client
-                }
-            });
-        }
-        if(oConnection){
-            if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
-                await oConnection.connect();
-                aConnections.push(oConnection);
-            }
-        }
+        const connectArgs = await connect({}, false, false);
+        const systemConnector = connectArgs.getSystemConnector() as ISystemConnector;
+        await systemConnector.connect();
+        aConnections.push(systemConnector);
     }
     return {
         continue: askConnection,
@@ -96,13 +53,10 @@ export async function compare(commandArgs: CompareArguments) {
         } catch (e) {
             throw new Error('Input connections: invalid JSON format.');
         }
-        for(const sAlias of aInputConnections){
+        for (const sAlias of aInputConnections) {
             const oAlias = SystemAlias.get(sAlias);
             const oConnection = oAlias.getConnection();
-            if (!aConnections.find(o => _compareConnectionData(o.getConnectionData(), oConnection.getConnectionData()))) {
-                await oConnection.connect();
-                aConnections.push(oConnection);
-            }
+            aConnections.push(oConnection);
         }
     }
     if (aConnections.length === 0) {
@@ -113,7 +67,7 @@ export async function compare(commandArgs: CompareArguments) {
             aConnections = oPromptRes.connections;
         }
     }
-    
+
     Logger.info(`Compare systems: ${aConnections.map(o => o.getDest()).join(', ')}`);
 
     const tableHead = [`System`, `Installed`, `Version`, `Devclass`, `Import transport`];
@@ -121,9 +75,9 @@ export async function compare(commandArgs: CompareArguments) {
 
     Logger.loading(`Reading registry data...`);
     var oRegistryView: View;
-    try{
+    try {
         oRegistryView = await viewRegistryPackage(packageName, true);
-    }catch(e){ }
+    } catch (e) { }
 
     Logger.loading(`Reading system data...`);
 
@@ -136,16 +90,16 @@ export async function compare(commandArgs: CompareArguments) {
         var importTransport;
         const aSystemPackages = await SystemConnector.getInstalledPackages(true);
         const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
-        if(oSystemView && oSystemView.manifest){
+        if (oSystemView && oSystemView.manifest) {
             installed = 'Yes';
             version = oSystemView.manifest.get().version || 'Unknown';
             devclass = oSystemView.getDevclass() || 'Unknown';
-            if(oSystemView.manifest.getLinkedTransport()){
+            if (oSystemView.manifest.getLinkedTransport()) {
                 importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
-            }else{
+            } else {
                 importTransport = 'Unknown';
             }
-        }else{
+        } else {
             installed = 'No';
             version = '';
             devclass = '';

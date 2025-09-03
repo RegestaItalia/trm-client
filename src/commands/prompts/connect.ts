@@ -1,9 +1,7 @@
-import { RESTConnection, RFCConnection } from "trm-core";
 import { SystemAlias } from "../../systemAlias";
-import { getSapLogonConnections, getSystemConnector, NoConnection, SystemConnectorType } from "../../utils";
+import { Context, getSapLogonConnections } from "../../utils";
 import { ConnectArguments } from "../arguments";
-import normalizeUrl from "@esm2cjs/normalize-url";
-import { Inquirer } from "trm-commons";
+import { IConnect, Inquirer } from "trm-commons";
 
 const languageList = [
     { value: 'AR', name: 'AR (Arabic)' },
@@ -47,23 +45,19 @@ const languageList = [
     { value: 'VI', name: 'VI (Vietnamese)' }
 ];
 
-const _createAliasIfNotExists = () => {
-
-}
-
-export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<ConnectArguments> {
+export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<IConnect> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     const force = commandArgs.force ? true : false;
     var type = commandArgs.type;
     var aInputType = [];
     var aSapLogonConnections;
     const aAlias = SystemAlias.getAll();
-    try{
+    try {
         aSapLogonConnections = await getSapLogonConnections();
-    }catch(e){
+    } catch (e) {
         aSapLogonConnections = [];
     }
-    if(addNoConnection){
+    if (addNoConnection) {
         aInputType.push({
             value: 'none', name: 'No connection'
         });
@@ -74,7 +68,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         });
     }
     aInputType.push({
-        value: 'input', name: 'Manual input'
+        value: null, name: 'Manual input'
     });
     if (aSapLogonConnections.length > 0) {
         aInputType.push({
@@ -82,9 +76,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         });
     }
 
-    var result: ConnectArguments;
     var inputType: string;
-    if (!commandArgs.ashost && !commandArgs.dest && !commandArgs.sysnr) {
+    if (!commandArgs.type) {
         const inq1 = await Inquirer.prompt({
             type: `list`,
             name: `inputType`,
@@ -92,29 +85,27 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             choices: aInputType
         });
         inputType = inq1.inputType;
-    } else {
-        inputType = 'input';
     }
 
-    if (inputType === 'none'){
-        return {
-            connection: new NoConnection()
-        };
-    }else if (inputType === 'alias') {
-        const inq2 = await Inquirer.prompt({
+    if (inputType === 'none') {
+        return null;
+    } else if (inputType === 'alias') {
+        const inq2 = (await Inquirer.prompt({
             type: `list`,
-            name: `aliasName`,
+            name: `alias`,
             message: `Select alias`,
             choices: aAlias.map(o => {
                 return {
-                    value: o.alias, name: o.alias
+                    value: o, name: o.alias
                 }
             })
-        });
-        const alias = aAlias.find(o => o.alias === inq2.aliasName);
-        result = { ...alias.connection, ...alias.login };
-        type = alias.type;
-        createAliasIfNotExist = false; //force to false
+        })).alias;
+        const connection = Context.getInstance().connections.find(o => o.name === inq2.type);
+        if (!connection) {
+            throw new Error(`Unknown connection type "${inq2.type}" in alias "${inq2.name}"`);
+        }
+        connection.setData(inq2.data);
+        return connection;
     } else {
         if (inputType === 'logon') {
             const inq3 = await Inquirer.prompt({
@@ -132,196 +123,85 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             commandArgs.dest = logonConnection.dest;
             commandArgs.sysnr = logonConnection.sysnr;
             commandArgs.saprouter = logonConnection.saprouter;
-            type = SystemConnectorType.RFC;
-        }else{
-            type = commandArgs.type;
+            type = 'RFC'; //force to rfc
         }
-        result = await Inquirer.prompt([{
-            type: `list`,
-            name: `type`,
-            message: `Connection type`,
-            choices: [{
-                value: 'REST',
-                name: 'REST (Requires trm-rest)'
-            }, {
-                value: 'RFC',
-                name: 'RFC (Uses node-rfc)'
-            }],
-            when: (type ? false : true) || force
-        },
-        //REST
-        {
-            type: `input`,
-            name: `endpoint`,
-            message: `System endpoint`,
-            default: commandArgs.endpoint,
-            when: (hash) => {
-                return hash.type === 'REST' && ((commandArgs.endpoint ? false : true) || force);
-            }
-        }, {
-            type: `input`,
-            name: `forwardRfcDest`,
-            message: `Forward RFC Destination`,
-            default: commandArgs.forwardRfcDest || 'NONE',
-            when: (hash) => {
-                return hash.type === 'REST' && (commandArgs.forwardRfcDest || force);
-            }
-        },
-        //RFC
-        {
-            type: `input`,
-            name: `ashost`,
-            message: `Application server`,
-            default: commandArgs.ashost,
-            when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.ashost ? false : true) || force);
-            }
-        }, {
-            type: `input`,
-            name: `dest`,
-            message: `System ID`,
-            default: commandArgs.dest,
-            when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.dest ? false : true) || force);
-            },
-            validate: (val) => {
-                if(val && /^\w{3}$/.test(val)){
-                    return true;
-                }else{
-                    return `Invalid input: expected length 3, only letters allowed`;
-                }
-            }
-        }, {
-            type: `input`,
-            name: `sysnr`,
-            message: `Instance number`,
-            default: commandArgs.sysnr,
-            when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.sysnr ? false : true) || force);
-            },
-            validate: (val) => {
-                if(val && /^\d{2}$/.test(val)){
-                    return true;
-                }else{
-                    return `Invalid input: expected length 2, only numbers allowed`;
-                }
-            }
-        }, {
-            type: `input`,
-            name: `saprouter`,
-            message: `SAProuter`,
-            default: commandArgs.saprouter,
-            when: (hash) => {
-                return hash.type === 'RFC' && ((commandArgs.saprouter ? false : true) || force);
-            }
-        }, {
-            type: `input`,
-            name: `client`,
-            message: `Logon Client`,
-            default: commandArgs.client,
-            when: (hash) => {
-                return (commandArgs.client ? false : true) || force;
-            },
-            validate: (val) => {
-                if(val && /^\d{3}$/.test(val)){
-                    return true;
-                }else{
-                    return `Invalid input: expected length 3, only numbers allowed`;
-                }
-            }
-        }, {
-            type: `input`,
-            name: `user`,
-            message: `Logon User`,
-            default: commandArgs.user,
-            when: (hash) => {
-                return (commandArgs.user ? false : true) || force;
-            }
-        }, {
-            type: `password`,
-            name: `passwd`,
-            message: `Logon Password`,
-            default: commandArgs.passwd,
-            when: (hash) => {
-                return (commandArgs.passwd ? false : true) || force;
-            }
-        }, {
-            type: `list`,
-            name: `lang`,
-            message: `Logon Language`,
-            default: commandArgs.lang || 'EN', //default to english
-            when: (hash) => {
-                return (commandArgs.lang ? false : true) || force;
-            },
-            validate: (input) => {
-                return languageList.includes(input.trim().toUpperCase());
-            },
-            choices: languageList
-        }]);
-    }
 
-    result.type = result.type || type;
-    result.user = result.user || commandArgs.user;
-    result.passwd = result.passwd || commandArgs.passwd;
-    result.lang = result.lang || commandArgs.lang;
-    result.user = result.user.toUpperCase();
-    result.lang = result.lang.toUpperCase();
-
-    if(result.type === SystemConnectorType.RFC){
-        result.ashost = result.ashost || commandArgs.ashost;
-        result.dest = result.dest || commandArgs.dest;
-        result.saprouter = result.saprouter || commandArgs.saprouter;
-        result.sysnr = result.sysnr || commandArgs.sysnr;
-        result.client = result.client || commandArgs.client;
-        result.noSystemAlias = commandArgs.noSystemAlias;
-    
-        result.dest = result.dest.toUpperCase();
-        
-        result.connection = getSystemConnector(SystemConnectorType.RFC, {
-            connection: {
-                dest: result.dest,
-                ashost: result.ashost,
-                sysnr: result.sysnr,
-                saprouter: result.saprouter
-            } as RFCConnection,
-            login: {
-                user: result.user,
-                passwd: result.passwd,
-                lang: result.lang,
-                client: result.client
-            }
-        });
-    }else if(result.type === SystemConnectorType.REST){
-        result.endpoint = result.endpoint || commandArgs.endpoint;
-        result.forwardRfcDest = result.forwardRfcDest || commandArgs.forwardRfcDest;
-        result.client = result.client || commandArgs.client;
-
-        if(result.forwardRfcDest){
-            result.forwardRfcDest = result.forwardRfcDest.toUpperCase();
+        if (!type || force) {
+            type = (await Inquirer.prompt({
+                type: `list`,
+                name: `type`,
+                message: `Connection type`,
+                choices: Context.getInstance().connections.map(o => {
+                    return {
+                        name: o.description,
+                        value: o.name
+                    }
+                })
+            })).type;
         }
-        result.endpoint = normalizeUrl(result.endpoint, {
-            removeTrailingSlash: true
-        });
-
-        result.connection = getSystemConnector(SystemConnectorType.REST, {
-            connection: {
-                endpoint: result.endpoint,
-                rfcdest: result.forwardRfcDest || 'NONE'
-            } as RESTConnection,
-            login: {
-                user: result.user,
-                passwd: result.passwd,
-                lang: result.lang,
-                client: result.client
-            }
-        });
-    }else{
-        throw new Error(`Unknown connection type "${result.type}".`);
+        const connectionType = Context.getInstance().connections.find(o => o.name === type);
+        if (!connectionType) {
+            throw new Error(`Invalid connection type "${type}"`);
+        }
+        if (connectionType.onConnectionData) {
+            await connectionType.onConnectionData(force, commandArgs);
+        }
+        if (connectionType.loginData) {
+            commandArgs = {
+                ...commandArgs, ...(await Inquirer.prompt([
+                    {
+                        type: `input`,
+                        name: `client`,
+                        message: `Logon Client`,
+                        default: commandArgs.client,
+                        when: (hash) => {
+                            return (commandArgs.client ? false : true) || force;
+                        },
+                        validate: (val) => {
+                            if (val && /^\d{3}$/.test(val)) {
+                                return true;
+                            } else {
+                                return `Invalid input: expected length 3, only numbers allowed`;
+                            }
+                        }
+                    }, {
+                        type: `input`,
+                        name: `user`,
+                        message: `Logon User`,
+                        default: commandArgs.user,
+                        when: (hash) => {
+                            return (commandArgs.user ? false : true) || force;
+                        }
+                    }, {
+                        type: `password`,
+                        name: `passwd`,
+                        message: `Logon Password`,
+                        default: commandArgs.passwd,
+                        when: (hash) => {
+                            return (commandArgs.passwd ? false : true) || force;
+                        }
+                    }, {
+                        type: `list`,
+                        name: `lang`,
+                        message: `Logon Language`,
+                        default: commandArgs.lang || 'EN', //default to english
+                        when: (hash) => {
+                            return (commandArgs.lang ? false : true) || force;
+                        },
+                        validate: (input) => {
+                            return languageList.includes(input.trim().toUpperCase());
+                        },
+                        choices: languageList
+                    }
+                ]))
+            };
+        }
+        if (connectionType.onAfterLoginData) {
+            await connectionType.onAfterLoginData(force, commandArgs);
+        }
+        if (createAliasIfNotExist) {
+            await SystemAlias.createIfNotExists(connectionType);
+        }
+        return connectionType;
     }
-
-    if(createAliasIfNotExist){
-        await SystemAlias.createIfNotExists(result);
-    }
-
-    return result;
 }
