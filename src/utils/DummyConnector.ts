@@ -1,6 +1,6 @@
 import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, TRKORR } from "trm-core";
 
-export class NoConnection implements ISystemConnector {
+export class DummyConnector implements ISystemConnector {
     _throw() {
         throw new Error(`No connection to SAP server.`);
         return null;

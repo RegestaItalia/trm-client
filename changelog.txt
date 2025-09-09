@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2025-09-09 v5.0.2
+-------------------
+
+* fix no connection
++ fallback text for node-rfc and node-r3trans not found in info command
+
 2025-09-03 v5.0.1
 -------------------
 

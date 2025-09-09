@@ -1,5 +1,5 @@
 import { getCoreTrmDependencies, getNpmGlobalPath, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector } from "trm-core";
-import { checkCliUpdate, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion, NoConnection } from "../utils";
+import { checkCliUpdate, DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { readFileSync } from "fs";
@@ -160,10 +160,20 @@ export async function info(commandArgs: InfoArguments) {
             text: await _getNpmLatestForText('node-rfc', nodeRfcVersion, `node-rfc ${nodeRfcVersion}`),
             children: []
         });
+    }else{
+        clientChildrenTree.push({
+            text: `node-rfc ${chalk.bold('not found')}`,
+            children: []
+        });
     }
     if(nodeR3transVersion){
         clientChildrenTree.push({
             text: await _getNpmLatestForText('node-r3trans', nodeR3transVersion, `node-r3trans ${nodeR3transVersion}`),
+            children: []
+        });
+    }else{
+        clientChildrenTree.push({
+            text: `node-r3trans ${chalk.bold('not found')}`,
             children: []
         });
     }
@@ -178,7 +188,7 @@ export async function info(commandArgs: InfoArguments) {
         text: chalk.bold(`Server (${SystemConnector.getDest()})`),
         children: serverDependenciesTree
     };
-    if(!(SystemConnector.systemConnector instanceof NoConnection)){
+    if(!(SystemConnector.systemConnector instanceof DummyConnector)){
         Logger.tree(serverTree);
     }
 }
