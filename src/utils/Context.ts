@@ -52,6 +52,10 @@ export class Context {
         }
     }
 
+    public async listPlugins(){
+        //await Plugin.
+    }
+
     public setSetting(key: string, value: string): void {
         if (this.settings[key] === undefined) {
             throw new Error(`Invalid key ${key}.`);

@@ -191,4 +191,10 @@ export async function info(commandArgs: InfoArguments) {
     if(!(SystemConnector.systemConnector instanceof DummyConnector)){
         Logger.tree(serverTree);
     }
+
+    //build plugins tree
+    const pluginsTree: TreeLog = {
+        text: chalk.bold(`Plugins`),
+        children: []
+    };
 }
