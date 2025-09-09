@@ -4,9 +4,9 @@ import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
 import { View } from "trm-registry-types";
 import { RegistryAlias } from "../registryAlias";
-import { NoConnection } from "../utils";
 import chalk from "chalk";
 import { Logger } from "trm-commons";
+import { DummyConnector } from "../utils";
 
 type PrintManifest = {
     devclass?: string,
@@ -32,7 +32,7 @@ const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) =
         return;
     }
     var oSystemManifest: TrmManifest;
-    if (!(SystemConnector.systemConnector instanceof NoConnection)) {
+    if (!(SystemConnector.systemConnector instanceof DummyConnector)) {
         console.log(''); //new line
         if (systemPackage) {
             oSystemManifest = systemPackage.manifest.get();

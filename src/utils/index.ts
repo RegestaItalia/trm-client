@@ -12,7 +12,7 @@ export * from "./getClientVersion";
 export * from "./getTempFolder";
 export * from "./getLogFolder";
 export * from "./getClientNodeDependencies";
-export * from "./NoConnection";
+export * from "./DummyConnector";
 export * from "./getNpmPackageLatestVersion";
 export * from "./SettingsData";
 export * from "./Context";

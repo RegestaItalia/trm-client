@@ -1,5 +1,5 @@
 import { SystemAlias } from "../../systemAlias";
-import { Context, getSapLogonConnections } from "../../utils";
+import { Context, DummyConnector, getSapLogonConnections } from "../../utils";
 import { ConnectArguments } from "../arguments";
 import { IConnect, Inquirer } from "trm-commons";
 
@@ -45,6 +45,17 @@ const languageList = [
     { value: 'VI', name: 'VI (Vietnamese)' }
 ];
 
+class NoConnection implements IConnect {
+    name = null;
+    description = 'No connection';
+    loginData = false;
+    getData: () => any;
+    setData: (data: any) => void;
+    getSystemConnector(): DummyConnector {
+        return new DummyConnector();
+    }
+}
+
 export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<IConnect> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     const force = commandArgs.force ? true : false;
@@ -88,7 +99,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }
 
     if (inputType === 'none') {
-        return null;
+        return new NoConnection();
     } else if (inputType === 'alias') {
         const inq2 = (await Inquirer.prompt({
             type: `list`,

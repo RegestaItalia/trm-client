@@ -53,6 +53,7 @@ export function registerCommand(command: Command, args?: {
     command.action(async (arg1, arg2) => {
         var args = {...{
             command: commandName,
+            checkUpdate: true,
             requiresConnection,
             addNoConnection,
             requiresTrmDependencies,
@@ -80,6 +81,13 @@ export function registerCommand(command: Command, args?: {
             }
         }else{
             args = {...args, ...arg1};
+        }
+        if(args.command === 'update' && !args.package){ // hardcode to keep command update for both trm packages and self-update
+            args.command = 'selfUpdate';
+            delete args.requiresConnection;
+            delete args.requiresRegistry;
+            delete args.requiresTrmDependencies;
+            delete args.checkUpdate;
         }
         await executeCommand(args);
     });
