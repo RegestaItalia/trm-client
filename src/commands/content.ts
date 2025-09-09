@@ -1,10 +1,9 @@
 import { TrmPackage } from "trm-core";
 import { ContentArguments } from "./arguments";
 import { CommandContext } from "./commons";
-import { getTempFolder } from "../utils";
+import { Context, getTempFolder } from "../utils";
 import chalk from "chalk";
 import { Logger, TreeLog } from "trm-commons";
-import { Settings } from "../settings";
 
 export async function content(commandArgs: ContentArguments) {
     //search package
@@ -23,9 +22,9 @@ export async function content(commandArgs: ContentArguments) {
     const packageContent = await remotePackage.fetchRemoteContent(commandArgs.version, {
         tempDirPath: getTempFolder(),
         r3transDirPath: commandArgs.r3transPath,
-        useDocker: Settings.getInstance().data.r3transDocker,
+        useDocker: Context.getInstance().settings.r3transDocker,
         dockerOptions: {
-            name: Settings.getInstance().data.r3transDockerName
+            name: Context.getInstance().settings.r3transDockerName
         }
     });
     if (!commandArgs.all) {

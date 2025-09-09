@@ -1,8 +1,7 @@
 import { ISystemConnector } from "trm-core"
-import { SystemConnectorType } from "../../utils"
 
 export type ConnectArguments = {
-    type?: SystemConnectorType,
+    type?: string,
     dest?: string,
     ashost?: string,
     sysnr?: string,

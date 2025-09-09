@@ -1,5 +1,5 @@
+import { Context } from "../utils";
 import { SettingsArguments } from "./arguments";
-import { Settings } from "../settings";
 import { Logger } from "trm-commons";
 
 export async function settings(commandArgs: SettingsArguments) {
@@ -11,9 +11,9 @@ export async function settings(commandArgs: SettingsArguments) {
         }
         const key = aSplit[0];
         const value = aSplit[1];
-        Settings.getInstance().set(key, value);
+        Context.getInstance().setSetting(key, value);
     }
-    const settingsData = Settings.getInstance().data;
+    const settingsData = Context.getInstance().settings;
     Object.keys(settingsData).forEach(k => {
         Logger.log(`${k}: ${settingsData[k]}`);
     });

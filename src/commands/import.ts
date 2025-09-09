@@ -1,9 +1,8 @@
 import { FileSystem, InstallPackageReplacements, install as action } from "trm-core";
-import { getTempFolder } from "../utils";
+import { Context, getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
 import { ImportArguments } from "./arguments/ImportArguments";
 import { Logger } from "trm-commons";
-import { Settings } from "../settings";
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
     if (arg) {
@@ -29,9 +28,9 @@ export async function _import(commandArgs: ImportArguments) {
             r3transOptions: {
                 tempDirPath: getTempFolder(),
                 r3transDirPath: commandArgs.r3transPath,
-                useDocker: Settings.getInstance().data.r3transDocker,
+                useDocker: Context.getInstance().settings.r3transDocker,
                 dockerOptions: {
-                    name: Settings.getInstance().data.r3transDockerName
+                    name: Context.getInstance().settings.r3transDockerName
                 }
             },
             noInquirer: commandArgs.noPrompts,

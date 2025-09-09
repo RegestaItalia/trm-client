@@ -1,6 +1,6 @@
 import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, TRKORR } from "trm-core";
 
-export class NoConnection implements ISystemConnector {
+export class DummyConnector implements ISystemConnector {
     _throw() {
         throw new Error(`No connection to SAP server.`);
         return null;
@@ -24,6 +24,7 @@ export class NoConnection implements ISystemConnector {
     connect = async () => {
         return;
     };
+    closeConnection = async () => this._throw();
     checkConnection = async () => true;
     ping = async () => 'PONG';
     getFileSystem = async () => this._throw();

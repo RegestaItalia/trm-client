@@ -1,4 +1,6 @@
 import * as commands from "../commands";
+import * as Core from "trm-core";
+import * as Commons from "trm-commons";
 import { SystemAlias } from "../systemAlias";
 import { logError } from "./logError";
 import { checkTrmDependencies } from "./checkTrmDependencies";
@@ -7,7 +9,8 @@ import { ISystemConnector, SystemConnector, RegistryProvider, AbstractRegistry }
 import { getLogFolder } from "./getLogFolder";
 import { RegistryAlias } from "../registryAlias";
 import { CommandContext } from "../commands/commons";
-import { CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Inquirer, Logger } from "trm-commons";
+import { CliInquirer, CliLogFileLogger, CliLogger, ConsoleLogger, DummyLogger, Inquirer, Logger, Plugin } from "trm-commons";
+import { Context } from "./Context";
 
 export enum LoggerType {
     CLI = 'CLI',
@@ -44,6 +47,9 @@ const _getInquirer = (type: InquirerType) => {
 export async function executeCommand(args: any) {
     var exitCode: number;
     try {
+        await Context.getInstance().load();
+        await Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
+        await Plugin.call<{ commons: typeof Commons }>("client", "loadCommons", { commons: Commons });
         Inquirer.inquirer = _getInquirer(InquirerType.CLI);
         Logger.logger = _getLogger(args.logType, args.debug, args.logOutputFolder);
 
@@ -101,26 +107,26 @@ export async function executeCommand(args: any) {
                 var append = true;
                 var aliasRegistry = RegistryAlias.get(o.alias).getRegistry();
                 RegistryProvider.registry.forEach(k => {
-                    if(append){
+                    if (append) {
                         append = !k.compare(aliasRegistry);
                     }
                 });
-                if(append){
+                if (append) {
                     RegistryProvider.registry.push(aliasRegistry);
                 }
             });
         }
-        
+
         if (requiresConnection) {
             var system: ISystemConnector;
             if (args.systemAlias) {
                 system = SystemAlias.get(args.systemAlias).getConnection();
             } else {
-                const skipCreateAlias = ['createAlias', 'deleteAlias', 'alias'];
-                system = (await commands.connect(args as commands.ConnectArguments, !skipCreateAlias.includes(args.command), args.addNoConnection)).connection;
+                system = (await commands.connect(args as commands.ConnectArguments, true, args.addNoConnection)).getSystemConnector() as ISystemConnector;
             }
             await system.connect();
             SystemConnector.systemConnector = system;
+            await Plugin.call<ISystemConnector>("client", "onInitializeSystemConnector", SystemConnector.systemConnector);
             if (requiresTrmDependencies) {
                 await checkTrmDependencies(args);
             }
@@ -145,6 +151,14 @@ export async function executeCommand(args: any) {
         await logError(e);
         exitCode = 1;
     } finally {
+        if (SystemConnector.systemConnector) {
+            try {
+                await SystemConnector.closeConnection();
+            } catch (e) {
+                Logger.log(`Couldn't close system connection!`, true);
+                Logger.log(e.toString(), true);
+            }
+        }
         if (Logger.logger instanceof CliLogFileLogger) {
             const sessionId = Logger.logger.getSessionId();
             const logFilePath = Logger.logger.getFilePath();

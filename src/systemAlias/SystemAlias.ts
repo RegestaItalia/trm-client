@@ -1,23 +1,24 @@
-import { getRoamingFolder, getSystemConnector, SystemConnectorType } from "../utils";
+import { Context, getRoamingFolder } from "../utils";
 import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { SystemAliasData } from "./SystemAliasData";
-import { ISystemConnector, Login, RESTConnection, RFCConnection } from "trm-core";
-import { ConnectArguments } from "../commands";
-import { Inquirer } from "trm-commons";
+import { ISystemConnector } from "trm-core";
+import { IConnect, Inquirer } from "trm-commons";
 
 const SYSTEM_FILE_NAME = "systems.ini";
 
 export class SystemAlias {
 
-    constructor(public type: SystemConnectorType, private _connection: RFCConnection | RESTConnection, private _login: Login) { }
+    constructor(public type: string, private _data: any) { }
 
     public getConnection(): ISystemConnector {
-        return getSystemConnector(this.type, {
-            connection: this._connection,
-            login: this._login
-        });
+        const connection = Context.getInstance().connections.find(o => o.name === this.type);
+        if (!connection) {
+            throw new Error(`Unknown connection type "${this.type}". Possible values are ${Context.getInstance().connections.map(k => k.name).join(', ')}.`);
+        }
+        connection.setData(this._data);
+        return connection.getSystemConnector() as ISystemConnector;
     }
 
     private static generateFile(content: SystemAliasData[], filePath?: string): void {
@@ -26,30 +27,10 @@ export class SystemAlias {
         }
         var oContent = {};
         content.forEach(o => {
-            if (o.type === SystemConnectorType.RFC) {
-                oContent[o.alias] = {
-                    type: o.type,
-                    dest: (o.connection as RFCConnection).dest,
-                    ashost: (o.connection as RFCConnection).ashost,
-                    sysnr: (o.connection as RFCConnection).sysnr,
-                    client: o.login.client,
-                    user: o.login.user,
-                    passwd: o.login.passwd,
-                    lang: o.login.lang
-                };
-                if((o.connection as RFCConnection).saprouter){
-                    oContent[o.alias].saprouter = (o.connection as RFCConnection).saprouter;
-                }
-            } else if (o.type === SystemConnectorType.REST) {
-                oContent[o.alias] = {
-                    type: o.type,
-                    endpoint: (o.connection as RESTConnection).endpoint,
-                    rfcdest: (o.connection as RESTConnection).rfcdest || 'NONE',
-                    client: o.login.client,
-                    user: o.login.user,
-                    passwd: o.login.passwd,
-                    lang: o.login.lang
-                };
+            const connection = Context.getInstance().connections.find(k => k.name === o.type);
+            if (connection) {
+                oContent[o.alias] = o.data;
+                oContent[o.alias].type = o.type;
             }
         });
         fs.writeFileSync(filePath, ini.encode(oContent), { encoding: 'utf8', flag: 'w' });
@@ -69,37 +50,16 @@ export class SystemAlias {
         const sIni = fs.readFileSync(filePath).toString();
         const oIni = ini.decode(sIni);
         Object.keys(oIni).forEach(sAlias => {
-            if (oIni[sAlias].type === SystemConnectorType.RFC || !oIni[sAlias].type) { //blank defaults to RFC (for backwards compatibility)
+            if (!oIni[sAlias].type) {
+                oIni[sAlias].type = 'RFC'; //blank defaults to RFC (for backwards compatibility)
+            }
+            const connection = Context.getInstance().connections.find(o => o.name === oIni[sAlias].type);
+            if (connection) {
+                connection.setData(oIni[sAlias]);
                 aAlias.push({
                     alias: sAlias,
-                    type: SystemConnectorType.RFC,
-                    connection: {
-                        dest: oIni[sAlias].dest,
-                        ashost: oIni[sAlias].ashost,
-                        sysnr: oIni[sAlias].sysnr,
-                        saprouter: oIni[sAlias].saprouter
-                    },
-                    login: {
-                        client: oIni[sAlias].client,
-                        user: oIni[sAlias].user,
-                        passwd: oIni[sAlias].passwd,
-                        lang: oIni[sAlias].lang
-                    }
-                });
-            } else if (oIni[sAlias].type === SystemConnectorType.REST) {
-                aAlias.push({
-                    alias: sAlias,
-                    type: SystemConnectorType.REST,
-                    connection: {
-                        endpoint: oIni[sAlias].endpoint,
-                        rfcdest: oIni[sAlias].rfcdest || 'NONE'
-                    },
-                    login: {
-                        user: oIni[sAlias].user,
-                        passwd: oIni[sAlias].passwd,
-                        lang: oIni[sAlias].lang,
-                        client: oIni[sAlias].client
-                    }
+                    type: oIni[sAlias].type,
+                    data: connection.getData()
                 });
             }
         })
@@ -110,13 +70,13 @@ export class SystemAlias {
         const aAlias = this.getAll();
         const alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if (alias) {
-            return new SystemAlias(alias.type, alias.connection, alias.login);
+            return new SystemAlias(alias.type, alias);
         } else {
             throw new Error(`System alias "${name}" not found.`);
         }
     }
 
-    public static create(name: string, type: SystemConnectorType, connection: RFCConnection | RESTConnection, login: Login): SystemAlias {
+    public static create(name: string, type: string, data: any): SystemAlias {
         if (!name) {
             throw new Error(`Invalid alias name.`);
         }
@@ -128,12 +88,11 @@ export class SystemAlias {
             aAlias.push({
                 alias: name,
                 type,
-                connection,
-                login
+                data
             });
             this.generateFile(aAlias);
         }
-        return new SystemAlias(type, connection, login);
+        return new SystemAlias(type, data);
     }
 
     public static delete(name: string): void {
@@ -142,41 +101,55 @@ export class SystemAlias {
         this.generateFile(aAlias);
     }
 
-    public static async createIfNotExists(connArgs: ConnectArguments): Promise<void> {
-        const aAlias = this.getAll();
-        var alias;
-        if (connArgs.type === SystemConnectorType.RFC) {
-            alias = aAlias.find(o => {
-                if (o.type === SystemConnectorType.RFC || !o.type) {
-                    const rfcConn = o.connection as RFCConnection;
-                    if (rfcConn.dest === connArgs.dest &&
-                        rfcConn.ashost === connArgs.ashost &&
-                        rfcConn.sysnr === connArgs.sysnr &&
-                        rfcConn.saprouter === connArgs.saprouter &&
-                        o.login.client === connArgs.client &&
-                        o.login.lang === connArgs.lang &&
-                        o.login.user === connArgs.user &&
-                        o.login.passwd === connArgs.passwd) {
-                        return o;
-                    }
+    private static deepEqual(a: any, b: any): boolean {
+        if (a === b) return true;
+
+        if (a && b && typeof a === "object" && typeof b === "object") {
+            //date
+            if (a instanceof Date && b instanceof Date) {
+                return a.getTime() === b.getTime();
+            }
+
+            //array
+            if (Array.isArray(a) && Array.isArray(b)) {
+                if (a.length !== b.length) return false;
+                for (let i = 0; i < a.length; i++) {
+                    if (!this.deepEqual(a[i], b[i])) return false;
                 }
-            });
-        } else if (connArgs.type === SystemConnectorType.REST) {
-            alias = aAlias.find(o => {
-                if (o.type === SystemConnectorType.REST) {
-                    const restConn = o.connection as RESTConnection;
-                    if (restConn.endpoint === connArgs.endpoint &&
-                        restConn.rfcdest === connArgs.forwardRfcDest &&
-                        o.login.client === connArgs.client &&
-                        o.login.lang === connArgs.lang &&
-                        o.login.user === connArgs.user &&
-                        o.login.passwd === connArgs.passwd) {
-                        return o;
-                    }
-                }
-            });
+                return true;
+            }
+
+            //object
+            if (a.constructor !== b.constructor) return false;
+
+            const keysA = Object.keys(a);
+            const keysB = Object.keys(b);
+
+            if (keysA.length !== keysB.length) return false;
+
+            for (const key of keysA) {
+                if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
+                if (!this.deepEqual(a[key], b[key])) return false;
+            }
+
+            return true;
         }
-        if (!alias) {
+
+        return false;
+    }
+
+    public static compare(a: SystemAlias, b: SystemAlias): boolean {
+        if(a.type === b.type){
+            return this.deepEqual(a._data, b._data);
+        }else{
+            return false;
+        }
+    }
+
+    public static async createIfNotExists(connection: IConnect): Promise<void> {
+        const aAlias = this.getAll();
+        const parsedData = connection.getData();
+        if (!aAlias.find(o => this.deepEqual(o, parsedData))) {
             const aliasName = (await Inquirer.prompt([{
                 name: 'create',
                 message: 'Create new alias for connection?',
@@ -190,8 +163,8 @@ export class SystemAlias {
                     return hash.create;
                 }
             }])).alias;
-            if(aliasName){
-                this.create(aliasName, connArgs.type, connArgs as any, connArgs as any);
+            if (aliasName) {
+                this.create(aliasName, connection.name, parsedData);
             }
         }
     }
