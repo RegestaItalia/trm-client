@@ -13,6 +13,7 @@ Legend
 
 * fix no connection
 + fallback text for node-rfc and node-r3trans not found in info command
++ update command now self updates the client if ran without arguments
 
 2025-09-03 v5.0.1
 -------------------
