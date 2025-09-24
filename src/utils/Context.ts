@@ -1,5 +1,5 @@
 import path from "path";
-import { getRoamingFolder, getTempFolder } from ".";
+import { getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from "./";
 import * as ini from "ini";
@@ -7,11 +7,6 @@ import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
 
 const SETTINGS_FILE_NAME = "settings.ini";
-const defaultSettings: SettingsData = {
-    loggerType: 'CLI',
-    logOutputFolder: 'default',
-    globalNodeModules: ''
-}
 
 class RESTConnectExtended extends RESTConnect {
 
@@ -19,7 +14,7 @@ class RESTConnectExtended extends RESTConnect {
         const data = this.getData();
         return new RESTSystemConnector(data, data);
     }
-    
+
 }
 class RFCConnectExtended extends RFCConnect {
 
@@ -27,7 +22,7 @@ class RFCConnectExtended extends RFCConnect {
         const data = this.getData();
         return new RFCSystemConnector(data, data, getTempFolder(), Context.getInstance().settings.globalNodeModules);
     }
-    
+
 }
 
 export class Context {
@@ -47,12 +42,12 @@ export class Context {
         }
     }
 
-    public async load(){
+    public async load() {
         const plugins = await Plugin.load({
             globalNodeModulesPath: this.settings.globalNodeModules
         });
         this.plugins = [...new Set(plugins)];
-        if(!this.connections){
+        if (!this.connections) {
             this.connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
         }
     }
@@ -70,20 +65,41 @@ export class Context {
         return path.join(getRoamingFolder(), SETTINGS_FILE_NAME);
     }
 
+    private getDefaultSettings(): SettingsData {
+        var sapLandscape = path.join(getRoamingPath(), process.platform === 'win32' ? 'SAP\\Common\\SAPUILandscape.xml' : 'SAP/SAPGUILandscape.xml');
+        if (!fs.existsSync(sapLandscape)) {
+            sapLandscape = undefined;
+        }
+        return {
+            loggerType: 'CLI',
+            logOutputFolder: 'default',
+            globalNodeModules: getGlobalNodeModules() || '',
+            sapLandscape
+        }
+    }
+
     private getSettings(): SettingsData {
+        var defaultSettings: SettingsData;
         const filePath = this.getSettingsFilePath();
         if (fs.existsSync(filePath)) {
             try {
                 const sIni = fs.readFileSync(filePath).toString();
                 const settingsData = ini.decode(sIni) as SettingsData;
-                if(!settingsData.globalNodeModules){
-                    settingsData.globalNodeModules = getGlobalNodeModules() || '';
+                if (!settingsData.globalNodeModules || !settingsData.sapLandscape) {
+                    defaultSettings = this.getDefaultSettings();
+                    if (!settingsData.globalNodeModules) {
+                        settingsData.globalNodeModules = defaultSettings.globalNodeModules;
+                    }
+                    if (!settingsData.sapLandscape) {
+                        settingsData.sapLandscape = defaultSettings.sapLandscape;
+                    }
                     this.generateSettingsFile(settingsData, filePath);
                 }
                 return settingsData;
             } catch (e) { }
         }
-        defaultSettings.globalNodeModules = getGlobalNodeModules() || '';
+
+        defaultSettings = this.getDefaultSettings();
         this.generateSettingsFile(defaultSettings, filePath);
         return defaultSettings;
     }
