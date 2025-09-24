@@ -13,6 +13,9 @@ Legend
 
 * alias command view/edit
 ! npm global path in settings
+! trm-commons ^3.3.2
+! trm-core ^7.5.3
++ add plugins in info command
 
 2025-09-09 v5.0.2
 -------------------

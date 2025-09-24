@@ -25,7 +25,7 @@ class RFCConnectExtended extends RFCConnect {
 
     public getSystemConnector(): ISystemConnector {
         const data = this.getData();
-        return new RFCSystemConnector(data, data, getTempFolder());
+        return new RFCSystemConnector(data, data, getTempFolder(), Context.getInstance().settings.globalNodeModules);
     }
     
 }
@@ -34,6 +34,7 @@ export class Context {
     private static _instance: Context = null;
     public settings: SettingsData;
     public connections: IConnect[];
+    public plugins: string[];
 
     constructor() {
         //load settings
@@ -47,9 +48,10 @@ export class Context {
     }
 
     public async load(){
-        await Plugin.load({
+        const plugins = await Plugin.load({
             globalNodeModulesPath: this.settings.globalNodeModules
         });
+        this.plugins = [...new Set(plugins)];
         if(!this.connections){
             this.connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
         }
