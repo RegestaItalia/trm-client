@@ -3,13 +3,14 @@ import { getRoamingFolder, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from "./";
 import * as ini from "ini";
-import { IConnect, Logger, RESTConnect, RFCConnect, Plugin } from "trm-commons";
+import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules } from "trm-commons";
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
 
 const SETTINGS_FILE_NAME = "settings.ini";
 const defaultSettings: SettingsData = {
     loggerType: 'CLI',
-    logOutputFolder: 'default'
+    logOutputFolder: 'default',
+    globalNodeModules: ''
 }
 
 class RESTConnectExtended extends RESTConnect {
@@ -46,7 +47,9 @@ export class Context {
     }
 
     public async load(){
-        await Plugin.load();
+        await Plugin.load({
+            globalNodeModulesPath: this.settings.globalNodeModules
+        });
         if(!this.connections){
             this.connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
         }
@@ -71,9 +74,14 @@ export class Context {
             try {
                 const sIni = fs.readFileSync(filePath).toString();
                 const settingsData = ini.decode(sIni) as SettingsData;
+                if(!settingsData.globalNodeModules){
+                    settingsData.globalNodeModules = getGlobalNodeModules() || '';
+                    this.generateSettingsFile(settingsData, filePath);
+                }
                 return settingsData;
             } catch (e) { }
         }
+        defaultSettings.globalNodeModules = getGlobalNodeModules() || '';
         this.generateSettingsFile(defaultSettings, filePath);
         return defaultSettings;
     }

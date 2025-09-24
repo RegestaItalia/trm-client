@@ -1,5 +1,5 @@
-import { getCoreTrmDependencies, getNpmGlobalPath, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector } from "trm-core";
-import { checkCliUpdate, DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion } from "../utils";
+import { getCoreTrmDependencies, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector } from "trm-core";
+import { checkCliUpdate, Context, DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { readFileSync } from "fs";
@@ -54,7 +54,7 @@ const _getNpmLatestForText = async (packageName: string, installedVersion: strin
 export async function info(commandArgs: InfoArguments) {
     Logger.loading(`Reading data...`);
 
-    const npmGlobal = await getNpmGlobalPath();
+    const npmGlobal = Context.getInstance().settings.globalNodeModules;
     const clientLatest = await checkCliUpdate(false);
     const clientVersion = getClientVersion();
     const clientDependencies = getClientNodeDependencies();

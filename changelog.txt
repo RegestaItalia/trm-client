@@ -12,6 +12,7 @@ Legend
 -------------------
 
 * alias command view/edit
+! npm global path in settings
 
 2025-09-09 v5.0.2
 -------------------
