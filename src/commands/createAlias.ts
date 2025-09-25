@@ -9,8 +9,10 @@ export async function createAlias(commandArgs: CreateAliasArguments,) {
         noSystemAlias: true,
         force: true
     }, false, false);
+    const data = connection.getData();
     //create alias first because if it already exists it will throw an exception
-    SystemAlias.create(commandArgs.alias, connection.name, connection.getData());
+    SystemAlias.create(commandArgs.alias, connection.name, data);
+    connection.setData(data);
     Logger.loading(`Connecting to "${commandArgs.alias}"...`);
     var connectionSuccess = true;
     try {
