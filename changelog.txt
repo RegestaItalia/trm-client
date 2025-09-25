@@ -12,6 +12,7 @@ Legend
 -------------------
 
 * create alias command
+* keep original abap packages name selection
 
 2025-09-24 v5.1.0
 -------------------
