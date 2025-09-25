@@ -22,6 +22,7 @@ const _view = (alias: SystemAliasData) => {
     if(!connection){
         throw new Error(`Unknown connection type "${alias.type}".`);
     }
+    connection.setData(alias.data);
     if(connection.logData){
         connection.logData();
     }else{
@@ -51,9 +52,10 @@ const _edit = async (alias: SystemAliasData) => {
             force: true
         }
     } as ConnectArguments, false);
+    const newData = connectionArgs.getData();
     try {
         SystemAlias.delete(alias.alias);
-        await SystemAlias.create(alias.alias, connectionArgs.name, connectionArgs.getData()).getConnection().connect();
+        await SystemAlias.create(alias.alias, connectionArgs.name, newData).getConnection().connect();
     } catch (e) {
         connectionSuccess = false;
         throw e;

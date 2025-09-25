@@ -8,6 +8,17 @@ Legend
 + : added
 - : removed
 
+2025-09-24 v5.1.0
+-------------------
+
+* alias command view/edit
+! npm global path in settings
+! sap landscape in settings
+* sap landscape for mac
++ add plugins in info command
+! trm-commons ^3.3.2
+! trm-core ^7.5.3
+
 2025-09-09 v5.0.2
 -------------------
 
