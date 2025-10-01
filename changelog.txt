@@ -14,6 +14,7 @@ Legend
 ! trm-core ^7.5.5
 ! trm-commons ^3.4.2
 * connection data problems
++ cache time consuming data
 
 2025-09-25 v5.1.1
 -------------------
