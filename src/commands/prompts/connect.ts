@@ -2,6 +2,7 @@ import { SystemAlias } from "../../systemAlias";
 import { Context, DummyConnector, getSapLogonConnections } from "../../utils";
 import { ConnectArguments } from "../arguments";
 import { IConnect, Inquirer } from "trm-commons";
+import { isEqual } from "lodash";
 
 const languageList = [
     { value: 'AR', name: 'AR (Arabic)' },
@@ -116,6 +117,14 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             throw new Error(`Unknown connection type "${inq2.type}" in alias "${inq2.name}"`);
         }
         connection.setData(inq2.data);
+        if (connection.onAfterLoginData) {
+            await connection.onAfterLoginData(force, commandArgs);
+        }
+        //check for changes to login data and update alias
+        if(!isEqual(inq2.data, connection.getData())){
+            SystemAlias.delete(inq2.alias);
+            SystemAlias.create(inq2.alias, inq2.type, connection.getData());
+        }
         return connection;
     } else {
         if (inputType === 'logon') {

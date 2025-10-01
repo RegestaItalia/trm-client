@@ -55,11 +55,10 @@ export class SystemAlias {
             }
             const connection = Context.getInstance().getConnections().find(o => o.name === oIni[sAlias].type);
             if (connection) {
-                connection.setData(oIni[sAlias]);
                 aAlias.push({
                     alias: sAlias,
                     type: oIni[sAlias].type,
-                    data: connection.getData()
+                    data: oIni[sAlias]
                 });
             }
         })
