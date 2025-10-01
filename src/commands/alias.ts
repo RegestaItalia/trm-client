@@ -18,7 +18,7 @@ const _create = async () => {
 }
 
 const _view = (alias: SystemAliasData) => {
-    const connection = Context.getInstance().connections.find(o => o.name === alias.type);
+    const connection = Context.getInstance().getConnections().find(o => o.name === alias.type);
     if(!connection){
         throw new Error(`Unknown connection type "${alias.type}".`);
     }

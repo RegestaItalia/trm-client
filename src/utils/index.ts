@@ -15,4 +15,5 @@ export * from "./getClientNodeDependencies";
 export * from "./DummyConnector";
 export * from "./getNpmPackageLatestVersion";
 export * from "./SettingsData";
+export * from "./CacheData";
 export * from "./Context";

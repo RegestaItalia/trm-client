@@ -13,9 +13,9 @@ export class SystemAlias {
     constructor(public type: string, private _data: any) { }
 
     public getConnection(): ISystemConnector {
-        const connection = Context.getInstance().connections.find(o => o.name === this.type);
+        const connection = Context.getInstance().getConnections().find(o => o.name === this.type);
         if (!connection) {
-            throw new Error(`Unknown connection type "${this.type}". Possible values are ${Context.getInstance().connections.map(k => k.name).join(', ')}.`);
+            throw new Error(`Unknown connection type "${this.type}". Possible values are ${Context.getInstance().getConnections().map(k => k.name).join(', ')}.`);
         }
         connection.setData(this._data);
         return connection.getSystemConnector() as ISystemConnector;
@@ -27,7 +27,7 @@ export class SystemAlias {
         }
         var oContent = {};
         content.forEach(o => {
-            const connection = Context.getInstance().connections.find(k => k.name === o.type);
+            const connection = Context.getInstance().getConnections().find(k => k.name === o.type);
             if (connection) {
                 oContent[o.alias] = o.data;
                 oContent[o.alias].type = o.type;
@@ -53,13 +53,12 @@ export class SystemAlias {
             if (!oIni[sAlias].type) {
                 oIni[sAlias].type = 'RFC'; //blank defaults to RFC (for backwards compatibility)
             }
-            const connection = Context.getInstance().connections.find(o => o.name === oIni[sAlias].type);
+            const connection = Context.getInstance().getConnections().find(o => o.name === oIni[sAlias].type);
             if (connection) {
-                connection.setData(oIni[sAlias]);
                 aAlias.push({
                     alias: sAlias,
                     type: oIni[sAlias].type,
-                    data: connection.getData()
+                    data: oIni[sAlias]
                 });
             }
         })

@@ -8,6 +8,15 @@ Legend
 + : added
 - : removed
 
+2025-10-01 v5.2.0
+-------------------
+
+! trm-core ^7.5.5
+! trm-commons ^3.4.2
+* connection data problems
++ cache time consuming data
++ on after login update alias on changes
+
 2025-09-25 v5.1.1
 -------------------
 
