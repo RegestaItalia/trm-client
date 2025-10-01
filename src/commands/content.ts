@@ -22,9 +22,9 @@ export async function content(commandArgs: ContentArguments) {
     const packageContent = await remotePackage.fetchRemoteContent(commandArgs.version, {
         tempDirPath: getTempFolder(),
         r3transDirPath: commandArgs.r3transPath,
-        useDocker: Context.getInstance().settings.r3transDocker,
+        useDocker: Context.getInstance().getSettings().r3transDocker,
         dockerOptions: {
-            name: Context.getInstance().settings.r3transDockerName
+            name: Context.getInstance().getSettings().r3transDockerName
         }
     });
     if (!commandArgs.all) {

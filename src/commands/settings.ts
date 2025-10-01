@@ -13,7 +13,7 @@ export async function settings(commandArgs: SettingsArguments) {
         const value = aSplit[1];
         Context.getInstance().setSetting(key, value);
     }
-    const settingsData = Context.getInstance().settings;
+    const settingsData = Context.getInstance().getSettings();
     Object.keys(settingsData).forEach(k => {
         Logger.log(`${k}: ${settingsData[k]}`);
     });

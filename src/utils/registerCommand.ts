@@ -24,8 +24,8 @@ export function registerCommand(command: Command, args?: {
     const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable ? true : false;
     const noSystemAlias = args.noSystemAlias ? true : false;
     const registryAuthBlacklist = args.registryAuthBlacklist || [];
-    const defaultLogger = Context.getInstance().settings.loggerType;
-    const logOutputFolder = Context.getInstance().settings.logOutputFolder;
+    const defaultLogger = Context.getInstance().getSettings().loggerType;
+    const logOutputFolder = Context.getInstance().getSettings().logOutputFolder;
 
     if (requiresConnection) {
         command.option(`-de, --dest <dest>`, `System ID.`)

@@ -4,9 +4,9 @@ import { Context } from "./Context";
 
 export async function getSapLogonConnections() {
     var systems = [];
-    const sapLandscape = Context.getInstance().settings.sapLandscape;
+    const sapLandscape = Context.getInstance().getSettings().sapLandscape;
     if (sapLandscape) {
-        const sXml = fs.readFileSync(Context.getInstance().settings.sapLandscape, { encoding: 'utf8', flag: 'r' });
+        const sXml = fs.readFileSync(Context.getInstance().getSettings().sapLandscape, { encoding: 'utf8', flag: 'r' });
         const result = await xml2js(sXml);
         try {
             result.Landscape.Services[0].Service.forEach((xmlObj) => {

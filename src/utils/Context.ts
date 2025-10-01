@@ -3,7 +3,7 @@ import { getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from "./";
 import * as ini from "ini";
-import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules } from "trm-commons";
+import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules, PluginModule } from "trm-commons";
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
 
 const SETTINGS_FILE_NAME = "settings.ini";
@@ -20,45 +20,67 @@ class RFCConnectExtended extends RFCConnect {
 
     public getSystemConnector(): ISystemConnector {
         const data = this.getData();
-        return new RFCSystemConnector(data, data, getTempFolder(), Context.getInstance().settings.globalNodeModules);
+        return new RFCSystemConnector(data, data, getTempFolder(), Context.getInstance().getSettings().globalNodeModules);
     }
 
 }
 
 export class Context {
     private static _instance: Context = null;
-    public settings: SettingsData;
-    public connections: IConnect[];
-    public plugins: string[];
+
+    private _pluginsLoaded: boolean = false;
+    private _settings: SettingsData;
+    private _connections: IConnect[] = [];
+    private _plugins: PluginModule[] = [];
 
     constructor() {
         //load settings
-        this.settings = this.getSettings();
-        if (typeof (this.settings.r3transDocker) !== 'boolean') {
+        this._settings = this.getSettingsInternal();
+        if (typeof (this._settings.r3transDocker) !== 'boolean') {
             if (process.platform === 'darwin') {
                 Logger.info(`R3trans defaults to docker in darwin os.`, true);
-                this.settings.r3transDocker = true;
+                this._settings.r3transDocker = true;
             }
         }
     }
 
+    public getSettings(): SettingsData {
+        return this._settings;
+    }
+
     public async load() {
-        const plugins = await Plugin.load({
-            globalNodeModulesPath: this.settings.globalNodeModules
-        });
-        this.plugins = [...new Set(plugins)];
-        if (!this.connections) {
-            this.connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
+        if (!this._pluginsLoaded) {
+            this._plugins = await Plugin.load({
+                globalNodeModulesPath: this._settings.globalNodeModules
+            });
+            this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
+            this._pluginsLoaded = true;
         }
     }
 
+    public getPlugins(): PluginModule[] {
+        return this._plugins;
+    }
+
+    public getConnections(): IConnect[] {
+        return this.cloneArrayOfInstances(this._connections);
+    }
+
     public setSetting(key: string, value: string): void {
-        if (this.settings[key] === undefined) {
+        if (this._settings[key] === undefined) {
             throw new Error(`Invalid key ${key}.`);
         }
         const filePath = this.getSettingsFilePath();
-        this.settings[key] = value;
-        this.generateSettingsFile(this.settings, filePath);
+        this._settings[key] = value;
+        this.generateSettingsFile(this._settings, filePath);
+    }
+
+    private cloneInstance<T>(obj: T): T {
+        return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+    }
+
+    private cloneArrayOfInstances<T>(arr: T[]): T[] {
+        return arr.map(this.cloneInstance);
     }
 
     private getSettingsFilePath(): string {
@@ -78,7 +100,7 @@ export class Context {
         }
     }
 
-    private getSettings(): SettingsData {
+    private getSettingsInternal(): SettingsData {
         var defaultSettings: SettingsData;
         const filePath = this.getSettingsFilePath();
         if (fs.existsSync(filePath)) {

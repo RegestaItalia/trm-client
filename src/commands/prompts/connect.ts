@@ -111,7 +111,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 }
             })
         })).alias;
-        const connection = Context.getInstance().connections.find(o => o.name === inq2.type);
+        const connection = Context.getInstance().getConnections().find(o => o.name === inq2.type);
         if (!connection) {
             throw new Error(`Unknown connection type "${inq2.type}" in alias "${inq2.name}"`);
         }
@@ -119,21 +119,20 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         return connection;
     } else {
         if (inputType === 'logon') {
-            const inq3 = await Inquirer.prompt({
+            const logonConnection = (await Inquirer.prompt({
                 type: `list`,
-                name: `logonConnection`,
+                name: `data`,
                 message: `Select connection`,
                 choices: aSapLogonConnections.map(o => {
                     return {
-                        value: o.id, name: o.name
+                        value: o, name: o.name
                     }
                 })
-            });
-            const logonConnection = aSapLogonConnections.find(o => o.id === inq3.logonConnection);
+            })).data;
             commandArgs.ashost = logonConnection.ashost;
             commandArgs.dest = logonConnection.dest;
             commandArgs.sysnr = logonConnection.sysnr;
-            commandArgs.saprouter = logonConnection.saprouter;
+            commandArgs.saprouter = logonConnection.saprouter || ' '; //passing default blank string to avoid asking saprouter again in inquirer
             type = 'RFC'; //force to rfc
         }
 
@@ -142,7 +141,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 type: `list`,
                 name: `type`,
                 message: `Connection type`,
-                choices: Context.getInstance().connections.map(o => {
+                choices: Context.getInstance().getConnections().map(o => {
                     return {
                         name: o.description,
                         value: o.name
@@ -150,7 +149,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                 })
             })).type;
         }
-        const connectionType = Context.getInstance().connections.find(o => o.name === type);
+        const connectionType = Context.getInstance().getConnections().find(o => o.name === type);
         if (!connectionType) {
             throw new Error(`Invalid connection type "${type}"`);
         }
@@ -200,7 +199,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
                             return (commandArgs.lang ? false : true) || force;
                         },
                         validate: (input) => {
-                            return languageList.includes(input.trim().toUpperCase());
+                            return languageList.find(o => o.value === input.trim().toUpperCase()) ? true : `Unknown language "${input}".`
                         },
                         choices: languageList
                     }

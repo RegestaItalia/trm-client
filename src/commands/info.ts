@@ -3,7 +3,7 @@ import { checkCliUpdate, Context, DummyConnector, getClientNodeDependencies, get
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { readFileSync } from "fs";
-import path from "path";
+import { join } from "path";
 import { rootPath } from 'get-root-path';
 import chalk from "chalk";
 import { gte } from "semver";
@@ -11,41 +11,41 @@ import { Logger, TreeLog } from "trm-commons";
 
 const _getDependencyVersion = (moduleName: string, rootModule: string = 'trm-client') => {
     var file: Buffer;
-    try{
-        file = readFileSync(path.join(rootPath, `/node_modules/${rootModule}/node_modules/${moduleName}/package.json`));
-    }catch(e){
-        file = readFileSync(path.join(rootPath, `/node_modules/${moduleName}/package.json`));
+    try {
+        file = readFileSync(join(rootPath, `/node_modules/${rootModule}/node_modules/${moduleName}/package.json`));
+    } catch (e) {
+        file = readFileSync(join(rootPath, `/node_modules/${moduleName}/package.json`));
     }
-    if(!file){
+    if (!file) {
         Logger.warning(`Library ${moduleName} (root ${rootModule}) was not found!`, true);
-    }else{
+    } else {
         return JSON.parse(file.toString()).version;
     }
 }
 
 const _getNodeRfcVersion = (npmGlobal: string) => {
     var file: Buffer;
-    try{
-        file = readFileSync(path.join(npmGlobal, `/node-rfc/package.json`));
-    }catch(e){
+    try {
+        file = readFileSync(join(npmGlobal, `/node-rfc/package.json`));
+    } catch (e) {
         //
     }
-    if(!file){
+    if (!file) {
         Logger.warning(`Library node-rfc was not found!`, true);
-    }else{
+    } else {
         return JSON.parse(file.toString()).version;
     }
 }
 
 const _getNpmLatestForText = async (packageName: string, installedVersion: string, text: string) => {
-    try{
+    try {
         const latestVersion = await getNpmPackageLatestVersion(packageName);
-        if(gte(installedVersion, latestVersion)){
+        if (gte(installedVersion, latestVersion)) {
             text += ` ${chalk.bgGreen('LATEST')}`;
-        }else{
+        } else {
             text += ` ${chalk.bold('v' + latestVersion + ' available')}`;
         }
-    }catch(e){
+    } catch (e) {
         text += ` ${chalk.bgGray('Can\'t fetch latest version')}`;
     }
     return text;
@@ -54,7 +54,7 @@ const _getNpmLatestForText = async (packageName: string, installedVersion: strin
 export async function info(commandArgs: InfoArguments) {
     Logger.loading(`Reading data...`);
 
-    const npmGlobal = Context.getInstance().settings.globalNodeModules;
+    const npmGlobal = Context.getInstance().getSettings().globalNodeModules;
     const clientLatest = await checkCliUpdate(false);
     const clientVersion = getClientVersion();
     const clientDependencies = getClientNodeDependencies();
@@ -64,24 +64,24 @@ export async function info(commandArgs: InfoArguments) {
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
     const packages = await CommandContext.getSystemPackages();
     const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
-    
+
     //MIW: root changed!
     var nodeR3transVersion;
-    try{
+    try {
         nodeR3transVersion = _getDependencyVersion("node-r3trans", "trm-core");
-        if(!nodeR3transVersion){
+        if (!nodeR3transVersion) {
             throw new Error();
         }
-    }catch(e){
+    } catch (e) {
         nodeR3transVersion = _getDependencyVersion("node-r3trans");
     }
 
     var clientDependenciesTree: TreeLog[] = [];
-    if(clientDependencies){
-        for(const d of Object.keys(clientDependencies).filter(k => k.startsWith('trm'))){
+    if (clientDependencies) {
+        for (const d of Object.keys(clientDependencies).filter(k => k.startsWith('trm'))) {
             var dText = ``;
             var dInstalledVersion = _getDependencyVersion(d);
-            if(dInstalledVersion){
+            if (dInstalledVersion) {
                 dText = ` -> ${dInstalledVersion}`;
                 dText = await _getNpmLatestForText(d, dInstalledVersion, dText);
             }
@@ -93,46 +93,46 @@ export async function info(commandArgs: InfoArguments) {
     }
 
     var serverDependenciesTree: TreeLog[] = [];
-    if(trmDependencies){
-        for(const d of Object.keys(trmDependencies)){
+    if (trmDependencies) {
+        for (const d of Object.keys(trmDependencies)) {
             var dText = ``;
             const oTrmPackage = trmDependenciesInstances.find(o => o.compareName(d));
-            if(oTrmPackage){
+            if (oTrmPackage) {
                 var dInstalledVersion;
-                try{
+                try {
                     dInstalledVersion = oTrmPackage.manifest.get().version;
-                }catch(e){
+                } catch (e) {
                     dText = ` -> ${e.message}`;
                 }
-                if(dInstalledVersion){
+                if (dInstalledVersion) {
                     dText = ` -> ${dInstalledVersion}`;
-                    try{
+                    try {
                         const dLatestVersion = (await oTrmPackage.fetchRemoteManifest('latest')).get().version;
-                        if(gte(dInstalledVersion, dLatestVersion)){
+                        if (gte(dInstalledVersion, dLatestVersion)) {
                             dText += ` ${chalk.bgGreen('LATEST')}`;
-                        }else{
+                        } else {
                             dText += ` ${chalk.bold('v' + dLatestVersion + ' available')}`;
                         }
-                    }catch(e){
+                    } catch (e) {
                         dText += ` ${chalk.bgGray('Can\'t fetch latest version')}`;
                     }
                 }
-            }else{
+            } else {
                 const missingDependency = trmMissingDependencies.find(o => {
-                    if(typeof(o) === 'string'){
-                        if(o === d){
+                    if (typeof (o) === 'string') {
+                        if (o === d) {
                             return o;
                         }
-                    }else{
-                        if(o.compareName(d)){
+                    } else {
+                        if (o.compareName(d)) {
                             return o;
                         }
                     }
                 });
-                if(missingDependency){
-                    try{
+                if (missingDependency) {
+                    try {
                         dText = ` -> ${chalk.bgRed((missingDependency as any).manifest.get().version)}`;
-                    }catch(e){
+                    } catch (e) {
                         dText = ` -> ${chalk.bgRed('Not found')}`;
                     }
                 }
@@ -143,7 +143,7 @@ export async function info(commandArgs: InfoArguments) {
             });
         }
     }
-    if(trmRest && trmRest.manifest){
+    if (trmRest && trmRest.manifest) {
         serverDependenciesTree.push({
             text: `trm-rest -> ${trmRest.manifest.get().version}`,
             children: []
@@ -155,23 +155,23 @@ export async function info(commandArgs: InfoArguments) {
         text: `trm-client ${clientVersion} ${gte(clientLatest.localVersion, clientLatest.latestVersion) ? chalk.bgGreen('LATEST') : chalk.bold('v' + clientLatest.latestVersion + ' available')}`,
         children: clientDependenciesTree
     }];
-    if(nodeRfcVersion){
+    if (nodeRfcVersion) {
         clientChildrenTree.push({
             text: await _getNpmLatestForText('node-rfc', nodeRfcVersion, `node-rfc ${nodeRfcVersion}`),
             children: []
         });
-    }else{
+    } else {
         clientChildrenTree.push({
             text: `node-rfc ${chalk.bold('not found')}`,
             children: []
         });
     }
-    if(nodeR3transVersion){
+    if (nodeR3transVersion) {
         clientChildrenTree.push({
             text: await _getNpmLatestForText('node-r3trans', nodeR3transVersion, `node-r3trans ${nodeR3transVersion}`),
             children: []
         });
-    }else{
+    } else {
         clientChildrenTree.push({
             text: `node-r3trans ${chalk.bold('not found')}`,
             children: []
@@ -181,29 +181,39 @@ export async function info(commandArgs: InfoArguments) {
         text: chalk.bold(`Client`),
         children: clientChildrenTree
     };
-    Logger.tree(clientTree);
 
     //build server tree
     const serverTree: TreeLog = {
         text: chalk.bold(`Server (${SystemConnector.getDest()})`),
         children: serverDependenciesTree
     };
-    if(!(SystemConnector.systemConnector instanceof DummyConnector)){
-        Logger.tree(serverTree);
-    }
 
     //build plugins tree
     const pluginsTree: TreeLog = {
         text: chalk.bold(`Plugins`),
         children: []
     };
-    Context.getInstance().plugins.forEach(p => {
-        pluginsTree.children.push({
-            text: p,
-            children: []
-        });
-    })
-    if(pluginsTree.children.length > 0){
+    for (const plugin of Context.getInstance().getPlugins()) {
+        try {
+            const installedVersion = JSON.parse(readFileSync(join(plugin.location, 'package.json')).toString()).version;
+            pluginsTree.children.push({
+                text: await _getNpmLatestForText(plugin.name, installedVersion, `${plugin.name} ${installedVersion}`),
+                children: []
+            });
+        } catch {
+            pluginsTree.children.push({
+                text: plugin.name,
+                children: []
+            });
+        }
+    }
+
+    //print
+    Logger.tree(clientTree);
+    if (!(SystemConnector.systemConnector instanceof DummyConnector)) {
+        Logger.tree(serverTree);
+    }
+    if (pluginsTree.children.length > 0) {
         Logger.tree(pluginsTree);
     }
 }
