@@ -8,6 +8,11 @@ Legend
 + : added
 - : removed
 
+2025-10-15 v5.2.1
+-------------------
+* system alias connection data
+* typo in update message
+
 2025-10-01 v5.2.0
 -------------------
 

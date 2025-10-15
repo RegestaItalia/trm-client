@@ -25,7 +25,7 @@ export async function checkCliUpdate(print: boolean): Promise<{
                 Logger.warning(`A newer release of trm-client (v${chalk.bold(latestVersion)}) is available.`);
                 Logger.warning(`New releases can introduce features and bug fixes.`);
                 Logger.warning(`It is recommended to update your client by running the command`);
-                Logger.warning(`    ${chalk.bold('trm update')})`);
+                Logger.warning(`    ${chalk.bold('trm update')}`);
                 Logger.warning(` `);
             }
         }
