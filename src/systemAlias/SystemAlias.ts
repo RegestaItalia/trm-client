@@ -17,7 +17,7 @@ export class SystemAlias {
         if (!connection) {
             throw new Error(`Unknown connection type "${this.type}". Possible values are ${Context.getInstance().getConnections().map(k => k.name).join(', ')}.`);
         }
-        connection.setData(this._data);
+        connection.setData(this._data.data);
         return connection.getSystemConnector() as ISystemConnector;
     }
 
