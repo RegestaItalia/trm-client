@@ -4,9 +4,6 @@ import { RegistryAlias } from "../../registryAlias";
 export async function pickRegistry(): Promise<RegistryAlias> {
     var registryAlias: RegistryAlias;
 
-    //generate public alias if it doesn't exist
-    RegistryAlias.generatePublicRegistryAlias();
-
     const allAliases = RegistryAlias.getAll();
     if (allAliases.length === 1) {
         registryAlias = RegistryAlias.get(allAliases[0].alias);

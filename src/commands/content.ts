@@ -1,4 +1,3 @@
-import { TrmPackage } from "trm-core";
 import { ContentArguments } from "./arguments";
 import { CommandContext } from "./commons";
 import { Context, getTempFolder } from "../utils";
@@ -8,8 +7,8 @@ import { Logger, TreeLog } from "trm-commons";
 export async function content(commandArgs: ContentArguments) {
     //search package
     Logger.loading(`Searching package "${commandArgs.package}"...`);
-    const remotePackage = new TrmPackage(commandArgs.package, CommandContext.getRegistry());
-    const remoteManifest = await remotePackage.fetchRemoteManifest(commandArgs.version);
+    const data = await CommandContext.getRegistry().getPackage(commandArgs.package, commandArgs.version);
+    const artifact = await CommandContext.getRegistry().downloadArtifact(commandArgs.package, commandArgs.version);
 
     Logger.loading(`Reading content...`);
     //build output tree
@@ -19,7 +18,7 @@ export async function content(commandArgs: ContentArguments) {
         content: any[]
     }[] = [];
     var iOtherEntries = 0;
-    const packageContent = await remotePackage.fetchRemoteContent(commandArgs.version, {
+    const packageContent = await artifact.getContent({
         tempDirPath: getTempFolder(),
         r3transDirPath: commandArgs.r3transPath,
         useDocker: Context.getInstance().getSettings().r3transDocker,
@@ -62,7 +61,7 @@ export async function content(commandArgs: ContentArguments) {
         });
     }
     var tree: TreeLog = {
-        text: `${chalk.bold(commandArgs.package)} v${remoteManifest.get().version} content`,
+        text: `${chalk.bold(commandArgs.package)} v${data.manifest.version} content`,
         children: []
     };
     aNodes.forEach(node => {
@@ -118,9 +117,9 @@ export async function content(commandArgs: ContentArguments) {
     var header = ['Namespace', 'ABAP Package', 'TRM Transport', 'Customizing', 'Translations'];
     var row1 = [];
     var row2 = [];
-    if (remoteManifest.get().namespace) {
+    if (data.manifest.namespace) {
         row1.push(`\u2714`);
-        row2.push(remoteManifest.get().namespace.replicense);
+        row2.push(data.manifest.namespace.replicense);
     } else {
         row1.push(`\u274C`);
         row2.push(``);

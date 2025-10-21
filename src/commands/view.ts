@@ -2,11 +2,11 @@ import { ViewArguments } from "./arguments";
 import { PUBLIC_RESERVED_KEYWORD, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { CommandContext, viewRegistryPackage } from "./commons";
 import { eq } from "semver";
-import { View } from "trm-registry-types";
 import { RegistryAlias } from "../registryAlias";
 import chalk from "chalk";
 import { Logger } from "trm-commons";
 import { DummyConnector } from "../utils";
+import { Package } from "trm-registry-types";
 
 type PrintManifest = {
     devclass?: string,
@@ -27,7 +27,7 @@ const _printHeaderSection = (packageName: string) => {
     Logger.info(`Registry: ${CommandContext.getRegistry().name}`);
 }
 
-const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) => {
+const _printVersionSection = (systemPackage?: TrmPackage, registryView?: Package) => {
     if (!systemPackage && !registryView) {
         return;
     }
@@ -42,10 +42,10 @@ const _printVersionSection = (systemPackage?: TrmPackage, registryView?: View) =
             Logger.error(`Installed on ${SystemConnector.getDest()}: No`);
         }
     }
-    if (registryView && registryView.release) {
-        console.log(`Latest version available: ${registryView.release.version}`);
+    if (registryView) {
+        console.log(`Latest version available: ${registryView.latest}`);
         if (oSystemManifest) {
-            if (eq(oSystemManifest.version, registryView.release.version)) {
+            if (eq(oSystemManifest.version, registryView.latest)) {
                 Logger.success(`Latest version installed: Yes`);
             } else {
                 Logger.error(`Latest version installed: No`);
@@ -193,11 +193,11 @@ export async function view(commandArgs: ViewArguments) {
     } else if (oRegistryView) {
         dependencies = [];
         printManifest = {
-            private: oRegistryView.private,
-            description: oRegistryView.shortDescription,
-            git: oRegistryView.git,
-            website: oRegistryView.website,
-            license: oRegistryView.license
+            private: oRegistryView.manifest.private,
+            description: oRegistryView.manifest.shortDescription,
+            git: oRegistryView.manifest.git,
+            website: oRegistryView.manifest.website,
+            license: oRegistryView.manifest.license
         };
     } else {
         throw new Error(`Package "${packageName}" does not exist or insufficient view permissions.`);

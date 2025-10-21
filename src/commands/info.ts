@@ -1,4 +1,4 @@
-import { getCoreTrmDependencies, PUBLIC_RESERVED_KEYWORD, Registry, SystemConnector } from "trm-core";
+import { getCoreTrmDependencies, RegistryProvider, SystemConnector } from "trm-core";
 import { checkCliUpdate, Context, DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion } from "../utils";
 import { InfoArguments } from "./arguments";
 import { CommandContext } from "./commons";
@@ -63,7 +63,7 @@ export async function info(commandArgs: InfoArguments) {
     const trmMissingDependencies = CommandContext.missingTrmDependencies;
     const nodeRfcVersion = _getNodeRfcVersion(npmGlobal);
     const packages = await CommandContext.getSystemPackages();
-    const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(new Registry(PUBLIC_RESERVED_KEYWORD)));
+    const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
 
     //MIW: root changed!
     var nodeR3transVersion;
@@ -107,7 +107,7 @@ export async function info(commandArgs: InfoArguments) {
                 if (dInstalledVersion) {
                     dText = ` -> ${dInstalledVersion}`;
                     try {
-                        const dLatestVersion = (await oTrmPackage.fetchRemoteManifest('latest')).get().version;
+                        const dLatestVersion = (await oTrmPackage.registry.getPackage(oTrmPackage.packageName, 'latest')).manifest.version;
                         if (gte(dInstalledVersion, dLatestVersion)) {
                             dText += ` ${chalk.bgGreen('LATEST')}`;
                         } else {

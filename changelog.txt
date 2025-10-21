@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2025-10-21 v6.0.0
+-------------------
+! migrate to registry v2
+! trm-registry-types ^2.0.0
+! trm-core ^8.0.0
+
 2025-10-15 v5.2.1
 -------------------
 * system alias connection data

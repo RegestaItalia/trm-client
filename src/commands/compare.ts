@@ -1,4 +1,4 @@
-import { View } from "trm-registry-types";
+import { Package } from "trm-registry-types";
 import { CompareArguments } from "./arguments";
 import * as fs from "fs";
 import { SystemAlias } from "../systemAlias";
@@ -74,7 +74,7 @@ export async function compare(commandArgs: CompareArguments) {
     var tableData = [];
 
     Logger.loading(`Reading registry data...`);
-    var oRegistryView: View;
+    var oRegistryView: Package;
     try {
         oRegistryView = await viewRegistryPackage(packageName, true);
     } catch (e) { }
@@ -117,7 +117,7 @@ export async function compare(commandArgs: CompareArguments) {
     Logger.info(`Package name: ${packageName}`);
     Logger.info(`Registry: ${registry.name}`);
     try {
-        Logger.info(`Latest version: ${oRegistryView.release.version}`);
+        Logger.info(`Latest version: ${oRegistryView.latest}`);
     } catch (e) {
         Logger.warning(`Latest version: Unknown`);
     }

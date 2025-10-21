@@ -33,7 +33,9 @@ export async function addRegistry(commandArgs: AddRegistryArguments) {
     var pingSuccess = true;
     try{
         const ping = await registry.getRegistry().ping();
-        Logger.registryResponse(ping.wallMessage);
+        if(ping.messages){
+            ping.messages.forEach(m => Logger.registryResponse(m));
+        }
     }catch(e){
         Logger.error(`Ping to registry "${registryName}" (${endpoint}) failed.`);
         pingSuccess = false;
