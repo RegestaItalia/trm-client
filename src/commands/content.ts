@@ -5,12 +5,6 @@ import chalk from "chalk";
 import { Logger, TreeLog } from "trm-commons";
 
 export async function content(commandArgs: ContentArguments) {
-    //search package
-    Logger.loading(`Searching package "${commandArgs.package}"...`);
-    const data = await CommandContext.getRegistry().getPackage(commandArgs.package, commandArgs.version);
-    const artifact = await CommandContext.getRegistry().downloadArtifact(commandArgs.package, commandArgs.version);
-
-    Logger.loading(`Reading content...`);
     //build output tree
     var transports: any = {};
     var aNodes: {
@@ -18,6 +12,13 @@ export async function content(commandArgs: ContentArguments) {
         content: any[]
     }[] = [];
     var iOtherEntries = 0;
+
+    //search package
+    Logger.loading(`Searching package "${commandArgs.package}"...`);
+    const data = await CommandContext.getRegistry().getPackage(commandArgs.package, commandArgs.version);
+    const artifact = await CommandContext.getRegistry().downloadArtifact(commandArgs.package, commandArgs.version);
+
+    Logger.loading(`Reading content...`);
     const packageContent = await artifact.getContent({
         tempDirPath: getTempFolder(),
         r3transDirPath: commandArgs.r3transPath,
