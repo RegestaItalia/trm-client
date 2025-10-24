@@ -12,7 +12,7 @@ export async function login(commandArgs: LoginArguments) {
             const inq1 = await Inquirer.prompt({
                 type: "confirm",
                 name: "continue",
-                message: `Already logged in as "${whoami.username}". Do you want to logout and continue?`,
+                message: `Already logged in as "${whoami.user}". Do you want to logout?`,
                 default: false
             });
             continueLogin = inq1.continue;

@@ -13,7 +13,7 @@ const _dependencies = async (oPackage: TrmPackage) => {
             systemPackages: packages
         },
         packageData: {
-            package: oPackage
+            manifest: oPackage.manifest.get()
         },
         printOptions: {
             dependencyStatus: true,
@@ -26,7 +26,7 @@ const _sapEntries = async (oPackage: TrmPackage) => {
     Logger.loading(`Analyzing package SAP Entries...`);
     await checkSapEntries({
         packageData: {
-            package: oPackage
+            manifest: oPackage.manifest.get()
         },
         printOptions: {
             entriesStatus: true,

@@ -40,12 +40,10 @@ export async function _import(commandArgs: ImportArguments) {
         packageData: {
             name: 'dummy',
             overwrite: commandArgs.overwrite,
-            integrity: commandArgs.integrity,
             registry
         },
         installData: {
             checks: {
-                safe: commandArgs.safe,
                 noDependencies: commandArgs.noDependencies,
                 noObjectTypes: commandArgs.noObjectTypes,
                 noSapEntries: commandArgs.noSapEntries
@@ -66,7 +64,7 @@ export async function _import(commandArgs: ImportArguments) {
             }
         }
     });
-    var sOutput = `${result.trmPackage.packageName} installed`;
+    var sOutput = `${result.manifest.name} v${result.manifest.version} installed`;
     if (result.installTransport) {
         sOutput += `, use ${result.installTransport.trkorr} transport in landscape`;
     }

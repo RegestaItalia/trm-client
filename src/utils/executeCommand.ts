@@ -63,7 +63,7 @@ export async function executeCommand(args: any) {
         const registryAuthBlacklist = args.registryAuthBlacklist;
         const ignoreRegistryUnreachable = args.ignoreRegistryUnreachable;
 
-        if(args.checkUpdate){
+        if (args.checkUpdate) {
             await checkCliUpdate(true);
         }
 
@@ -80,11 +80,11 @@ export async function executeCommand(args: any) {
             registry = registryAlias.getRegistry();
             try {
                 const registryPing = await registry.ping();
-                if (registryPing.wallMessage) {
-                    if (registryAuthBlacklist.includes(registryPing.authenticationType)) {
-                        throw new Error(`This command is not supported by registry "${registry.name}".`);
-                    }
-                    Logger.registryResponse(registryPing.wallMessage);
+                if (registryAuthBlacklist.includes(registryPing.authentication_type)) {
+                    throw new Error(`This command is not supported by registry "${registry.name}".`);
+                }
+                if (registryPing.messages) {
+                    registryPing.messages.forEach(m => Logger.registryResponse(m));
                 }
             } catch (e) {
                 Logger.error(e, true);
@@ -103,19 +103,21 @@ export async function executeCommand(args: any) {
             CommandContext.registry = registry;
             CommandContext.hasRegistryAuthData = !!registryAlias.authData;
             RegistryProvider.registry.push(registry);
-            RegistryAlias.getAll().forEach(o => {
-                var append = true;
-                var aliasRegistry = RegistryAlias.get(o.alias).getRegistry();
-                RegistryProvider.registry.forEach(k => {
-                    if (append) {
-                        append = !k.compare(aliasRegistry);
-                    }
-                });
+        }
+        
+        //adding all registries to provider even if not required in command
+        RegistryAlias.getAll().forEach(o => {
+            var append = true;
+            var aliasRegistry = RegistryAlias.get(o.alias).getRegistry();
+            RegistryProvider.registry.forEach(k => {
                 if (append) {
-                    RegistryProvider.registry.push(aliasRegistry);
+                    append = !k.compare(aliasRegistry);
                 }
             });
-        }
+            if (append) {
+                RegistryProvider.registry.push(aliasRegistry);
+            }
+        });
 
         if (requiresConnection) {
             var system: ISystemConnector;

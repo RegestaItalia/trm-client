@@ -4,7 +4,7 @@ import { Command } from "commander";
 import { getClientVersion, registerCommand } from "./utils";
 import { AuthenticationType } from 'trm-registry-types';
 
-//dotenv.config();
+dotenv.config();
 
 const program = new Command();
 

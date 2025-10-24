@@ -3,7 +3,7 @@ import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
 import { RegistryAliasData } from "./RegistryAliasData";
-import { AbstractRegistry, PUBLIC_RESERVED_KEYWORD, Registry } from "trm-core";
+import { AbstractRegistry, PUBLIC_RESERVED_KEYWORD, RegistryV2 } from "trm-core";
 
 const REGISTRY_FILE_NAME = "registry.ini";
 
@@ -23,7 +23,7 @@ export class RegistryAlias {
     }
 
     public getRegistry(): AbstractRegistry {
-        return new Registry(this._endpoint, this._name);
+        return new RegistryV2(this._endpoint, this._name);
     }
 
     private static generateFile(content: RegistryAliasData[], filePath?: string): void {
@@ -35,11 +35,11 @@ export class RegistryAlias {
             const auth = o.auth;
             var sAuth: string;
             //miw
-            if(typeof(auth) === 'string'){
+            if (typeof (auth) === 'string') {
                 sAuth = auth;
-            }else if(typeof(auth) === "object"){
+            } else if (typeof (auth) === "object") {
                 sAuth = JSON.stringify(o.auth);
-            }else{
+            } else {
                 sAuth = null;
             }
             oContent[o.alias] = {
@@ -70,8 +70,11 @@ export class RegistryAlias {
                 alias: sAlias,
                 endpointUrl: oIni[sAlias].endpoint,
                 auth: JSON.parse(oIni[sAlias].auth)
-            })
-        })
+            });
+        });
+        if (!aAlias.find(o => o.alias.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD)) {
+            RegistryAlias.create(PUBLIC_RESERVED_KEYWORD, PUBLIC_RESERVED_KEYWORD, null, aAlias);
+        }
         return aAlias;
     }
 
@@ -84,23 +87,25 @@ export class RegistryAlias {
                 alias.alias = PUBLIC_RESERVED_KEYWORD;
             }
             return new RegistryAlias(alias.endpointUrl, alias.alias).setAuthData(alias.auth);
-        }else{
+        } else {
             throw new Error(`Registry "${name}" not found.`);
         }
     }
 
-    public static create(name: string, endpointUrl: string, auth: any = {}): RegistryAlias {
-        var aAlias = this.getAll();
-        const alreadyExists = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase()) ? true : false;
+    public static create(name: string, endpointUrl: string, auth: any = {}, data?: RegistryAliasData[]): RegistryAlias {
+        if (!data) {
+            data = this.getAll();
+        }
+        const alreadyExists = data.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase()) ? true : false;
         if (alreadyExists) {
             throw new Error(`Alias already exists. Choose an unique name.`);
         } else {
-            aAlias.push({
+            data.push({
                 alias: name,
                 endpointUrl: endpointUrl.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD ? null : endpointUrl,
                 auth
             });
-            this.generateFile(aAlias);
+            this.generateFile(data);
         }
         return new RegistryAlias(endpointUrl, name).setAuthData(auth);
     }
@@ -122,15 +127,8 @@ export class RegistryAlias {
         }
     }
 
-    public static generatePublicRegistryAlias(): void {
-        const allRegistries = this.getAll();
-        if(!allRegistries.find(o => o.alias.trim().toLowerCase() === PUBLIC_RESERVED_KEYWORD)){
-            RegistryAlias.create(PUBLIC_RESERVED_KEYWORD, PUBLIC_RESERVED_KEYWORD, null);
-        }
-    }
-
-    public static getTemporaryInstance(endpoint: string, auth?: any) : RegistryAlias {
+    public static getTemporaryInstance(endpoint: string, auth?: any): RegistryAlias {
         return new RegistryAlias(endpoint, endpoint).setAuthData(auth);
     }
-    
+
 }

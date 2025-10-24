@@ -25,13 +25,9 @@ export async function logError(err: any) {
     if (originalException.name === 'ExitPromptError') {
         Logger.log(`User exited prompt: ${originalException.message}`, true);
         return;
-    } else if (originalException.name === 'TrmRegistryError') {
+    } else if (originalException.name === 'TrmRegistryV2Error') {
         if (originalException.status) {
             sError = `${chalk.black.bgRed(originalException.status)} ${sError}`;
-            if ((originalException.status === 401 || /whoami$/.test(originalException.axiosError.request.path)) && !CommandContext.hasRegistryAuthData) {
-                aError.push(`${chalk.black.bgRed(originalException.status)} You are not logged in!`);
-                aError.push(`${chalk.black.bgRed(originalException.status)} Run command "trm login" and follow instructions.`);
-            }
         }
     } else if (originalException.name === 'TrmRFCClient') {
         const rfcClientError: RFCClientError = originalException;
