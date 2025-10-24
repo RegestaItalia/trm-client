@@ -12,7 +12,7 @@ Legend
 -------------------
 ! migrate to registry v2
 ! trm-registry-types ^2.0.0
-! trm-core ^8.0.0
+! trm-core ^8.0.1
 
 2025-10-15 v5.2.1
 -------------------

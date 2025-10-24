@@ -1,4 +1,4 @@
-import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, TRKORR } from "trm-core";
+import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, Transport, TRKORR, TrmPackage } from "trm-core";
 
 export class DummyConnector implements ISystemConnector {
     _throw() {
@@ -94,4 +94,5 @@ export class DummyConnector implements ISystemConnector {
     readClassDescriptions = async () => this._throw();
     isServerApisAllowed = async () => this._throw();
     changeTrOwner = async () => this._throw();
+    getWbTransports = async () => this._throw();
 }

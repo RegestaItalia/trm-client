@@ -47,7 +47,7 @@
     "lodash": "^4.17.21",
     "semver": "^7.5.4",
     "trm-commons": "^3.4.2",
-    "trm-core": "^8.0.0",
+    "trm-core": "^8.0.1",
     "trm-registry-types": "^2.0.0",
     "xml2js": "^0.6.2"
   },
