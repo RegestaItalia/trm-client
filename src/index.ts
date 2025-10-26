@@ -124,7 +124,7 @@ const pack = program.command(`pack`)
 Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
 Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
 If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
-    .option(`-o, --output <<outputPath>>`, `Output path.`)
+    .option(`-o, --output <outputPath>`, `Output path.`)
     .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
     .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
     .option(`-nd, --noDependenciesDetection`, `Skip automatic dependencies detection.`, false)
@@ -233,6 +233,17 @@ const _import = program.command(`import <file>`)
 registerCommand(_import, {
     requiresConnection: true,
     requiresTrmDependencies: true
+});
+
+/*LOCK*/
+const lock = program.command(`lock`)
+    .argument(`<package>`, `Name of the package to generate lock file.`)
+    .argument(`[outputPath]`, `Output path.`, 'trm-lock.json')
+    .description(`Generate lock file.`);
+registerCommand(lock, {
+    requiresConnection: true,
+    requiresRegistry: true,
+    ignoreRegistryUnreachable: true
 });
 
 /*VIEW*/
