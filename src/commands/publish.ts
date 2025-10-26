@@ -78,6 +78,6 @@ export async function publish(commandArgs: PublishArguments) {
             transportTarget: commandArgs.transportTarget
         }
     });
-    const sOutput = `+ ${result.trmPackage.manifest.get().name} ${result.trmPackage.manifest.get().version} on ${CommandContext.getRegistry().name}`;
+    const sOutput = `+ ${result.trmPackage.manifest.get().name} v${result.trmPackage.manifest.get().version} on ${CommandContext.getRegistry().name}`;
     Logger.success(sOutput);
 }

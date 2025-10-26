@@ -24,3 +24,4 @@ export * from "./content";
 export * from "./pack";
 export * from "./import";
 export * from "./selfUpdate";
+export * from "./lock";

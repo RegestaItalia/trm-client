@@ -21,3 +21,4 @@ export * from "./SettingsArgument";
 export * from "./UpdateArguments";
 export * from "./ContentArguments";
 export * from "./PackArguments";
+export * from "./LockArguments";
