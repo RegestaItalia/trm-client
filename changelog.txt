@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2025-10-21 v6.0.1
+-------------------
+* dotenv output
+
 2025-10-21 v6.0.0
 -------------------
 ! migrate to registry v2
