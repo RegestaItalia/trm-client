@@ -8,6 +8,7 @@ export type InstallArguments = {
     noDependencies: boolean,
     noObjectTypes: boolean,
     noSapEntries: boolean,
+    lockfile?: string,
     noLanguageTransport: boolean,
     noCustomizingTransport: boolean,
     importTimeout: string,

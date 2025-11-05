@@ -89,6 +89,9 @@ export function registerCommand(command: Command, args?: {
             delete args.requiresTrmDependencies;
             delete args.checkUpdate;
         }
+        if(args.command === 'dist-tag'){
+            args.command = 'distTag';
+        }
         await executeCommand(args);
     });
 }

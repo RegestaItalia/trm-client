@@ -43,13 +43,17 @@ const _printVersionSection = (systemPackage?: TrmPackage, registryView?: Package
         }
     }
     if (registryView) {
-        console.log(`Latest version available: ${registryView.latest}`);
-        if (oSystemManifest) {
-            if (eq(oSystemManifest.version, registryView.latest)) {
-                Logger.success(`Latest version installed: Yes`);
-            } else {
-                Logger.error(`Latest version installed: No`);
+        if (registryView.dist_tags['latest']) {
+            console.log(`Latest version available: ${registryView['latest']}`);
+            if (oSystemManifest) {
+                if (eq(oSystemManifest.version, registryView['latest'])) {
+                    Logger.success(`Latest version installed: Yes`);
+                } else {
+                    Logger.error(`Latest version installed: No`);
+                }
             }
+        } else {
+            console.log(`Latest version available: unknown`);
         }
     }
 }

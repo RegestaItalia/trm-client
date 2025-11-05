@@ -3,12 +3,25 @@ import { InstallPackageReplacements, install as action } from "trm-core";
 import { Context, getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
 import { Logger } from "trm-commons";
+import * as fs from "fs";
+import { Lockfile } from "trm-core/dist/lockfile";
 
-const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
+const _parseLockFileArg = (arg: string): Lockfile => {
+    if (arg) {
+        try {
+            arg = fs.readFileSync(arg).toString();
+        } catch { }
+        try {
+            return new Lockfile(JSON.parse(arg));
+        } catch { }
+    }
+}
+
+const _parsePackageReplacementsArg = (arg: string): InstallPackageReplacements[] => {
     if (arg) {
         try {
             return JSON.parse(arg);
-        } catch (e) { }
+        } catch { }
     }
 }
 
@@ -16,7 +29,7 @@ const _parseImportTimeoutArg = (arg: string): number => {
     if (arg) {
         try {
             return parseInt(arg);
-        } catch (e) { }
+        } catch { }
     }
 }
 
@@ -47,7 +60,8 @@ export async function install(commandArgs: InstallArguments) {
                 noDependencies: commandArgs.noDependencies,
                 noObjectTypes: commandArgs.noObjectTypes,
                 noSapEntries: commandArgs.noSapEntries,
-                noExistingObjects: commandArgs.overwrite
+                noExistingObjects: commandArgs.overwrite,
+                lockfile: _parseLockFileArg(commandArgs.lockfile)
             },
             import: {
                 noLang: commandArgs.noLanguageTransport,
@@ -57,7 +71,7 @@ export async function install(commandArgs: InstallArguments) {
             installDevclass: {
                 keepOriginal: commandArgs.keepOriginalPackages,
                 transportLayer: commandArgs.transportLayer,
-                replacements: _parsePackageReplacementsArgument(commandArgs.packageReplacements)
+                replacements: _parsePackageReplacementsArg(commandArgs.packageReplacements)
             },
             installTransport: {
                 create: commandArgs.createInstallTransport,

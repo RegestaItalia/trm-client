@@ -39,6 +39,14 @@ const _parseReleaseTimeoutArg = (arg: string): number => {
     }
 }
 
+const _parseTagArg = (arg: string): string[] => {
+    if(arg){
+        try{
+            return arg.split(',');
+        }catch(e){ }
+    }
+}
+
 export async function publish(commandArgs: PublishArguments) {
     const packages = await CommandContext.getSystemPackages();
     const result = await action({
@@ -51,6 +59,10 @@ export async function publish(commandArgs: PublishArguments) {
             name: commandArgs.package,
             version: commandArgs.version,
             devclass: commandArgs.devclass,
+            inc: commandArgs.inc as any,
+            preRelease: commandArgs.preRelease,
+            preReleaseIdentifier: commandArgs.preReleaseIdentifier,
+            tags: _parseTagArg(commandArgs.tag),
             manifest: {
                 authors: commandArgs.authors,
                 backwardsCompatible: commandArgs.backwardsCompatible,

@@ -1,6 +1,10 @@
 export type PublishArguments = {
     package: string,
     version?: string,
+    inc: string,
+    tag: string,
+    preRelease: boolean,
+    preReleaseIdentifier?: string,
     
     noPrompts: boolean,
     private: boolean,

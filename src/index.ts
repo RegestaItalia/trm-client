@@ -15,8 +15,9 @@ program
     .description(`TRM - Transport Request Manager CLI
         
 Full documentation available at https://docs.trmregistry.com/
+Public registry at https://trmregistry.com/
 
-© 2025 RegestaItalia https://www.regestaitalia.eu/`)
+© 2025 RegestaItalia https://regestaitalia.eu/`)
     .version(getClientVersion());
 
 /*SYSTEM ALIAS*/
@@ -84,13 +85,17 @@ const publish = program.command(`publish`)
     .description(`Publish package to registry.`)
     .addHelpText(`before`, `When no version argument is defined, it will automatically set to:
 - When it's the first publish: 1.0.0
-- When it's already published: the latest available release with patch increased by 1
+- When it's already published: the latest available release with --inc parameter increased
 When it's the first publish, full manifest definition is asked.
 When a release is already published, the latest available manifest is used but can be overwritten.
 Translation transport is only generated for packages that contain one or more objects with translations (unless skipped by flag).
 Customizing transport is only generated if a valid list of customizing transports is provided (unless skipped by flag).
 If a default manifest with dependencies is provided in conjunction with the automatic dependency generation, results will be merged.`)
     .option(`-p, --private`, `Publish package with private visibility.`)
+    .option(`-vi, --inc <inc>`, `Version increment (when no value is defined).`, `patch`)
+    .option(`-t, --tag <tag>`, `Tag(s) (separated by comma)`, `latest`)
+    .option(`-pr, --preRelease`, `Mark as pre release`, false)
+    .option(`-pri, --preReleaseIdentifier <preReleaseIdentifier>`, `Pre release identifier`)
     .option(`-np, --noPrompts`, `No prompts (will force some decisions).`, false)
     .option(`-km, --keepLatestReleaseManifestValues`, `Keep the latest release (if exists) manifest values as defaults.`, true)
     .option(`-nl, --noLanguageTransport`, `Skip language (translations) transport publish.`, false)
@@ -102,7 +107,7 @@ If a default manifest with dependencies is provided in conjunction with the auto
     .option(`-rm, --readme <readme>`, `Path to file or value of readme.`)
     .option(`-tt, --transportTarget <transportTarget>`, `Publish transports target.`)
     .option(`-bc, --backwardsCompatible`, `Indicates backwards compatibility with older releases.`, true)
-    .option(`-sd, --description`, `Short description of the package.`)
+    .option(`-sd, --description <description>`, `Short description of the package.`)
     .option(`-gl, --git <link>`, `Git link.`)
     .option(`-wl, --website <link>`, `Website link.`)
     .option(`-pl, --license <license>`, `Package license.`)
@@ -115,6 +120,22 @@ registerCommand(publish, {
     requiresRegistry: true,
     requiresTrmDependencies: true
 });
+const distTagAdd = program.command(`dist-tag add`)
+    .argument(`<package>`, `Name of the package.`)
+    .argument(`<version>`, `Release version of the package.`)
+    .argument(`<tag>`, `Tag to assign to release.`)
+    .description(`Tag a release.`);
+registerCommand(distTagAdd, {
+    requiresRegistry: true
+});
+const distTagRm = program.command(`dist-tag rm`)
+    .argument(`<package>`, `Name of the package.`)
+    .argument(`<tag>`, `Tag to remove.`)
+    .description(`Remove a tag from a package.`);
+registerCommand(distTagRm, {
+    requiresRegistry: true
+});
+
 /*PACK*/
 const pack = program.command(`pack`)
     .argument(`<package>`, `Name of the package to generate.`)
@@ -134,7 +155,7 @@ If a default manifest with dependencies is provided in conjunction with the auto
     .option(`-cust, --customizingTransports <customizingTransports>`, `Customizing transports (separated by comma).`)
     .option(`-tt, --transportTarget <transportTarget>`, `Publish transports target.`)
     .option(`-bc, --backwardsCompatible`, `Indicates backwards compatibility with older releases.`, true)
-    .option(`-sd, --description`, `Short description of the package.`)
+    .option(`-sd, --description <description>`, `Short description of the package.`)
     .option(`-gl, --git <link>`, `Git link.`)
     .option(`-wl, --website <link>`, `Website link.`)
     .option(`-pl, --license <license>`, `Package license.`)
@@ -168,6 +189,7 @@ const install = program.command(`install`)
     .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
     .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
     .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-lf, --lockFile <lockfile>`, `Path to or lockfile.`)
     .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
     .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
     .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
@@ -195,6 +217,7 @@ const update = program.command(`update`)
     .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
     .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
     .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-lf, --lockFile <lockfile>`, `Path to or lockfile.`)
     .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
     .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
     .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
@@ -220,6 +243,7 @@ const _import = program.command(`import <file>`)
     .option(`-nd, --noDependencies`, `Skip check/install of package dependencies.`, false)
     .option(`-no, --noObjectTypes`, `Skip check of package object types.`, false)
     .option(`-ns, --noSapEntries`, `Skip check of package SAP entries/objects.`, false)
+    .option(`-lf, --lockFile <lockfile>`, `Path to or lockfile.`)
     .option(`-nl, --noLanguageTransport`, `Skip install of language (translations) transport (if exists).`, false)
     .option(`-nc, --noCustomizingTransport`, `Skip install of customizing transport (if exists).`, false)
     .option(`-to, --importTimeout <timeout>`, `Install transports import timeout (in seconds).`, '180')
