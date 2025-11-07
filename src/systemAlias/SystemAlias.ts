@@ -1,4 +1,4 @@
-import { Context, getRoamingFolder } from "../utils";
+import { GlobalContext, getRoamingFolder } from "../utils";
 import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
@@ -13,9 +13,9 @@ export class SystemAlias {
     constructor(public type: string, private _data: any) { }
 
     public getConnection(): ISystemConnector {
-        const connection = Context.getInstance().getConnections().find(o => o.name === this.type);
+        const connection = GlobalContext.getInstance().getConnections().find(o => o.name === this.type);
         if (!connection) {
-            throw new Error(`Unknown connection type "${this.type}". Possible values are ${Context.getInstance().getConnections().map(k => k.name).join(', ')}.`);
+            throw new Error(`Unknown connection type "${this.type}". Possible values are ${GlobalContext.getInstance().getConnections().map(k => k.name).join(', ')}.`);
         }
         connection.setData(this._data.data || this._data); //fallback to this._data for backward compatibility
         return connection.getSystemConnector() as ISystemConnector;
@@ -27,7 +27,7 @@ export class SystemAlias {
         }
         var oContent = {};
         content.forEach(o => {
-            const connection = Context.getInstance().getConnections().find(k => k.name === o.type);
+            const connection = GlobalContext.getInstance().getConnections().find(k => k.name === o.type);
             if (connection) {
                 oContent[o.alias] = o.data;
                 oContent[o.alias].type = o.type;
@@ -53,7 +53,7 @@ export class SystemAlias {
             if (!oIni[sAlias].type) {
                 oIni[sAlias].type = 'RFC'; //blank defaults to RFC (for backwards compatibility)
             }
-            const connection = Context.getInstance().getConnections().find(o => o.name === oIni[sAlias].type);
+            const connection = GlobalContext.getInstance().getConnections().find(o => o.name === oIni[sAlias].type);
             if (connection) {
                 aAlias.push({
                     alias: sAlias,
