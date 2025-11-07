@@ -13,6 +13,10 @@ Legend
 ! trm-core ^8.1.1
 + dist-tag commands
 
+2025-10-29 v6.1.1
+-------------------
+* fallback to this._data for backward compatibility
+
 2025-10-26 v6.1.0
 -------------------
 + lock command
