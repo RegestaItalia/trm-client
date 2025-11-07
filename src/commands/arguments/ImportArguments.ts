@@ -9,6 +9,7 @@ export type ImportArguments = {
     noSapEntries: boolean,
     noLanguageTransport: boolean,
     noCustomizingTransport: boolean,
+    lockfile?: string,
     importTimeout: string,
     keepOriginalPackages: boolean,
     createInstallTransport: boolean,

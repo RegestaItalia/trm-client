@@ -3,6 +3,19 @@ import { Context, getTempFolder } from "../utils";
 import { CommandContext } from "./commons";
 import { ImportArguments } from "./arguments/ImportArguments";
 import { Logger } from "trm-commons";
+import * as fs from "fs";
+import { Lockfile } from "trm-core/dist/lockfile";
+
+const _parseLockFileArg = (arg: string): Lockfile => {
+    if (arg) {
+        try {
+            arg = fs.readFileSync(arg).toString();
+        } catch { }
+        try {
+            return new Lockfile(JSON.parse(arg));
+        } catch { }
+    }
+}
 
 const _parsePackageReplacementsArgument = (arg: string): InstallPackageReplacements[] => {
     if (arg) {
@@ -46,7 +59,8 @@ export async function _import(commandArgs: ImportArguments) {
             checks: {
                 noDependencies: commandArgs.noDependencies,
                 noObjectTypes: commandArgs.noObjectTypes,
-                noSapEntries: commandArgs.noSapEntries
+                noSapEntries: commandArgs.noSapEntries,
+                lockfile: _parseLockFileArg(commandArgs.lockfile)
             },
             import: {
                 noLang: commandArgs.noLanguageTransport,

@@ -117,7 +117,7 @@ export async function compare(commandArgs: CompareArguments) {
     Logger.info(`Package name: ${packageName}`);
     Logger.info(`Registry: ${registry.name}`);
     try {
-        Logger.info(`Latest version: ${oRegistryView.latest}`);
+        Logger.info(`Latest version: ${oRegistryView.dist_tags['latest'] || 'unknown'}`);
     } catch (e) {
         Logger.warning(`Latest version: Unknown`);
     }
