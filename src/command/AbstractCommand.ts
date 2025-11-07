@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { RegisterCommandOpts } from "./RegisterCommandOpts";
-import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus } from "../utils";
+import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning } from "../utils";
 import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
@@ -92,8 +92,12 @@ export abstract class AbstractCommand {
 
     public async getSystemPackages(): Promise<Core.TrmPackage[]> {
         if (!this.systemPackages) {
-            Commons.Logger.loading(`Reading "${Core.SystemConnector.getDest()}" packages...`);
-            this.systemPackages = await Core.SystemConnector.getInstalledPackages(true, true, true);
+            if(Core.SystemConnector instanceof DummyConnector){
+                this.systemPackages = [];
+            }else{
+                Commons.Logger.loading(`Reading "${Core.SystemConnector.getDest()}" packages...`);
+                this.systemPackages = await Core.SystemConnector.getInstalledPackages(true, true, true);
+            }
         }
         return this.systemPackages;
     }
@@ -278,16 +282,22 @@ export abstract class AbstractCommand {
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
         var exitCode: number;
         try {
-            if(this.registerOpts.requiresR3trans && process.platform === 'darwin'){
-                // needs docker running
-                
-            }
             await GlobalContext.getInstance().load();
             await Commons.Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
             await Commons.Plugin.call<{ commons: typeof Commons }>("client", "loadCommons", { commons: Commons });
             Commons.Inquirer.inquirer = this.getInquirer(InquirerType.CLI);
             Commons.Logger.logger = this.getLogger(this.args.logger, this.args.debug, this.args.loggerOutDir);
 
+            if(this.registerOpts.requiresR3trans && process.platform === 'darwin'){
+                Commons.Logger.info(`This command needs R3trans program dockerized in your OS.`);
+                Commons.Logger.loading(`Checking if docker is running...`);
+                if(await isDockerRunning()){
+                    const dockerName = GlobalContext.getInstance().getSettings().r3transDockerName;
+                    Commons.Logger.info(`Docker "${dockerName || 'local/r3trans'}" will be used.`);
+                }else{
+                    throw new Error(`Command needs R3trans dockerized, docker is not currently running.`);
+                }
+            }
             if (process.platform !== 'win32' && process.platform !== 'darwin') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
@@ -306,6 +316,7 @@ export abstract class AbstractCommand {
                 }
                 registry = registryAlias.getRegistry();
                 try {
+                    Commons.Logger.loading(`Connecting to registry "${registry.name}" (${registry.endpoint})...`);
                     const registryPing = await registry.ping();
                     if (this.registerOpts.registryAuthBlacklist && this.registerOpts.registryAuthBlacklist.includes(registryPing.authentication_type)) {
                         throw new Error(`This command is not supported by registry "${registry.name}".`);
