@@ -2,7 +2,6 @@ import { RESTClientError, RFCClientError, SystemConnector } from "trm-core";
 import { inspect } from "util";
 import chalk from "chalk";
 import { Logger } from "trm-commons";
-import { CommandContext } from "../commands/commons";
 
 const _getUnauthorizedError = (): string => {
     return `User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`;

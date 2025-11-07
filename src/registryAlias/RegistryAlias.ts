@@ -112,7 +112,7 @@ export class RegistryAlias {
 
     public static delete(name: string): void {
         var aAlias = this.getAll();
-        aAlias = aAlias.filter(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
+        aAlias = aAlias.filter(o => o.alias.trim().toUpperCase() !== name.trim().toUpperCase());
         this.generateFile(aAlias);
     }
 

@@ -1,11 +1,8 @@
-export * from "./registerCommand";
-export * from "./executeCommand";
 export * from "./getRoamingPath";
 export * from "./getRoamingFolder";
 export * from "./xml2js";
 export * from "./getSapLogonConnections";
 export * from "./logError";
-export * from "./checkTrmDependencies";
 export * from "./checkCliUpdate";
 export * from "./getNodePackage";
 export * from "./getClientVersion";
@@ -16,4 +13,4 @@ export * from "./DummyConnector";
 export * from "./getNpmPackageLatestVersion";
 export * from "./SettingsData";
 export * from "./CacheData";
-export * from "./Context";
+export * from "./GlobalContext";

@@ -3,20 +3,22 @@ import { getClientVersion } from './getClientVersion';
 import chalk from 'chalk';
 import { getNpmPackageLatestVersion } from './getNpmPackageLatestVersion';
 import { Logger } from "trm-commons";
-import { Context } from "./Context";
+import { GlobalContext } from "./GlobalContext";
 
-export async function checkCliUpdate(print: boolean): Promise<{
+export interface CliVersionStatus {
     localVersion: string,
     latestVersion: string
-}> {
+}
+
+export async function checkCliUpdate(print: boolean): Promise<CliVersionStatus> {
     try {
         var latestVersion: string;
-        const cache = Context.getInstance().getCache().latestVersion;
+        const cache = GlobalContext.getInstance().getCache().latestVersion;
         if(cache && cache.ts && Date.now() - cache.ts <= 60_000){
             latestVersion = cache.data;
         }else{
             latestVersion = await getNpmPackageLatestVersion('trm-client');
-            Context.getInstance().setCache('latestVersion', latestVersion);
+            GlobalContext.getInstance().setCache('latestVersion', latestVersion);
         }
         const localVersion = getClientVersion();
         const versionDiff = diff(localVersion, latestVersion);

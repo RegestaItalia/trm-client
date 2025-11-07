@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import { xml2js } from "./xml2js";
-import { Context } from "./Context";
+import { GlobalContext } from "./GlobalContext";
 
 export async function getSapLogonConnections() {
     var systems = [];
-    const sapLandscape = Context.getInstance().getSettings().sapLandscape;
+    const sapLandscape = GlobalContext.getInstance().getSettings().sapLandscape;
     if (sapLandscape) {
-        const sXml = fs.readFileSync(Context.getInstance().getSettings().sapLandscape, { encoding: 'utf8', flag: 'r' });
+        const sXml = fs.readFileSync(GlobalContext.getInstance().getSettings().sapLandscape, { encoding: 'utf8', flag: 'r' });
         const result = await xml2js(sXml);
         try {
             result.Landscape.Services[0].Service.forEach((xmlObj) => {
