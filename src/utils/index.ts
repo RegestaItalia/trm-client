@@ -14,3 +14,4 @@ export * from "./getNpmPackageLatestVersion";
 export * from "./SettingsData";
 export * from "./CacheData";
 export * from "./GlobalContext";
+export * from "./isDockerRunning";
