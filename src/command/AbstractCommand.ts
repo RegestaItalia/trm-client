@@ -92,7 +92,7 @@ export abstract class AbstractCommand {
 
     public async getSystemPackages(): Promise<Core.TrmPackage[]> {
         if (!this.systemPackages) {
-            if(Core.SystemConnector instanceof DummyConnector){
+            if(Core.SystemConnector.systemConnector instanceof DummyConnector){
                 this.systemPackages = [];
             }else{
                 Commons.Logger.loading(`Reading "${Core.SystemConnector.getDest()}" packages...`);

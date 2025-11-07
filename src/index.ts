@@ -39,7 +39,7 @@ new DistTag(program, 'dist-tag rm').register();
 new Publish(program, 'pack', ['export']).register();
 new Lock(program, 'lock', ['lock-file']).register();
 new Unpublish(program, 'unpublish').register();
-new Deprecate(program, 'deprecrate').register();
+new Deprecate(program, 'deprecate').register();
 
 new Install(program, 'install', ['i']).register();
 new Install(program, 'clean-install', ['ci']).register();
