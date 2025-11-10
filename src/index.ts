@@ -23,19 +23,19 @@ Public registry at https://trmregistry.com/
 new Ping(program, 'ping').register();
 new Info(program, 'info').register();
 
-new Registry(program, 'registry add').register();
-new Registry(program, 'registry rm').register();
+new Registry(program, 'registry', null, 'add').register();
+new Registry(program, 'registry', null, 'rm').register();
 new Login(program, 'login').register();
 new WhoAmI(program, 'whoami').register();
 new Logout(program, 'logout').register();
 
-new Alias(program, 'alias create').register();
-new Alias(program, 'alias delete').register();
 new Alias(program, 'alias').register();
+new Alias(program, 'alias', null, 'create').register();
+new Alias(program, 'alias', null, 'delete').register();
 
 new Publish(program, 'publish').register();
-new DistTag(program, 'dist-tag add').register();
-new DistTag(program, 'dist-tag rm').register();
+new DistTag(program, 'dist-tag', null, 'add').register();
+new DistTag(program, 'dist-tag', null, 'rm').register();
 new Publish(program, 'pack', ['export']).register();
 new Lock(program, 'lock', ['lock-file']).register();
 new Unpublish(program, 'unpublish').register();

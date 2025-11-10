@@ -7,10 +7,10 @@ export class Registry extends AbstractCommand {
 
     protected init(): void {
         this.registerOpts.requiresRegistry = true;
-        if (this.name.includes('add')) {
+        if (this.subcommand === 'add') {
             this.command.description(`Add a new registry.`);
             this.command.argument(`<registry name>`, `Name of the registry to generate. Name "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be used.`);
-        } else if (this.name.includes('rm')) {
+        } else if (this.subcommand === 'rm') {
             this.command.description(`Remove a registry.`);
             this.command.argument(`<registry name>`, `Name of the registry to delete. Registries "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be deleted.`);
         }
@@ -19,7 +19,7 @@ export class Registry extends AbstractCommand {
 
     protected async handler(): Promise<void> {
         const registryName = this.args.registryName.trim();
-        if (this.args.add && this.args.add.trim().toLowerCase() === 'add') {
+        if (this.subcommand === 'add') {
             var endpoint = this.args.endpoint;
             if (registryName.toLowerCase() === PUBLIC_RESERVED_KEYWORD) {
                 throw new Error(`Registry name "${PUBLIC_RESERVED_KEYWORD}" is a reserved keyword.`);
@@ -53,7 +53,7 @@ export class Registry extends AbstractCommand {
                     RegistryAlias.delete(registryName);
                 }
             }
-        } else if (this.args.rm && this.args.rm.trim().toLowerCase() === 'rm') {
+        } else if (this.subcommand === 'rm') {
             if (registryName.toLowerCase() === PUBLIC_RESERVED_KEYWORD) {
                 throw new Error(`Registry "${PUBLIC_RESERVED_KEYWORD}" is protected and cannot be deleted.`);
             }
@@ -64,8 +64,6 @@ export class Registry extends AbstractCommand {
             RegistryAlias.get(registryName);
             RegistryAlias.delete(registryName);
             Logger.success(`Registry "${registryName}" has been removed.`);
-        } else {
-            throw new Error(`Unknown command.`);
         }
     }
 
