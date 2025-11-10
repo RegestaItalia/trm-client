@@ -36,5 +36,9 @@ export interface RegisterCommandOpts {
     /**
      * needs r3trans
      */
-    requiresR3trans?: boolean
+    requiresR3trans?: boolean,
+    /**
+     * do not check for client updates
+     */
+    noClientVersionCheck?: boolean
 }

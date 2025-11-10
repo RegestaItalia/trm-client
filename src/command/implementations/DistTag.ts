@@ -1,3 +1,4 @@
+import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 
 export class DistTag extends AbstractCommand {
@@ -22,10 +23,12 @@ export class DistTag extends AbstractCommand {
                 version: this.args.version,
                 tag: this.args.tag
             });
+            Logger.success(`${this.args.package} v${this.args.version} tagged "${this.args.tag}"`);
         } else if (this.subcommand === 'rm') {
             await this.getRegistry().rmDistTag(this.args.package, {
                 tag: this.args.tag
             });
+            Logger.success(`${this.args.package} removed tag "${this.args.tag}"`);
         }
     }
 

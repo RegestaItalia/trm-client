@@ -1,3 +1,4 @@
+import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 
 export class Deprecate extends AbstractCommand {
@@ -17,6 +18,7 @@ export class Deprecate extends AbstractCommand {
         await this.getRegistry().deprecate(this.args.package, this.args.version, {
             deprecate_note: this.args.note
         });
+        Logger.success(`${this.args.package} v${this.args.version} has just been deprecated`);
     }
 
 }

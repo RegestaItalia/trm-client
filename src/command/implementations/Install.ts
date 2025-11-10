@@ -117,7 +117,9 @@ export class Install extends AbstractCommand {
 
     protected onArgs(): void {
         if (this.name === 'update' && !this.args.package) {
-            this.registerOpts = {};
+            this.registerOpts = {
+                noClientVersionCheck: true
+            };
         }
     }
 
