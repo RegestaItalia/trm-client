@@ -302,7 +302,9 @@ export abstract class AbstractCommand {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
 
-            await this.getCliVersionStatus(); // prints possible updates
+            if(!this.registerOpts.noClientVersionCheck){
+                await this.getCliVersionStatus(); // prints possible updates
+            }
 
             if (this.registerOpts.requiresRegistry) {
                 var registryAlias: RegistryAlias;
