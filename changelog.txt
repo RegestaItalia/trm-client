@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2025-11-10 v7.0.3
+-------------------
+* commands with 2+ arguments
+
 2025-11-07 v7.0.2
 -------------------
 * deprecate typo

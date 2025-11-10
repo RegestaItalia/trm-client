@@ -176,34 +176,22 @@ export abstract class AbstractCommand {
         }
     }
 
-    private parseCommandArgs(args1: any, args2: any): any {
-        var args = this.command['_optionValues'] || {};
-        if (!args1) {
-            args1 = {};
-        }
-        if (!args2) {
-            args2 = {};
-        }
-        if (typeof (args1) === 'string') {
-            const oArg1 = this.command["_args"][0];
-            args[oArg1.name()] = args1;
-            if (typeof (args2) === 'string') {
-                const oArg2 = this.command["_args"][1];
-                args[oArg2.name()] = args2;
-            } else {
-                args = { ...args, ...args2 };
+    private parseCommandArgs(argsValues: string[]): any {
+        var args: any = {};
+        const commandOpts = this.command['_optionValues'] || {};
+        const commandArgs = this.command["_args"] || [];
+        commandArgs.forEach((a, i) => {
+            if(typeof(argsValues[i]) === 'string'){
+                args[a.name()] = argsValues[i];
             }
-        } else {
-            args = { ...args, ...args1 };
-        }
-
+        });
+        args = {...commandOpts, ...args};
         // transform arguments with spaces into camel case
         args = Object.entries(args).reduce((acc, [key, value]) => {
             const newKey = key.includes(" ") ? key.replace(/ (\w)/g, (_, char) => char.toUpperCase()) : key;
             acc[newKey] = value;
             return acc;
         }, {} as any);
-
         return args;
     }
 
@@ -277,8 +265,8 @@ export abstract class AbstractCommand {
         }
     }
 
-    private async execute(args1: any, args2: any): Promise<void> {
-        this.args = this.parseCommandArgs(args1, args2);
+    private async execute(...args: any[]): Promise<void> {
+        this.args = this.parseCommandArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
         var exitCode: number;
         try {
