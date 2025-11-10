@@ -25,8 +25,20 @@ export abstract class AbstractCommand {
     private systemPackages: Core.TrmPackage[];
     private trmDependenciesCheck: Core.CheckTrmDependencies;
 
-    constructor(program: Command, protected readonly name: string, protected readonly aliases?: string[]) {
-        this.command = program.command(this.name);
+    constructor(program: Command, protected readonly name: string, protected readonly aliases?: string[], protected readonly subcommand?: string) {
+        const index = program.commands.findIndex(c => c.name() === this.name);
+        if(index >= 0){
+            if(subcommand){
+                this.command = program.commands[index];
+            }else{
+                throw new Error(`Command "${this.name}" declared multiple times without subcommand.`);
+            }
+        }else{
+            this.command = program.command(this.name);
+        }
+        if(this.subcommand){
+            this.command = this.command.command(this.subcommand);
+        }
         if (aliases) {
             this.command.aliases(aliases);
         }

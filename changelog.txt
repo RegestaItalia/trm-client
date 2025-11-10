@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2025-11-10 v7.1.0
+-------------------
+* commands with subcommands
+
 2025-11-10 v7.0.3
 -------------------
 * commands with 2+ arguments

@@ -7,14 +7,14 @@ import { GlobalContext } from "../../utils";
 export class Alias extends AbstractCommand {
 
     protected init(): void {
-        if (this.name.includes('create')) {
+        if (this.subcommand === 'create') {
             this.command.description(`Create a new system alias.`);
             this.command.argument(`<alias>`, `Alias name.`);
-        } else if (this.name.includes('delete')) {
+        } else if (this.subcommand === 'delete') {
             this.command.description(`Delete a system alias.`);
             this.command.argument(`<alias>`, `Alias name.`);
         } else {
-            this.command.description(`List and manage aliases.`);
+            this.command.description(`Manage system aliases.`);
         }
     }
 
@@ -72,9 +72,9 @@ export class Alias extends AbstractCommand {
     }
 
     protected async handler(): Promise<void> {
-        if (this.args.create && this.args.add.trim().toLowerCase() === 'create') {
+        if (this.subcommand === 'create') {
             await createAlias(this.args.alias);
-        } else if (this.args.delete && this.args.rm.trim().toLowerCase() === 'delete') {
+        } else if (this.subcommand === 'delete') {
             await deleteAlias(this.args.alias);
         } else {
             const aAlias = SystemAlias.getAll();
