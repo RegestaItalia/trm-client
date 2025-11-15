@@ -1,8 +1,8 @@
-# TRM Client – Setup
+# Setup
 
-This document guides you through the installation of all required components to run the `trm-client`.
+This document guides you through the installation of all required components to run [trm-client](https://www.npmjs.com/package/trm-client).
 
-# Downloading from SAP Support Portal
+## Downloading from SAP Support Portal
 
 Whenever downloading from SAP Support Portal is mentioned in this document, make sure to download for the appropriate OS.
 

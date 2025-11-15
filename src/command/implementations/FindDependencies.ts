@@ -16,7 +16,7 @@ export class FindDependencies extends AbstractCommand {
         Logger.loading(`Searching for dependencies in package "${this.args.sapPackage}"...`);
         await findDependencies({
             contextData: {
-                noInquirer: this.args.noPrompts
+                noInquirer: this.args.prompts
             },
             packageData: {
                 package: this.args.sapPackage

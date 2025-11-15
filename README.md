@@ -10,49 +10,38 @@
 | Regesta S.p.A.                                  | [https://www.regestaitalia.eu/](https://www.regestaitalia.eu/) |
 | Clarex S.r.l.                                   | [https://www.clarex.it/](https://www.clarex.it/)               |
 
-This is the official CLI implementation of the core functionalities of TRM.
+[trm-client](https://www.npmjs.com/package/trm-client) is the CLI implementation of the core functionalities of TRM.
 
-TRM is a software designed to make transports between SAP ECC/S4 systems easy.
+**TRM (Transport Request Manager)** is a package manager inspired solution built leveraging CTS that simplifies SAP ABAP transports.
 
-To find out more about TRM, visit its full [documentation](https://docs.trmregistry.com).
-
-# Documentation <!-- {docsify-remove} -->
-
-Full documentation can be seen at [https://docs.trmregistry.com](https://docs.trmregistry.com).
-
-<!-- START TABLE_OF_CONTENTS.md -->
-- [Setup](/docs/setup.md)
-- [Commands](/docs/commands.md)
-- [Installing your first package](/docs/examples/install.md)
-- [Publishing your first package](/docs/examples/publish.md)
-- [Integrate with abapGit & Github Actions](/docs/examples/githubActions.md)
-<!-- END TABLE_OF_CONTENTS.md -->
-
-## Install <!-- {docsify-remove} -->
-
-First, make sure you have all the [requirements installed](/docs/setup.md#trm-client-requirements).
-
-You can then install the CLI via npm:
-
-`npm install trm-client -g`
-
-## Commands <!-- {docsify-remove} -->
-
-List of all commands is available [here](/docs/commands.md).
-
-### Demo publish <!-- {docsify-remove} -->
+### Demo publish
 
 <p align="center">
   <img src="https://docs.trmregistry.com/_media/publish.gif" />
 </p>
 
-### Demo install <!-- {docsify-remove} -->
+### Demo install
 
 <p align="center">
   <img src="https://docs.trmregistry.com/_media/install.gif" />
 </p>
 
-# Contributing <!-- {docsify-remove} -->
+# Documentation
+
+You can find the full documentation at [docs.trmregistry.com](https://docs.trmregistry.com).
+
+- [Setup](/docs/setup.md)
+- [Publish and install](https://docs.trmregistry.com/#/examples/1_publish_and_install)
+
+## Install
+
+First, make sure you have all the [requirements installed](/docs/setup.md).
+
+You can then install the CLI via npm:
+
+`npm install trm-client -g`
+
+# Contributing
 
 Like every other TRM open-source projects, contributions are always welcomed ❤️.
 
