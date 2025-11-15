@@ -252,7 +252,7 @@ export abstract class AbstractCommand {
             var sValue: string;
             try {
                 sValue = readFileSync(this.args[name]).toString();
-            } catch {
+            } catch(e) {
                 sValue = this.args[name];
             }
             try {

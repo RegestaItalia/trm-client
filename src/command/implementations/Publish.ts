@@ -58,7 +58,7 @@ export class Publish extends AbstractCommand {
     protected async handler(): Promise<void> {
         var registry: AbstractRegistry;
         if (this.name === 'pack') {
-            if (!this.args.noPrompts) {
+            if (!this.args.prompts) {
                 const pack = await Inquirer.prompt([{
                     name: 'package',
                     type: 'input',
@@ -88,7 +88,7 @@ export class Publish extends AbstractCommand {
             contextData: {
                 logTemporaryFolder: getTempFolder(),
                 systemPackages: packages,
-                noInquirer: this.args.noPrompts
+                noInquirer: this.args.prompts
             },
             packageData: {
                 registry,
@@ -114,10 +114,10 @@ export class Publish extends AbstractCommand {
             },
             publishData: {
                 private: this.args.private,
-                keepLatestReleaseManifestValues: !this.args.noKeepManifest,
-                noLanguageTransport: this.args.noLangTr,
-                noDependenciesDetection: this.args.noAutoDeps,
-                skipCustomizingTransports: this.args.noCustTr,
+                keepLatestReleaseManifestValues: !this.args.keepManifest,
+                noLanguageTransport: this.args.langTr,
+                noDependenciesDetection: this.args.autoDeps,
+                skipCustomizingTransports: this.args.custTr,
                 customizingTransports: this.args.cust,
                 readme: this.parseTextArg('readme')
             },

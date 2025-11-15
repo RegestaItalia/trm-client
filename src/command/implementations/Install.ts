@@ -149,7 +149,7 @@ export class Install extends AbstractCommand {
                         name: GlobalContext.getInstance().getSettings().r3transDockerName
                     }
                 },
-                noInquirer: this.args.noPrompts,
+                noInquirer: this.args.prompts,
                 systemPackages: packages,
                 noR3transInfo: false
             },
@@ -161,15 +161,15 @@ export class Install extends AbstractCommand {
             },
             installData: {
                 checks: {
-                    noDependencies: this.args.noDeps,
-                    noObjectTypes: this.args.noObjType,
-                    noSapEntries: this.args.noSapEntries,
-                    noExistingObjects: this.args.noObjCheck,
+                    noDependencies: this.args.deps,
+                    noObjectTypes: this.args.objType,
+                    noSapEntries: this.args.sapEntries,
+                    noExistingObjects: this.args.objCheck,
                     lockfile: this.args.lockFile ? Lockfile.fromJson(this.parseJsonArg('lockFile')) : undefined
                 },
                 import: {
-                    noLang: this.args.noLangTr,
-                    noCust: this.args.noCustTr,
+                    noLang: this.args.langTr,
+                    noCust: this.args.custTr,
                     timeout: this.parseNumberArg('timeout'),
                     replaceExistingTransports: false
                 },
@@ -177,10 +177,10 @@ export class Install extends AbstractCommand {
                     keepOriginal: false,
                     transportLayer: this.args.transportLayer,
                     replacements: this.parseJsonArg('packageReplacements'),
-                    skipNamespace: this.args.noNamespace
+                    skipNamespace: this.args.namespace
                 },
                 installTransport: {
-                    create: !!this.args.noInstallTransport,
+                    create: !!this.args.installTransport,
                     targetSystem: this.args.installTrTarget
                 }
             }
