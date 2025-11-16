@@ -180,7 +180,7 @@ export class Install extends AbstractCommand {
                     skipNamespace: this.args.namespace
                 },
                 installTransport: {
-                    create: !!this.args.installTransport,
+                    create: !this.args.installTr,
                     targetSystem: this.args.installTrTarget
                 }
             }
