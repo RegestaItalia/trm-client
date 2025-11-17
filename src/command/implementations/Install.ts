@@ -37,17 +37,17 @@ export class Install extends AbstractCommand {
         }
         this.command.option(`-t, --timeout <seconds>`, `Transport import timeout (in seconds)`, `180`);
         this.command.option(`-T, --transport-layer <transport layer>`, `Package transport layer. (default: System default)`);
-        this.command.option(`--no-deps`, `Do not install dependencies.`, false);
-        this.command.option(`--no-obj-type`, `Do not check object types before import.`, false);
-        this.command.option(`--no-obj-check`, `Do not check if objects before import.`, false);
-        this.command.option(`--no-sap-entries`, `Do not check SAP entries before import.`, false);
-        this.command.option(`--no-lang-tr`, `Do not import language (translation) transport.`, false);
-        this.command.option(`--no-cust-tr`, `Do not import customizing transports.`, false);
-        this.command.option(`--no-install-tr`, `Do not create install transport.`, false);
-        this.command.option(`--no-namespace`, `Do not import namespace.`, false);
+        this.command.option(`--no-deps`, `Do not install dependencies.`);
+        this.command.option(`--no-obj-type`, `Do not check object types before import.`);
+        this.command.option(`--no-obj-check`, `Do not check if objects exist before import.`);
+        this.command.option(`--no-sap-entries`, `Do not check SAP entries before import.`);
+        this.command.option(`--no-lang-tr`, `Do not import language (translation) transport.`);
+        this.command.option(`--no-cust-tr`, `Do not import customizing transports.`);
+        this.command.option(`--no-install-tr`, `Do not create install transport.`);
+        this.command.option(`--no-namespace`, `Do not import namespace.`);
         this.command.option(`--package-replacements <replacements>`, `SAP Package replacements (JSON or path to JSON file)`);
         this.command.option(`--install-tr-target <target>`, `Install transport target system`);
-        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`, false);
+        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
     }
 
     private async selfUpdate(): Promise<void> {
@@ -149,7 +149,7 @@ export class Install extends AbstractCommand {
                         name: GlobalContext.getInstance().getSettings().r3transDockerName
                     }
                 },
-                noInquirer: this.args.prompts,
+                noInquirer: !this.args.prompts,
                 systemPackages: packages,
                 noR3transInfo: false
             },
@@ -161,15 +161,15 @@ export class Install extends AbstractCommand {
             },
             installData: {
                 checks: {
-                    noDependencies: this.args.deps,
-                    noObjectTypes: this.args.objType,
-                    noSapEntries: this.args.sapEntries,
-                    noExistingObjects: this.args.objCheck,
+                    noDependencies: !this.args.deps,
+                    noObjectTypes: !this.args.objType,
+                    noSapEntries: !this.args.sapEntries,
+                    noExistingObjects: !this.args.objCheck,
                     lockfile: this.args.lockFile ? Lockfile.fromJson(this.parseJsonArg('lockFile')) : undefined
                 },
                 import: {
-                    noLang: this.args.langTr,
-                    noCust: this.args.custTr,
+                    noLang: !this.args.langTr,
+                    noCust: !this.args.custTr,
                     timeout: this.parseNumberArg('timeout'),
                     replaceExistingTransports: false
                 },
@@ -177,10 +177,10 @@ export class Install extends AbstractCommand {
                     keepOriginal: false,
                     transportLayer: this.args.transportLayer,
                     replacements: this.parseJsonArg('packageReplacements'),
-                    skipNamespace: this.args.namespace
+                    skipNamespace: !this.args.namespace
                 },
                 installTransport: {
-                    create: !this.args.installTr,
+                    create: this.args.installTr,
                     targetSystem: this.args.installTrTarget
                 }
             }
