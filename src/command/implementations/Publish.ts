@@ -25,15 +25,15 @@ export class Publish extends AbstractCommand {
             this.command.option(`--tag <tag>`, `Release tag(s) (separated by comma)`);
             this.command.option(`--private`, `Package marked as private. Depending on the registry, visibility might not be changed after first publish.`);
             this.command.option(`--readme <readme>`, `Release readme (markdown or path to markdown file)`);
-            this.command.option(`--no-keep-manifest`, `Don't default to previous release manifest values.`, false);
+            this.command.option(`--no-keep-manifest`, `Don't default to previous release manifest values.`);
         }
         this.command.option(`-P, --sap-package <sap package>`, `SAP Package.`);
         this.command.option(`-t, --timeout <seconds>`, `Transport release timeout (in seconds)`, `180`);
         this.command.option(`-T, --target <target>`, `Transport release target.`);
-        this.command.option(`--no-lang-tr`, `Do not generate language (translation) transport.`, false);
-        this.command.option(`--no-cust-tr`, `Do not generate customizing transport.`, false);
+        this.command.option(`--no-lang-tr`, `Do not generate language (translation) transport.`);
+        this.command.option(`--no-cust-tr`, `Do not generate customizing transport.`);
         this.command.option(`--cust <customizing>`, `Customizing transport(s) (separated by comma).`);
-        this.command.option(`--no-auto-deps`, `Do not look for dependencies.`, false);
+        this.command.option(`--no-auto-deps`, `Do not look for dependencies.`);
         this.command.option(`--authors <authors>`, `Release author(s) (separated by comma)`);
         this.command.option(`--backwards-compatible`, `Backwards-compatible release (reserved for future use)`);
         this.command.option(`--description <description>`, `Release description`);
@@ -44,7 +44,7 @@ export class Publish extends AbstractCommand {
         this.command.option(`--dependencies <dependencies>`, `Release dependencies (JSON or path to JSON file)`);
         this.command.option(`--sap-entries <sap entries>`, `Release SAP entries (JSON or path to JSON file)`);
         this.command.option(`--post-activities <post activities>`, `Release post activities (JSON or path to JSON file)`);
-        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`, false);
+        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
     }
 
     private validateVersion(v: string): true | string {
@@ -88,7 +88,7 @@ export class Publish extends AbstractCommand {
             contextData: {
                 logTemporaryFolder: getTempFolder(),
                 systemPackages: packages,
-                noInquirer: this.args.prompts
+                noInquirer: !this.args.prompts
             },
             packageData: {
                 registry,
@@ -114,10 +114,10 @@ export class Publish extends AbstractCommand {
             },
             publishData: {
                 private: this.args.private,
-                keepLatestReleaseManifestValues: !this.args.keepManifest,
-                noLanguageTransport: this.args.langTr,
-                noDependenciesDetection: this.args.autoDeps,
-                skipCustomizingTransports: this.args.custTr,
+                keepLatestReleaseManifestValues: this.args.keepManifest,
+                noLanguageTransport: !this.args.langTr,
+                noDependenciesDetection: !this.args.autoDeps,
+                skipCustomizingTransports: !this.args.custTr,
                 customizingTransports: this.args.cust,
                 readme: this.parseTextArg('readme')
             },
