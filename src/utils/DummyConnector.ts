@@ -5,7 +5,6 @@ export class DummyConnector implements ISystemConnector {
         throw new Error(`No connection to SAP server.`);
         return null;
     }
-
     supportedBulk: SystemConnectorSupportedBulk = {
         getExistingObjects: false,
         getTransportObjects: false
@@ -95,4 +94,19 @@ export class DummyConnector implements ISystemConnector {
     isServerApisAllowed = async () => this._throw();
     changeTrOwner = async () => this._throw();
     getWbTransports = async () => this._throw();
+    getNewConnection = () => {
+        return new DummyConnector();
+    };
+    createLogPolling = async () => this._throw();
+    deleteLogPolling = async () => this._throw();
+    readLogPolling = async () => this._throw();
+    getLogPollingStatus = async () => this._throw();
+    getLogPollingList = async () => this._throw();
+    getLogPollingResult = async () => this._throw();
+    getLogPollingError = async () => this._throw();
+    getPackageDependencies = async () => this._throw();
+    getObjectDependencies = async () => this._throw();
+    getTableKeys = async () => this._throw();
+    getRootDevclass = async () => this._throw();
+
 }

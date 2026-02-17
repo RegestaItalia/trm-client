@@ -373,7 +373,7 @@ export abstract class AbstractCommand {
                         )
                     ).getSystemConnector() as Core.ISystemConnector;
                 }
-                await system.connect();
+                await system.connect(false);
                 Core.SystemConnector.systemConnector = system;
                 await Commons.Plugin.call<Core.ISystemConnector>("client", "onInitializeSystemConnector", Core.SystemConnector.systemConnector);
                 if (this.registerOpts.requiresTrmDependencies) {

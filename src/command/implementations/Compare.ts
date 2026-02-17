@@ -33,7 +33,7 @@ export class Compare extends AbstractCommand {
         if (askConnection) {
             const connectArgs = await connect({}, false, false);
             const systemConnector = connectArgs.getSystemConnector() as ISystemConnector;
-            await systemConnector.connect();
+            await systemConnector.connect(false);
             this.connections.push(systemConnector);
             return true;
         }else{
