@@ -1,6 +1,6 @@
-import { getNodePackage } from "./getNodePackage";
+import { getNodePackage } from "trm-core";
 
 export function getClientVersion(): string {
-    const trmClientPackage = getNodePackage();
+    const trmClientPackage = getNodePackage("trm-client");
     return trmClientPackage.version;
 }

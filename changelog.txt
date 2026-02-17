@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2026-02-16 v7.3.0
+-------------------
+! trm-core ^8.2.3
+
 2025-11-16 v7.2.1
 -------------------
 * install transport generation default

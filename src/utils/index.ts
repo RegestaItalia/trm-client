@@ -4,7 +4,6 @@ export * from "./xml2js";
 export * from "./getSapLogonConnections";
 export * from "./logError";
 export * from "./checkCliUpdate";
-export * from "./getNodePackage";
 export * from "./getClientVersion";
 export * from "./getTempFolder";
 export * from "./getLogFolder";

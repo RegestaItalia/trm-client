@@ -2,7 +2,7 @@ import { Inquirer, Logger } from "trm-commons";
 import { AbstractRegistry, FileSystem, publish } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder } from "../../utils";
-import { ReleaseType, valid } from "semver";
+import { valid } from "semver";
 
 export class Publish extends AbstractCommand {
 
@@ -95,7 +95,7 @@ export class Publish extends AbstractCommand {
                 name: this.args.package,
                 version: this.args.version,
                 devclass: this.args.sapPackage,
-                inc: this.args.increment as ReleaseType,
+                inc: this.args.increment as any,
                 preRelease: this.args.preRelease,
                 preReleaseIdentifier: this.args.preReleaseIdentifier,
                 tags: this.parseArrayArg('tag'),

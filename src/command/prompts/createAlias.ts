@@ -13,7 +13,7 @@ export async function createAlias(alias: string) {
     Logger.loading(`Connecting to "${alias}"...`);
     var connectionSuccess = true;
     try {
-        await (connection.getSystemConnector() as ISystemConnector).connect();
+        await (connection.getSystemConnector() as ISystemConnector).connect(true);
     } catch (e) {
         connectionSuccess = false;
         throw e;

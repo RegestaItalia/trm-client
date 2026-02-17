@@ -35,7 +35,7 @@ export class Alias extends AbstractCommand {
         Logger.loading(`Checking connection with alias "${alias.alias}"...`);
         const oSystemAlias = new SystemAlias(alias.type, alias.data);
         try {
-            await oSystemAlias.getConnection().connect();
+            await oSystemAlias.getConnection().connect(false);
             Logger.success(`Connection to alias "${alias.alias}" OK.`);
         } catch (e) {
             Logger.error(`Connection failed!`);
@@ -56,7 +56,7 @@ export class Alias extends AbstractCommand {
         const newData = connectionArgs.getData();
         try {
             SystemAlias.delete(alias.alias);
-            await SystemAlias.create(alias.alias, connectionArgs.name, newData).getConnection().connect();
+            await SystemAlias.create(alias.alias, connectionArgs.name, newData).getConnection().connect(false);
         } catch (e) {
             connectionSuccess = false;
             throw e;
