@@ -1,12 +1,11 @@
 import { Logger, TreeLog } from "trm-commons";
-import { getCoreTrmDependencies, RegistryProvider, SystemConnector, TrmPackage } from "trm-core";
+import { getCoreTrmDependencies, getNodePackage, RegistryProvider, SystemConnector, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion, GlobalContext } from "../../utils";
 import { gte } from "semver";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { rootPath } from 'get-root-path';
 
 export class Info extends AbstractCommand {
 
@@ -25,20 +24,6 @@ export class Info extends AbstractCommand {
     protected onTrmDepVersionNotSatisfied(trmPackage: TrmPackage): boolean {
         // dependency version not satisfied don't throw -> status will appear later in command
         return false;
-    }
-
-    private getDependencyVersion(moduleName: string, rootModule: string = 'trm-client'): string | undefined {
-        var file: Buffer;
-        try {
-            file = readFileSync(join(rootPath, `/node_modules/${rootModule}/node_modules/${moduleName}/package.json`));
-        } catch (e) {
-            file = readFileSync(join(rootPath, `/node_modules/${moduleName}/package.json`));
-        }
-        if (!file) {
-            Logger.warning(`Library ${moduleName} (root ${rootModule}) was not found!`, true);
-        } else {
-            return JSON.parse(file.toString()).version;
-        }
     }
     
     private getNodeRfcVersion(npmGlobal: string): string | undefined {
@@ -82,23 +67,13 @@ export class Info extends AbstractCommand {
         const nodeRfcVersion = this.getNodeRfcVersion(npmGlobal);
         const packages = await this.getSystemPackages();
         const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
-
-        //MIW: root changed!
-        var nodeR3transVersion: string;
-        try {
-            nodeR3transVersion = this.getDependencyVersion("node-r3trans", "trm-core");
-            if (!nodeR3transVersion) {
-                throw new Error();
-            }
-        } catch (e) {
-            nodeR3transVersion = this.getDependencyVersion("node-r3trans");
-        }
+        const nodeR3transVersion = getNodePackage("node-r3trans")?.version;
 
         var clientDependenciesTree: TreeLog[] = [];
         if (clientDependencies) {
             for (const d of Object.keys(clientDependencies).filter(k => k.startsWith('trm'))) {
                 var dText = ``;
-                var dInstalledVersion = this.getDependencyVersion(d);
+                var dInstalledVersion = getNodePackage(d)?.version;
                 if (dInstalledVersion) {
                     dText = ` -> ${dInstalledVersion}`;
                     dText = await this.getNpmLatestForText(d, dInstalledVersion, dText);
@@ -116,7 +91,7 @@ export class Info extends AbstractCommand {
                 var dText = ``;
                 const oTrmPackage = trmDependenciesInstances.find(o => o.compareName(d));
                 if (oTrmPackage) {
-                    var dInstalledVersion: string;
+                    var dInstalledVersion;
                     try {
                         dInstalledVersion = oTrmPackage.manifest.get().version;
                     } catch (e) {
