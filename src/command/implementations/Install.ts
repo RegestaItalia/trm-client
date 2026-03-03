@@ -35,7 +35,6 @@ export class Install extends AbstractCommand {
             this.command.argument(`<filename>`, `Name (or path) of the file.`);
             this.command.description(`Import a package (as a file) into system.`);
         }
-        this.command.option(`-t, --timeout <seconds>`, `Transport import timeout (in seconds)`, `180`);
         this.command.option(`-T, --transport-layer <transport layer>`, `Package transport layer. (default: System default)`);
         this.command.option(`--no-deps`, `Do not install dependencies.`);
         this.command.option(`--no-obj-type`, `Do not check object types before import.`);
@@ -170,7 +169,6 @@ export class Install extends AbstractCommand {
                 import: {
                     noLang: !this.args.langTr,
                     noCust: !this.args.custTr,
-                    timeout: this.parseNumberArg('timeout'),
                     replaceExistingTransports: false
                 },
                 installDevclass: {

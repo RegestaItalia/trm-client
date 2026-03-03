@@ -5,6 +5,7 @@ export * from "./getSapLogonConnections";
 export * from "./logError";
 export * from "./checkCliUpdate";
 export * from "./getClientVersion";
+export * from "./getCoreVersion";
 export * from "./getTempFolder";
 export * from "./getLogFolder";
 export * from "./getClientNodeDependencies";

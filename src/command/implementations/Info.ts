@@ -26,10 +26,10 @@ export class Info extends AbstractCommand {
         return false;
     }
     
-    private getNodeRfcVersion(npmGlobal: string): string | undefined {
+    private getNodeRfcVersion(): string | undefined {
         var file: Buffer;
         try {
-            file = readFileSync(join(npmGlobal, `/node-rfc/package.json`));
+            file = readFileSync(join(GlobalContext.getInstance().getGlobalNodeModules(), `/node-rfc/package.json`));
         } catch (e) {
             //
         }
@@ -57,23 +57,22 @@ export class Info extends AbstractCommand {
     protected async handler(): Promise<void> {
         Logger.loading(`Reading data...`);
 
-        const npmGlobal = GlobalContext.getInstance().getSettings().globalNodeModules;
         const clientLatest = await this.getCliVersionStatus();
         const clientVersion = getClientVersion();
         const clientDependencies = getClientNodeDependencies();
-        const trmDependencies = getCoreTrmDependencies();
+        const trmDependencies = getCoreTrmDependencies(GlobalContext.getInstance().getGlobalNodeModules());
         const trmDependenciesInstances = (await this.getTrmDependenciesCheck()).dependencies;
         const trmMissingDependencies = (await this.getTrmDependenciesCheck()).missingDependencies;
-        const nodeRfcVersion = this.getNodeRfcVersion(npmGlobal);
+        const nodeRfcVersion = this.getNodeRfcVersion();
         const packages = await this.getSystemPackages();
         const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
-        const nodeR3transVersion = getNodePackage("node-r3trans")?.version;
+        const nodeR3transVersion = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), "node-r3trans")?.version;
 
         var clientDependenciesTree: TreeLog[] = [];
         if (clientDependencies) {
             for (const d of Object.keys(clientDependencies).filter(k => k.startsWith('trm'))) {
                 var dText = ``;
-                var dInstalledVersion = getNodePackage(d)?.version;
+                var dInstalledVersion = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), d)?.version;
                 if (dInstalledVersion) {
                     dText = ` -> ${dInstalledVersion}`;
                     dText = await this.getNpmLatestForText(d, dInstalledVersion, dText);

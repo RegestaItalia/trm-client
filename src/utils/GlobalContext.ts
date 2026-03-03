@@ -3,7 +3,7 @@ import { CacheData, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from ".";
 import * as ini from "ini";
-import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules, PluginModule } from "trm-commons";
+import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules as commonsGetGlobalNodeModules, PluginModule } from "trm-commons";
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
 
 const CACHE_FILE_NAME = ".cache";
@@ -21,7 +21,7 @@ class RFCConnectExtended extends RFCConnect {
 
     public getSystemConnector(): ISystemConnector {
         const data = this.getData();
-        return new RFCSystemConnector(data, data, getTempFolder(), GlobalContext.getInstance().getSettings().globalNodeModules);
+        return new RFCSystemConnector(data, data, getTempFolder(), GlobalContext.getInstance().getGlobalNodeModules());
     }
 
 }
@@ -34,6 +34,7 @@ export class GlobalContext {
     private _cache: CacheData;
     private _connections: IConnect[] = [];
     private _plugins: PluginModule[] = [];
+    private _globalNodeModules: string;
 
     constructor() {
         //load settings
@@ -46,6 +47,8 @@ export class GlobalContext {
                 this._settings.r3transDocker = true;
             }
         }
+        //get npm root
+        this._globalNodeModules = commonsGetGlobalNodeModules();
     }
 
     public getSettings(): SettingsData {
@@ -56,10 +59,14 @@ export class GlobalContext {
         return this._cache;
     }
 
+    public getGlobalNodeModules(): string {
+        return this._globalNodeModules;
+    }
+
     public async load() {
         if (!this._pluginsLoaded) {
             this._plugins = await Plugin.load({
-                globalNodeModulesPath: this._settings.globalNodeModules
+                globalNodeModulesPath: this.getGlobalNodeModules()
             });
             this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
             this._pluginsLoaded = true;
@@ -109,40 +116,45 @@ export class GlobalContext {
     }
 
     private getDefaultSettings(): SettingsData {
-        var sapLandscape = path.join(getRoamingPath(), process.platform === 'win32' ? 'SAP\\Common\\SAPUILandscape.xml' : 'SAP/SAPGUILandscape.xml');
-        if (!fs.existsSync(sapLandscape)) {
+        var sapLandscape: string;
+        switch(process.platform){
+            case 'win32':
+                sapLandscape = path.join(getRoamingPath(), 'SAP', 'Common', 'SAPUILandscape.xml');
+                break;
+            case 'darwin':
+                sapLandscape = path.join(getRoamingPath(), 'SAP', 'SAPGUILandscape.xml');
+                break;
+            default:
+                break;
+        }
+        if (!sapLandscape || !fs.existsSync(sapLandscape)) {
             sapLandscape = undefined;
         }
         return {
             loggerType: 'CLI',
             logOutputFolder: 'default',
-            globalNodeModules: getGlobalNodeModules() || '',
             sapLandscape
         }
     }
 
     private getSettingsInternal(): SettingsData {
-        var defaultSettings: SettingsData;
+        const defaultSettings = this.getDefaultSettings();
         const filePath = this.getSettingsFilePath();
-        if (fs.existsSync(filePath)) {
-            try {
-                const sIni = fs.readFileSync(filePath).toString();
-                const settingsData = ini.decode(sIni) as SettingsData;
-                if (!settingsData.globalNodeModules || !settingsData.sapLandscape) {
-                    defaultSettings = this.getDefaultSettings();
-                    if (!settingsData.globalNodeModules) {
-                        settingsData.globalNodeModules = defaultSettings.globalNodeModules;
-                    }
-                    if (!settingsData.sapLandscape) {
-                        settingsData.sapLandscape = defaultSettings.sapLandscape;
-                    }
-                    this.generateSettingsFile(settingsData, filePath);
-                }
-                return settingsData;
-            } catch (e) { }
-        }
+        try {
+            const sIni = fs.readFileSync(filePath).toString();
+            const settingsData = ini.decode(sIni) as SettingsData;
+            if (!settingsData.sapLandscape) {
+                settingsData.sapLandscape = defaultSettings.sapLandscape;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            // clear from legacy versions that had the node root in settings
+            if ((settingsData as any).globalNodeModules) {
+                delete (settingsData as any).globalNodeModules;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            return settingsData;
+        } catch (e) { }
 
-        defaultSettings = this.getDefaultSettings();
         this.generateSettingsFile(defaultSettings, filePath);
         return defaultSettings;
     }

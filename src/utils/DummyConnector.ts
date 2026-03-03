@@ -1,4 +1,4 @@
-import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TR_AS4USER, Transport, TRKORR, TrmPackage } from "trm-core";
+import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TMSSYSNAM, TPSTAT, TR_AS4USER, Transport, TRKORR, TrmPackage } from "trm-core";
 
 export class DummyConnector implements ISystemConnector {
     _throw() {
@@ -23,7 +23,9 @@ export class DummyConnector implements ISystemConnector {
     connect = async () => {
         return;
     };
-    closeConnection = async () => this._throw();
+    closeConnection = async () => {
+        return;
+    };
     checkConnection = async () => true;
     ping = async () => 'PONG';
     getFileSystem = async () => this._throw();
@@ -108,5 +110,8 @@ export class DummyConnector implements ISystemConnector {
     getObjectDependencies = async () => this._throw();
     getTableKeys = async () => this._throw();
     getRootDevclass = async () => this._throw();
-
+    getTransportImportStatus = async () => this._throw();
+    getTimezone = async () => {
+        return 'UTC';
+    };
 }
