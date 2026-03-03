@@ -88,6 +88,7 @@ export class Info extends AbstractCommand {
         const trmDependencies = getCoreTrmDependencies(globalNodeModulesPath);
         const trmDependenciesInstances = (await this.getTrmDependenciesCheck()).dependencies;
         const trmMissingDependencies = (await this.getTrmDependenciesCheck()).missingDependencies;
+        const trmNotSatisfiedDependencies = (await this.getTrmDependenciesCheck()).versionNotSatisfiedDependencies;
         const nodeRfcPackage = getNodeRfcPackage();
         const packages = await this.getSystemPackages();
         const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
@@ -105,7 +106,7 @@ export class Info extends AbstractCommand {
         if (trmDependencies) {
             for (const d of Object.keys(trmDependencies)) {
                 var dText = ``;
-                const oTrmPackage = trmDependenciesInstances.find(o => o.compareName(d));
+                const oTrmPackage = trmDependenciesInstances.concat(trmNotSatisfiedDependencies).find(o => o.compareName(d));
                 if (oTrmPackage) {
                     var dInstalledVersion;
                     try {
@@ -125,20 +126,14 @@ export class Info extends AbstractCommand {
                                     dText += ` ${chalk.bgGreen('LATEST')}`;
                                 }
                             } else {
-                                dText += ` ${chalk.bold('v' + dLatestVersion + ' available')}`;
+                                dText += ` ${chalk.bold('v' + dLatestVersion.dist_tags.latest + ' available')}`;
                             }
                         } catch (e) {
                             dText += ` ${chalk.bgGray('Can\'t fetch latest version')}`;
                         }
                     }
                 } else {
-                    const missingDependency = trmMissingDependencies.find(o => {
-                        if (typeof (o) === 'string') {
-                            if (o === d) {
-                                return o;
-                            }
-                        }
-                    });
+                    const missingDependency = trmMissingDependencies.find(o => o === d);
                     if (missingDependency) {
                         try {
                             dText = ` -> ${chalk.bgRed((missingDependency as any).manifest.get().version)}`;
