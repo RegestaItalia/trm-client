@@ -43,22 +43,23 @@ export class Info extends AbstractCommand {
     protected async handler(): Promise<void> {
         Logger.loading(`Reading data...`);
 
+        const globalNodeModulesPath = GlobalContext.getInstance().getGlobalNodeModules();
         const clientLatest = await this.getCliVersionStatus();
         const clientVersion = getClientVersion();
         const clientDependencies = getClientNodeDependencies();
-        const trmDependencies = getCoreTrmDependencies(GlobalContext.getInstance().getGlobalNodeModules());
+        const trmDependencies = getCoreTrmDependencies(globalNodeModulesPath);
         const trmDependenciesInstances = (await this.getTrmDependenciesCheck()).dependencies;
         const trmMissingDependencies = (await this.getTrmDependenciesCheck()).missingDependencies;
         const nodeRfcPackage = getNodeRfcPackage();
         const packages = await this.getSystemPackages();
         const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
-        const nodeR3transVersion = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), "node-r3trans")?.version;
+        const nodeR3transVersion = getNodePackage(globalNodeModulesPath, "node-r3trans")?.version;
 
         var clientDependenciesTree: TreeLog[] = [];
         if (clientDependencies) {
             for (const d of Object.keys(clientDependencies).filter(k => k.startsWith('trm'))) {
                 var dText = ``;
-                var dInstalledVersion = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), d)?.version;
+                var dInstalledVersion = getNodePackage(globalNodeModulesPath, d)?.version;
                 if (dInstalledVersion) {
                     dText = ` -> ${dInstalledVersion}`;
                     dText = await this.getNpmLatestForText(d, dInstalledVersion, dText);
