@@ -1,9 +1,9 @@
 import path from "path";
-import { CacheData, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
+import { CacheData, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from ".";
 import * as ini from "ini";
-import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules, PluginModule } from "trm-commons";
+import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules as commonsGetGlobalNodeModules, PluginModule } from "trm-commons";
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
 
 const CACHE_FILE_NAME = ".cache";
@@ -21,7 +21,7 @@ class RFCConnectExtended extends RFCConnect {
 
     public getSystemConnector(): ISystemConnector {
         const data = this.getData();
-        return new RFCSystemConnector(data, data, getTempFolder(), GlobalContext.getInstance().getSettings().globalNodeModules);
+        return new RFCSystemConnector(data, data, getTempFolder(), GlobalContext.getInstance().getGlobalNodeModules());
     }
 
 }
@@ -52,15 +52,37 @@ export class GlobalContext {
         return this._settings;
     }
 
-    public getCache(): CacheData {
-        return this._cache;
+    public getGlobalNodeModules(): string {
+        //called before load
+        if (!this._cache.globalNpmPath) {
+            this.setGlobalNpmPathInternal();
+        }
+        return this._cache.globalNpmPath.data;
+    }
+
+    public getLatestVersion(): string {
+        return this._cache.latestVersion.data;
     }
 
     public async load() {
+        //global npm path
+        this.setGlobalNpmPathInternal();
+        //latest version
+        const latestVersionCache = this._cache.latestVersion;
+        if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > this.getSettings().cliUpdateCheckCache * 1000)) {
+            Logger.loading(`Cache expired, setting client latest version...`, true);
+            const version = (await getNpmPackageLatestVersion('trm-client')).latest;
+            Logger.log(`Client latest version set to ${version}`, true);
+            this.setCache('latestVersion', version);
+        }
+        //load plugins
         if (!this._pluginsLoaded) {
+            Logger.loading(`Loading plugins...`, true);
             this._plugins = await Plugin.load({
-                globalNodeModulesPath: this._settings.globalNodeModules
+                globalNodeModulesPath: this.getGlobalNodeModules()
             });
+            Logger.log(`Loaded ${this._plugins.length} plugins: ${this._plugins.map(o => o.name).join(', ')}`, true);
+            Logger.loading(`Calling event onContextLoadConnections...`, true);
             this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
             this._pluginsLoaded = true;
         }
@@ -109,40 +131,65 @@ export class GlobalContext {
     }
 
     private getDefaultSettings(): SettingsData {
-        var sapLandscape = path.join(getRoamingPath(), process.platform === 'win32' ? 'SAP\\Common\\SAPUILandscape.xml' : 'SAP/SAPGUILandscape.xml');
-        if (!fs.existsSync(sapLandscape)) {
+        var sapLandscape: string;
+        switch (process.platform) {
+            case 'win32':
+                sapLandscape = path.join(getRoamingPath(), 'SAP', 'Common', 'SAPUILandscape.xml');
+                break;
+            case 'darwin':
+                sapLandscape = path.join(getRoamingPath(), 'SAP', 'SAPGUILandscape.xml');
+                break;
+            default:
+                break;
+        }
+        if (!sapLandscape || !fs.existsSync(sapLandscape)) {
             sapLandscape = undefined;
         }
         return {
             loggerType: 'CLI',
             logOutputFolder: 'default',
-            globalNodeModules: getGlobalNodeModules() || '',
+            cliUpdateCheckCache: 60,
+            npmGlobalPathCheckCache: 180,
             sapLandscape
         }
     }
 
-    private getSettingsInternal(): SettingsData {
-        var defaultSettings: SettingsData;
-        const filePath = this.getSettingsFilePath();
-        if (fs.existsSync(filePath)) {
-            try {
-                const sIni = fs.readFileSync(filePath).toString();
-                const settingsData = ini.decode(sIni) as SettingsData;
-                if (!settingsData.globalNodeModules || !settingsData.sapLandscape) {
-                    defaultSettings = this.getDefaultSettings();
-                    if (!settingsData.globalNodeModules) {
-                        settingsData.globalNodeModules = defaultSettings.globalNodeModules;
-                    }
-                    if (!settingsData.sapLandscape) {
-                        settingsData.sapLandscape = defaultSettings.sapLandscape;
-                    }
-                    this.generateSettingsFile(settingsData, filePath);
-                }
-                return settingsData;
-            } catch (e) { }
+    private setGlobalNpmPathInternal(): void {
+        const globalNpmPathCache = this._cache.globalNpmPath;
+        if (!globalNpmPathCache || (globalNpmPathCache.ts && Date.now() - globalNpmPathCache.ts > this.getSettings().npmGlobalPathCheckCache * 1000)) {
+            Logger.loading(`Cache expired, setting npm global modules path...`, true);
+            const path = commonsGetGlobalNodeModules();
+            Logger.log(`Npm global modules path set to ${path}`, true);
+            this.setCache('globalNpmPath', path);
         }
+    }
 
-        defaultSettings = this.getDefaultSettings();
+    private getSettingsInternal(): SettingsData {
+        const defaultSettings = this.getDefaultSettings();
+        const filePath = this.getSettingsFilePath();
+        try {
+            const sIni = fs.readFileSync(filePath).toString();
+            const settingsData = ini.decode(sIni) as SettingsData;
+            if (!settingsData.sapLandscape) {
+                settingsData.sapLandscape = defaultSettings.sapLandscape;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.cliUpdateCheckCache) {
+                settingsData.cliUpdateCheckCache = defaultSettings.cliUpdateCheckCache;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.npmGlobalPathCheckCache) {
+                settingsData.npmGlobalPathCheckCache = defaultSettings.npmGlobalPathCheckCache;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            // clear from legacy versions that had the node root in settings
+            if ((settingsData as any).globalNodeModules) {
+                delete (settingsData as any).globalNodeModules;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            return settingsData;
+        } catch (e) { }
+
         this.generateSettingsFile(defaultSettings, filePath);
         return defaultSettings;
     }

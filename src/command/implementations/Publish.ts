@@ -28,7 +28,6 @@ export class Publish extends AbstractCommand {
             this.command.option(`--no-keep-manifest`, `Don't default to previous release manifest values.`);
         }
         this.command.option(`-P, --sap-package <sap package>`, `SAP Package.`);
-        this.command.option(`-t, --timeout <seconds>`, `Transport release timeout (in seconds)`, `180`);
         this.command.option(`-T, --target <target>`, `Transport release target.`);
         this.command.option(`--no-lang-tr`, `Do not generate language (translation) transport.`);
         this.command.option(`--no-cust-tr`, `Do not generate customizing transport.`);
@@ -122,7 +121,6 @@ export class Publish extends AbstractCommand {
                 readme: this.parseTextArg('readme')
             },
             systemData: {
-                releaseTimeout: this.parseNumberArg('timeout'),
                 transportTarget: this.args.target
             }
         });

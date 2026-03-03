@@ -1,4 +1,4 @@
-import { getRoamingFolder } from "../utils";
+import { getCoreVersion, getRoamingFolder, GlobalContext } from "../utils";
 import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
@@ -23,7 +23,7 @@ export class RegistryAlias {
     }
 
     public getRegistry(): AbstractRegistry {
-        return new RegistryV2(this._endpoint, this._name);
+        return new RegistryV2(this._endpoint, this._name, getCoreVersion());
     }
 
     private static generateFile(content: RegistryAliasData[], filePath?: string): void {

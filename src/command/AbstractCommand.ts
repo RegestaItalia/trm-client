@@ -117,7 +117,7 @@ export abstract class AbstractCommand {
     public async getTrmDependenciesCheck(): Promise<Core.CheckTrmDependencies> {
         if (!this.trmDependenciesCheck) {
             const packages = await this.getSystemPackages();
-            this.trmDependenciesCheck = await Core.checkCoreTrmDependencies(packages);
+            this.trmDependenciesCheck = await Core.checkCoreTrmDependencies(packages, GlobalContext.getInstance().getGlobalNodeModules());
         }
         return this.trmDependenciesCheck;
     }
@@ -223,7 +223,7 @@ export abstract class AbstractCommand {
 
     private async checkTrmDependencies() {
         const trmDependenciesCheck = await this.getTrmDependenciesCheck();
-        const trmDependencies = Core.getCoreTrmDependencies();
+        const trmDependencies = Core.getCoreTrmDependencies(GlobalContext.getInstance().getGlobalNodeModules());
         trmDependenciesCheck.missingDependencies.forEach(missingDependency => {
             if (this.onTrmDepMissing(missingDependency)) {
                 throw new Error(`Package "${missingDependency}" is not installed on ${Core.SystemConnector.getDest()}.`);
