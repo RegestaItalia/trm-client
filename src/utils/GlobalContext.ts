@@ -54,7 +54,7 @@ export class GlobalContext {
 
     public getGlobalNodeModules(): string {
         //called before load
-        if(!this._cache.globalNpmPath){
+        if (!this._cache.globalNpmPath) {
             this.setGlobalNpmPathInternal();
         }
         return this._cache.globalNpmPath.data;
@@ -69,7 +69,7 @@ export class GlobalContext {
         this.setGlobalNpmPathInternal();
         //latest version
         const latestVersionCache = this._cache.latestVersion;
-        if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > 60_000)) {
+        if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > this.getSettings().cliUpdateCheckCache * 1000)) {
             Logger.loading(`Cache expired, setting client latest version...`, true);
             const version = await getNpmPackageLatestVersion('trm-client');
             Logger.log(`Client latest version set to ${version}`, true);
@@ -148,13 +148,15 @@ export class GlobalContext {
         return {
             loggerType: 'CLI',
             logOutputFolder: 'default',
+            cliUpdateCheckCache: 60,
+            npmGlobalPathCheckCache: 180,
             sapLandscape
         }
     }
 
     private setGlobalNpmPathInternal(): void {
         const globalNpmPathCache = this._cache.globalNpmPath;
-        if (!globalNpmPathCache || (globalNpmPathCache.ts && Date.now() - globalNpmPathCache.ts > 180_000)) {
+        if (!globalNpmPathCache || (globalNpmPathCache.ts && Date.now() - globalNpmPathCache.ts > this.getSettings().npmGlobalPathCheckCache * 1000)) {
             Logger.loading(`Cache expired, setting npm global modules path...`, true);
             const path = commonsGetGlobalNodeModules();
             Logger.log(`Npm global modules path set to ${path}`, true);
@@ -170,6 +172,14 @@ export class GlobalContext {
             const settingsData = ini.decode(sIni) as SettingsData;
             if (!settingsData.sapLandscape) {
                 settingsData.sapLandscape = defaultSettings.sapLandscape;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.cliUpdateCheckCache) {
+                settingsData.cliUpdateCheckCache = defaultSettings.cliUpdateCheckCache;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.npmGlobalPathCheckCache) {
+                settingsData.npmGlobalPathCheckCache = defaultSettings.npmGlobalPathCheckCache;
                 this.generateSettingsFile(settingsData, filePath);
             }
             // clear from legacy versions that had the node root in settings
