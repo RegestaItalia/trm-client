@@ -1,5 +1,5 @@
 import path from "path";
-import { CacheData, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
+import { CacheData, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from ".";
 import * as ini from "ini";
@@ -34,7 +34,6 @@ export class GlobalContext {
     private _cache: CacheData;
     private _connections: IConnect[] = [];
     private _plugins: PluginModule[] = [];
-    private _globalNodeModules: string;
 
     constructor() {
         //load settings
@@ -47,27 +46,43 @@ export class GlobalContext {
                 this._settings.r3transDocker = true;
             }
         }
-        //get npm root
-        this._globalNodeModules = commonsGetGlobalNodeModules();
     }
 
     public getSettings(): SettingsData {
         return this._settings;
     }
 
-    public getCache(): CacheData {
-        return this._cache;
+    public getGlobalNodeModules(): string {
+        //called before load
+        if(!this._cache.globalNpmPath){
+            this.setGlobalNpmPathInternal();
+        }
+        return this._cache.globalNpmPath.data;
     }
 
-    public getGlobalNodeModules(): string {
-        return this._globalNodeModules;
+    public getLatestVersion(): string {
+        return this._cache.latestVersion.data;
     }
 
     public async load() {
+        //global npm path
+        this.setGlobalNpmPathInternal();
+        //latest version
+        const latestVersionCache = this._cache.latestVersion;
+        if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > 60_000)) {
+            Logger.loading(`Cache expired, setting client latest version...`, true);
+            const version = await getNpmPackageLatestVersion('trm-client');
+            Logger.log(`Client latest version set to ${version}`, true);
+            this.setCache('latestVersion', version);
+        }
+        //load plugins
         if (!this._pluginsLoaded) {
+            Logger.loading(`Loading plugins...`, true);
             this._plugins = await Plugin.load({
                 globalNodeModulesPath: this.getGlobalNodeModules()
             });
+            Logger.log(`Loaded ${this._plugins.length} plugins: ${this._plugins.map(o => o.name).join(', ')}`, true);
+            Logger.loading(`Calling event onContextLoadConnections...`, true);
             this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
             this._pluginsLoaded = true;
         }
@@ -117,7 +132,7 @@ export class GlobalContext {
 
     private getDefaultSettings(): SettingsData {
         var sapLandscape: string;
-        switch(process.platform){
+        switch (process.platform) {
             case 'win32':
                 sapLandscape = path.join(getRoamingPath(), 'SAP', 'Common', 'SAPUILandscape.xml');
                 break;
@@ -134,6 +149,16 @@ export class GlobalContext {
             loggerType: 'CLI',
             logOutputFolder: 'default',
             sapLandscape
+        }
+    }
+
+    private setGlobalNpmPathInternal(): void {
+        const globalNpmPathCache = this._cache.globalNpmPath;
+        if (!globalNpmPathCache || (globalNpmPathCache.ts && Date.now() - globalNpmPathCache.ts > 180_000)) {
+            Logger.loading(`Cache expired, setting npm global modules path...`, true);
+            const path = commonsGetGlobalNodeModules();
+            Logger.log(`Npm global modules path set to ${path}`, true);
+            this.setCache('globalNpmPath', path);
         }
     }
 

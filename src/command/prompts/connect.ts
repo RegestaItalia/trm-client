@@ -1,5 +1,5 @@
 import { SystemAlias } from "../../systemAlias";
-import { GlobalContext, DummyConnector, getSapLogonConnections } from "../../utils";
+import { GlobalContext, DummyConnector, getSapLogonConnections, getNodeRfcPackage } from "../../utils";
 import { IConnect, Inquirer } from "trm-commons";
 import { isEqual } from "lodash";
 import { ISystemConnector } from "trm-core";
@@ -79,12 +79,12 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     const force = commandArgs.force ? true : false;
     var type = commandArgs.type;
     var aInputType = [];
-    var aSapLogonConnections;
+    var aSapLogonConnections = [];
     const aAlias = SystemAlias.getAll();
-    try {
-        aSapLogonConnections = await getSapLogonConnections();
-    } catch (e) {
-        aSapLogonConnections = [];
+    if (getNodeRfcPackage()) { //only if node-rfc is installed
+        try {
+            aSapLogonConnections = await getSapLogonConnections();
+        } catch { }
     }
     if (addNoConnection) {
         aInputType.push({
@@ -138,7 +138,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             await connection.onAfterLoginData(force, commandArgs);
         }
         //check for changes to login data and update alias
-        if(!isEqual(inq2.data, connection.getData())){
+        if (!isEqual(inq2.data, connection.getData())) {
             SystemAlias.delete(inq2.alias);
             SystemAlias.create(inq2.alias, inq2.type, connection.getData());
         }

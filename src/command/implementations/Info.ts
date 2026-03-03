@@ -1,7 +1,7 @@
 import { Logger, TreeLog } from "trm-commons";
 import { getCoreTrmDependencies, getNodePackage, RegistryProvider, SystemConnector, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
-import { DummyConnector, getClientNodeDependencies, getClientVersion, getNpmPackageLatestVersion, GlobalContext } from "../../utils";
+import { DummyConnector, getClientNodeDependencies, getClientVersion, getNodeRfcPackage, getNpmPackageLatestVersion, GlobalContext } from "../../utils";
 import { gte } from "semver";
 import chalk from "chalk";
 import { readFileSync } from "fs";
@@ -24,20 +24,6 @@ export class Info extends AbstractCommand {
     protected onTrmDepVersionNotSatisfied(trmPackage: TrmPackage): boolean {
         // dependency version not satisfied don't throw -> status will appear later in command
         return false;
-    }
-    
-    private getNodeRfcVersion(): string | undefined {
-        var file: Buffer;
-        try {
-            file = readFileSync(join(GlobalContext.getInstance().getGlobalNodeModules(), `/node-rfc/package.json`));
-        } catch (e) {
-            //
-        }
-        if (!file) {
-            Logger.warning(`Library node-rfc was not found!`, true);
-        } else {
-            return JSON.parse(file.toString()).version;
-        }
     }
     
     private async getNpmLatestForText(packageName: string, installedVersion: string, text: string): Promise<string> {
@@ -63,7 +49,7 @@ export class Info extends AbstractCommand {
         const trmDependencies = getCoreTrmDependencies(GlobalContext.getInstance().getGlobalNodeModules());
         const trmDependenciesInstances = (await this.getTrmDependenciesCheck()).dependencies;
         const trmMissingDependencies = (await this.getTrmDependenciesCheck()).missingDependencies;
-        const nodeRfcVersion = this.getNodeRfcVersion();
+        const nodeRfcPackage = getNodeRfcPackage();
         const packages = await this.getSystemPackages();
         const trmRest = packages.find(o => o.compareName("trm-rest") && o.compareRegistry(RegistryProvider.getRegistry()));
         const nodeR3transVersion = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), "node-r3trans")?.version;
@@ -143,9 +129,9 @@ export class Info extends AbstractCommand {
             text: `trm-client ${clientVersion} ${gte(clientLatest.localVersion, clientLatest.latestVersion) ? chalk.bgGreen('LATEST') : chalk.bold('v' + clientLatest.latestVersion + ' available')}`,
             children: clientDependenciesTree
         }];
-        if (nodeRfcVersion) {
+        if (nodeRfcPackage && nodeRfcPackage.version) {
             clientChildrenTree.push({
-                text: await this.getNpmLatestForText('node-rfc', nodeRfcVersion, `node-rfc ${nodeRfcVersion}`),
+                text: await this.getNpmLatestForText('node-rfc', nodeRfcPackage.version, `node-rfc ${nodeRfcPackage.version}`),
                 children: []
             });
         } else {
