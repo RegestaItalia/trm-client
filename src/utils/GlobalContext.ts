@@ -71,7 +71,7 @@ export class GlobalContext {
         const latestVersionCache = this._cache.latestVersion;
         if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > this.getSettings().cliUpdateCheckCache * 1000)) {
             Logger.loading(`Cache expired, setting client latest version...`, true);
-            const version = await getNpmPackageLatestVersion('trm-client');
+            const version = (await getNpmPackageLatestVersion('trm-client')).latest;
             Logger.log(`Client latest version set to ${version}`, true);
             this.setCache('latestVersion', version);
         }
