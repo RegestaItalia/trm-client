@@ -43,7 +43,7 @@ export class Install extends AbstractCommand {
         this.command.option(`--no-lang-tr`, `Do not import language (translation) transport.`);
         this.command.option(`--no-cust-tr`, `Do not import customizing transports.`);
         this.command.option(`--no-install-tr`, `Do not create install transport.`);
-        this.command.option(`--no-namespace`, `Do not import namespace.`);
+        this.command.option(`--namespace`, `Import customer namespace.`);
         this.command.option(`--package-replacements <replacements>`, `SAP Package replacements (JSON or path to JSON file)`);
         this.command.option(`--install-tr-target <target>`, `Install transport target system`);
         this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
