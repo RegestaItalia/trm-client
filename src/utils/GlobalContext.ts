@@ -156,12 +156,15 @@ export class GlobalContext {
 
     private setGlobalNpmPathInternal(): void {
         const globalNpmPathCache = this._cache.globalNpmPath;
-        if (!globalNpmPathCache || (globalNpmPathCache.ts && Date.now() - globalNpmPathCache.ts > this.getSettings().npmGlobalPathCheckCache * 1000)) {
-            Logger.loading(`Cache expired, setting npm global modules path...`, true);
-            const path = commonsGetGlobalNodeModules();
-            Logger.log(`Npm global modules path set to ${path}`, true);
-            this.setCache('globalNpmPath', path);
+        const isValid = !!globalNpmPathCache && !!globalNpmPathCache.ts && (Date.now() - globalNpmPathCache.ts) < this.getSettings().npmGlobalPathCheckCache * 1000;
+        if (isValid) {
+            return globalNpmPathCache.data; 
         }
+        Logger.loading(`Cache expired, setting npm global modules path...`, true);
+        const path = commonsGetGlobalNodeModules();
+        Logger.log(`Npm global modules path set to ${path}`, true);
+        this.setCache('globalNpmPath', path);
+
     }
 
     private getSettingsInternal(): SettingsData {
