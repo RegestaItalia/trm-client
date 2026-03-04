@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "7.4.2",
+  "version": "7.4.3",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,7 +47,7 @@
     "lodash": "^4.17.21",
     "semver": "^7.7.4",
     "trm-commons": "^3.5.1",
-    "trm-core": "^8.4.1",
+    "trm-core": "^8.4.2",
     "trm-registry-types": "^2.1.0",
     "xml2js": "^0.6.2"
   },
