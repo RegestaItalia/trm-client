@@ -14,7 +14,6 @@ export class FindDependencies extends AbstractCommand {
     }
 
     protected async handler(): Promise<void> {
-        Logger.loading(`Searching for dependencies in package "${this.args.sapPackage.toUpperCase()}"...`);
         const dependencies = await SystemConnector.getPackageDependencies(this.args.sapPackage.toUpperCase(), true, true);
         const trmPackageDependencies = dependencies.trmPackageDependencies;
         const sapPackageDependencies = dependencies.abapPackageDependencies.filter(o => !o.isCustomerPackage);
@@ -39,7 +38,7 @@ export class FindDependencies extends AbstractCommand {
                 text: `Customer packages (${custPackageDependencies.length})`,
                 children: custPackageDependencies.map(o => {
                     return {
-                        text: `${o.abapPackage}`,
+                        text: `${o.abapPackage.devclass}`,
                         children: o.entries.map(t => {
                             return {
                                 text: t.tableName,
