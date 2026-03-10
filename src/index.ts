@@ -18,7 +18,7 @@ program
 Full documentation available at https://docs.trmregistry.com/
 Public registry at https://trmregistry.com/
 
-© 2025 RegestaItalia https://regestaitalia.eu/`)
+© 2023 RegestaItalia https://regestaitalia.eu/`)
     .version(getClientVersion());
 
 new Ping(program, 'ping').register();
