@@ -1,4 +1,4 @@
-import { ISystemConnector, SystemConnectorSupportedBulk, TADIR, TMSSYSNAM, TPSTAT, TR_AS4USER, Transport, TRKORR, TrmPackage } from "trm-core";
+import { ISystemConnector, SystemConnectorSupportedBulk, TADIR } from "trm-core";
 
 export class DummyConnector implements ISystemConnector {
     _throw() {
@@ -9,7 +9,7 @@ export class DummyConnector implements ISystemConnector {
         getExistingObjects: false,
         getTransportObjects: false
     };
-
+    isStateless: boolean = true;
     getConnectionData = () => this._throw();
     getDest = () => 'NONE';
     getLogonLanguage = (c: boolean) => {

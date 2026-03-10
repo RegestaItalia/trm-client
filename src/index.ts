@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion } from "./utils";
 import { Alias, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
+import { Transport } from 'trm-core';
 
 dotenv.config({
     quiet: true
@@ -12,7 +13,7 @@ const program = new Command();
 
 program
     .name(`trm`)
-    .description(`TRM - Transport Request Manager CLI
+    .description(`${Transport.getTransportIcon()}  TRM - Transport Request Manager CLI
         
 Full documentation available at https://docs.trmregistry.com/
 Public registry at https://trmregistry.com/
