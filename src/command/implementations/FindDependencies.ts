@@ -38,7 +38,7 @@ export class FindDependencies extends AbstractCommand {
                 text: `Customer packages (${custPackageDependencies.length})`,
                 children: custPackageDependencies.map(o => {
                     return {
-                        text: `${o.abapPackage.devclass} (${o.entries.length})`,
+                        text: `${o.abapPackage.devclass} (${o.entries.reduce((sum, entry) => sum + entry.dependency.length, 0)})`,
                         children: o.entries.map(t => {
                             return {
                                 text: t.tableName,
@@ -67,7 +67,7 @@ export class FindDependencies extends AbstractCommand {
                 text: `SAP packages (${sapPackageDependencies.length})`,
                 children: sapPackageDependencies.map(o => {
                     return {
-                        text: `${o.abapPackage} (${o.entries.length})`,
+                        text: `${o.abapPackage} (${o.entries.reduce((sum, entry) => sum + entry.dependency.length, 0)})`,
                         children: o.entries.map(t => {
                             return {
                                 text: chalk.underline(t.tableName),
