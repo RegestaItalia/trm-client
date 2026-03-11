@@ -12,22 +12,57 @@
 
 [trm-client](https://www.npmjs.com/package/trm-client) is the CLI implementation of the core functionalities of TRM.
 
-**TRM (Transport Request Manager)** is a package manager inspired solution built leveraging CTS that simplifies SAP ABAP transports.
+🚚 **TRM (Transport Request Manager)** is a package manager inspired solution built leveraging CTS that simplifies SAP ABAP transports.
 
-# Documentation
+<p align="center">
+  <img src="https://docs.trmregistry.com/logo.png" alt="TRM Logo" />
+</p>
 
-You can find the full documentation at [docs.trmregistry.com](https://docs.trmregistry.com).
+TRM introduces **package-based software delivery** to the SAP ecosystem, bringing with it semantic versioning, dependency management, and automated deployment activities.
 
-- [Setup](/docs/setup.md)
-- [Publish and install](https://docs.trmregistry.com/#/examples/1_publish_and_install)
+---
 
-## Install
+# What is TRM?
 
-First, make sure you have all the [requirements installed](/docs/setup.md).
+TRM is a software that transforms how custom ABAP developments are published, installed, and maintained across SAP landscapes.
+Inspired by modern package managers, TRM introduces a declarative, version-controlled, and automated way to manage your SAP transports.
 
-You can then install the CLI via npm:
+With TRM, you can:
 
-`npm install trm-client -g`
+- **Define a manifest** for each ABAP package (similar to `package.json` with Node.js or `pom.xml` with Maven)
+- **Version your products** ([SemVer](https://semver.org/) compliance)
+- **Declare dependencies** (to other TRM packages, SAP standard objects, or customizing data)
+- **Automate post-install activities**, such as client dependant customizing, cache invalidation etc.
+- **Validate system requirements** prior to installation
+- **Compare versions** of the same product across multiple SAP systems (in or outside the same landscape)
+- **Distribute** your product release to the public or to a restricted number of users:
+  - Registry (e.g., [trmregistry.com](https://trmregistry.com) or private registry)
+  - Local `.trm` files for offline installations
+
+## Modern approach for ABAP
+
+- Publish ABAP packages from a **central development system**
+- Deliver packages to target systems (outside of the original landscape e.g. customers development system) using a single CLI command (or in a pipeline)
+- Full support for **workbench objects**, **customizing**, and **translations**
+
+## Structured Manifest
+
+Each package includes a `manifest.json` that declares:
+
+- Version and metadata
+- System requirements
+- Dependencies
+- Post-install scripts
+
+---
+
+<!-- START OF SETUP.MD -->
+
+
+
+<!-- END OF SETUP.MD -->
+
+---
 
 # Contributing
 
