@@ -54,6 +54,10 @@ Each package includes a `manifest.json` that declares:
 - Dependencies
 - Post-install scripts
 
+# Documentation
+
+Full documentation can be seen at [https://docs.trmregistry.com/](https://docs.trmregistry.com).
+
 ---
 
 <!-- START OF SETUP.MD -->
