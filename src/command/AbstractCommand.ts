@@ -9,8 +9,11 @@ import { RegistryAlias } from "../registryAlias";
 import { SystemAlias } from "../systemAlias";
 import chalk from "chalk";
 import { connect, pickRegistry } from "./prompts";
-import { readFileSync } from "fs";
+import { accessSync, existsSync, readFileSync, statSync } from "fs";
 import { Package } from "trm-registry-types";
+import { basename, dirname, resolve } from "path";
+import constants from "constants";
+import sanitize from "sanitize-filename";
 
 export abstract class AbstractCommand {
 
@@ -27,16 +30,16 @@ export abstract class AbstractCommand {
 
     constructor(program: Command, protected readonly name: string, protected readonly aliases?: string[], protected readonly subcommand?: string) {
         const index = program.commands.findIndex(c => c.name() === this.name);
-        if(index >= 0){
-            if(subcommand){
+        if (index >= 0) {
+            if (subcommand) {
                 this.command = program.commands[index];
-            }else{
+            } else {
                 throw new Error(`Command "${this.name}" declared multiple times without subcommand.`);
             }
-        }else{
+        } else {
             this.command = program.command(this.name);
         }
-        if(this.subcommand){
+        if (this.subcommand) {
             this.command = this.command.command(this.subcommand);
         }
         if (aliases) {
@@ -104,9 +107,9 @@ export abstract class AbstractCommand {
 
     public async getSystemPackages(): Promise<Core.TrmPackage[]> {
         if (!this.systemPackages) {
-            if(Core.SystemConnector.systemConnector instanceof DummyConnector){
+            if (Core.SystemConnector.systemConnector instanceof DummyConnector) {
                 this.systemPackages = [];
-            }else{
+            } else {
                 Commons.Logger.loading(`Reading "${Core.SystemConnector.getDest()}" packages...`);
                 this.systemPackages = await Core.SystemConnector.getInstalledPackages(true, true, true);
             }
@@ -160,7 +163,7 @@ export abstract class AbstractCommand {
                     .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file).`);
             }
         }
-        if(this.registerOpts.requiresR3trans){
+        if (this.registerOpts.requiresR3trans) {
             this.command
                 .option(`--r3trans-path <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`);
         }
@@ -193,11 +196,11 @@ export abstract class AbstractCommand {
         const commandOpts = this.command['_optionValues'] || {};
         const commandArgs = this.command["_args"] || [];
         commandArgs.forEach((a, i) => {
-            if(typeof(argsValues[i]) === 'string'){
+            if (typeof (argsValues[i]) === 'string') {
                 args[a.name()] = argsValues[i];
             }
         });
-        args = {...commandOpts, ...args};
+        args = { ...commandOpts, ...args };
         // transform arguments with spaces into camel case
         args = Object.entries(args).reduce((acc, [key, value]) => {
             const newKey = key.includes(" ") ? key.replace(/ (\w)/g, (_, char) => char.toUpperCase()) : key;
@@ -205,6 +208,79 @@ export abstract class AbstractCommand {
             return acc;
         }, {} as any);
         return args;
+    }
+
+    public validateOutputFileArg(argValue: string): void {
+        const resolvedPath = resolve(argValue);
+
+        // If path exists
+        if (existsSync(resolvedPath)) {
+            const stats = statSync(resolvedPath);
+
+            if (stats.isDirectory()) {
+                // Existing directory: must be writable
+                try {
+                    accessSync(resolvedPath, constants.W_OK);
+                } catch {
+                    throw new Error(`No write access to directory "${resolvedPath}"`);
+                }
+                return;
+            }
+
+            if (stats.isFile()) {
+                const dir = dirname(resolvedPath);
+
+                // Existing file's directory must be writable
+                try {
+                    accessSync(dir, constants.W_OK);
+                } catch {
+                    throw new Error(`No write access to directory "${dir}"`);
+                }
+
+                const fileName = basename(resolvedPath);
+                const sanitizedFileName = sanitize(fileName);
+
+                if (fileName !== sanitizedFileName) {
+                    throw new Error(`Invalid filename "${fileName}"`);
+                }
+
+                return;
+            }
+
+            throw new Error(`Output path "${resolvedPath}" is neither a file nor a directory`);
+        }
+
+        // Path does not exist: validate parent directory + filename
+        const dir = dirname(resolvedPath);
+        const fileName = basename(resolvedPath);
+        const sanitizedFileName = sanitize(fileName);
+
+        if (!existsSync(dir)) {
+            throw new Error(`Parent directory does not exist "${dir}"`);
+        }
+
+        try {
+            accessSync(dir, constants.W_OK);
+        } catch {
+            throw new Error(`No write access to directory "${dir}"`);
+        }
+
+        if (fileName !== sanitizedFileName) {
+            throw new Error(`Invalid filename "${fileName}"`);
+        }
+    }
+
+    public validateInputFileArg(argValue: string): void {
+        const resolvedPath = resolve(argValue);
+
+        if (!existsSync(resolvedPath)) {
+            throw new Error(`"${resolvedPath}" does not exist`);
+        }
+
+        const stats = statSync(resolvedPath);
+        if (!stats.isFile()) {
+            throw new Error(`"${resolvedPath}" is not a file`);
+        }
     }
 
     protected onArgs(): void {
@@ -252,7 +328,7 @@ export abstract class AbstractCommand {
             var sValue: string;
             try {
                 sValue = readFileSync(this.args[name]).toString();
-            } catch(e) {
+            } catch (e) {
                 sValue = this.args[name];
             }
             try {
@@ -288,21 +364,22 @@ export abstract class AbstractCommand {
             Commons.Inquirer.inquirer = this.getInquirer(InquirerType.CLI);
             Commons.Logger.logger = this.getLogger(this.args.logger, this.args.debug, this.args.loggerOutDir);
 
-            if(this.registerOpts.requiresR3trans && process.platform === 'darwin'){
-                Commons.Logger.info(`This command needs R3trans program dockerized in your OS.`);
+            const useDocker = GlobalContext.getInstance().getSettings().r3transDocker;
+            if (this.registerOpts.requiresR3trans && useDocker) {
+                Commons.Logger.info(`This command needs R3trans program dockerized.`);
                 Commons.Logger.loading(`Checking if docker is running...`);
-                if(await isDockerRunning()){
+                if (await isDockerRunning()) {
                     const dockerName = GlobalContext.getInstance().getSettings().r3transDockerName;
                     Commons.Logger.info(`Docker "${dockerName || 'local/r3trans'}" will be used.`);
-                }else{
-                    throw new Error(`Command needs R3trans dockerized, docker is not currently running.`);
+                } else {
+                    throw new Error(`Command needs R3trans dockerized, docker engine is not currently running.`);
                 }
             }
-            if (process.platform !== 'win32' && process.platform !== 'darwin') {
+            if (process.platform !== 'win32' && process.platform !== 'darwin' && process.platform !== 'linux') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
 
-            if(!this.registerOpts.noClientVersionCheck){
+            if (!this.registerOpts.noClientVersionCheck) {
                 await this.getCliVersionStatus(); // prints possible updates
             }
 

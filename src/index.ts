@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion } from "./utils";
-import { Alias, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
+import { Alias, Cg3y, Cg3z, ClearCache, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
 import { Transport } from 'trm-core';
 
 dotenv.config({
@@ -20,6 +20,29 @@ Public registry at https://trmregistry.com/
 
 © 2023 RegestaItalia https://regestaitalia.eu/`)
     .version(getClientVersion());
+
+program.configureHelp({
+    sortSubcommands: true,
+    visibleCommands: (cmd) => {
+        var commands: Command[] = [];
+        cmd.commands.forEach(c => {
+            if (c.description()) {
+                commands.push(c);
+            }
+            c.commands.forEach(s => {
+                commands.push(s);
+            });
+        });
+        return commands;
+    },
+    subcommandTerm: (cmd) => {
+        var term = `${cmd.name()} ${cmd.usage()}`
+        if (cmd.parent.name() !== program.name()) {
+            term = `${cmd.parent.name()} ${cmd.name()} ${cmd.usage()}`
+        }
+        return term;
+    }
+});
 
 new Ping(program, 'ping').register();
 new Info(program, 'info').register();
@@ -54,6 +77,10 @@ new Compare(program, 'compare').register();
 
 new FindDependencies(program, 'find-dependencies').register();
 
+new Cg3y(program, 'cg3y').register();
+new Cg3z(program, 'cg3z').register();
+
 new Settings(program, 'settings').register();
+new ClearCache(program, 'clear-cache').register();
 
 program.parse(process.argv);

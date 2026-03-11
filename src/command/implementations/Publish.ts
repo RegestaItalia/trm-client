@@ -3,6 +3,8 @@ import { AbstractRegistry, FileSystem, publish } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder } from "../../utils";
 import { valid } from "semver";
+import { extname, join } from "path";
+import sanitize from "sanitize-filename";
 
 export class Publish extends AbstractCommand {
 
@@ -11,7 +13,7 @@ export class Publish extends AbstractCommand {
         this.registerOpts.requiresTrmDependencies = true;
         if (this.name === 'pack') {
             this.command.description(`Export a package to local file.`);
-            this.command.argument(`<filename>`, `Name (or path) of the file.`);
+            this.command.argument(`[filename]`, `Name (or path) of the output file.`);
             this.command.option(`--package <package>`, `Name of the package`);
             this.command.option(`--version <version>`, `Version of the release`);
         } else {
@@ -78,6 +80,14 @@ export class Publish extends AbstractCommand {
             if (this.validateVersion(this.args.version) !== true) {
                 throw new Error(this.validateVersion(this.args.version) as string);
             }
+            if (!this.args.filename) {
+                this.args.filename = join(process.cwd(), `${sanitize(this.args.package)}.trm`);
+            }
+            const extension = extname(this.args.filename);
+            if (extension !== '.trm') {
+                this.args.filename = this.args.filename + '.trm';
+            }
+            this.validateOutputFileArg(this.args.filename);
             registry = new FileSystem(this.args.filename);
         } else {
             registry = this.getRegistry();

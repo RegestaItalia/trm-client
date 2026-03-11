@@ -35,7 +35,10 @@ export class GlobalContext {
     private _connections: IConnect[] = [];
     private _plugins: PluginModule[] = [];
 
+    private _dockerized: boolean;
+
     constructor() {
+        this._dockerized = process.env.TRM_DOCKERIZED === 'true';
         //load settings
         this._settings = this.getSettingsInternal();
         //load cache
@@ -155,16 +158,26 @@ export class GlobalContext {
     }
 
     private setGlobalNpmPathInternal(): void {
+        var path;
+        if(this._dockerized){
+            Logger.log(`TRM running in docker environment, ignoring cache and recalculating NPM global path`, true);
+            path = commonsGetGlobalNodeModules();
+            this._cache['globalNpmPath'] = {
+                ts: -1,
+                data: path
+            };
+            Logger.log(`Npm global modules path set to ${path}`, true);
+            return;
+        }
         const globalNpmPathCache = this._cache.globalNpmPath;
         const isValid = !!globalNpmPathCache && !!globalNpmPathCache.ts && (Date.now() - globalNpmPathCache.ts) < this.getSettings().npmGlobalPathCheckCache * 1000;
         if (isValid) {
             return globalNpmPathCache.data; 
         }
         Logger.loading(`Cache expired, setting npm global modules path...`, true);
-        const path = commonsGetGlobalNodeModules();
+        path = commonsGetGlobalNodeModules();
         Logger.log(`Npm global modules path set to ${path}`, true);
         this.setCache('globalNpmPath', path);
-
     }
 
     private getSettingsInternal(): SettingsData {
@@ -197,11 +210,20 @@ export class GlobalContext {
         return defaultSettings;
     }
 
+    public clearCache(): void {
+        const filePath = this.getCacheFilePath();
+        this.generateCacheFile({}, filePath);
+    }
+
     private getCacheInternal(): CacheData {
         const filePath = this.getCacheFilePath();
         if (fs.existsSync(filePath)) {
             try {
-                return JSON.parse(fs.readFileSync(filePath).toString());
+                var data = JSON.parse(fs.readFileSync(filePath).toString());
+                if(this._dockerized){
+                    delete data.globalNpmPath;
+                }
+                return data;
             } catch (e) { }
         }
         this.generateCacheFile({}, filePath);

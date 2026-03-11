@@ -5,6 +5,7 @@ import { getTempFolder, GlobalContext } from "../../utils";
 import { execa } from "execa";
 import os from "node:os";
 import { Lockfile } from "trm-core/dist/lockfile";
+import { extname } from "node:path";
 
 type PM = "npm" | "pnpm" | "yarn1";
 
@@ -133,6 +134,11 @@ export class Install extends AbstractCommand {
         }
         var registry: AbstractRegistry;
         if (this.name === 'import') {
+            const extension = extname(this.args.filename);
+            if (extension !== '.trm') {
+                this.args.filename = this.args.filename + 'trm';
+            }
+            this.validateInputFileArg(this.args.filename);
             registry = new FileSystem(this.args.filename);
         } else {
             registry = this.getRegistry();
