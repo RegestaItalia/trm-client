@@ -27,3 +27,4 @@ export * from "./Cg3y";
 export * from "./Cg3z";
 
 export * from "./Settings";
+export * from "./ClearCache";

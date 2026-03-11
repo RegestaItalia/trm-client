@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion } from "./utils";
-import { Alias, Cg3y, Cg3z, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
+import { Alias, Cg3y, Cg3z, ClearCache, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
 import { Transport } from 'trm-core';
 
 dotenv.config({
@@ -41,15 +41,7 @@ program.configureHelp({
             term = `${cmd.parent.name()} ${cmd.name()} ${cmd.usage()}`
         }
         return term;
-    },
-    /*
-    subcommandDescription: (cmd) => {
-        var description = cmd.description();
-        cmd.commands.forEach((sub, i) => {
-            description += `\t${sub.description()}`
-        });
-        return description;
-    },*/
+    }
 });
 
 new Ping(program, 'ping').register();
@@ -89,5 +81,6 @@ new Cg3y(program, 'cg3y').register();
 new Cg3z(program, 'cg3z').register();
 
 new Settings(program, 'settings').register();
+new ClearCache(program, 'clear-cache').register();
 
 program.parse(process.argv);
