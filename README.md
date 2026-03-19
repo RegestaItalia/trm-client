@@ -152,7 +152,7 @@ SAPCAR is used to extract `.SAR` archives downloaded from SAP Software Center.
 Execute this command to pull the latest docker image
 
 ```bash
-docker pull abaptrm/docker
+docker pull --platform=linux/amd64 abaptrm/docker
 ```
 
 ## Initial Installation via Script
