@@ -8,8 +8,8 @@ export async function getSapLogonConnections() {
     if (sapLandscape) {
         const sXml = fs.readFileSync(GlobalContext.getInstance().getSettings().sapLandscape, { encoding: 'utf8', flag: 'r' });
         const result = await xml2js(sXml);
-        try {
-            result.Landscape.Services[0].Service.forEach((xmlObj) => {
+        result.Landscape.Services[0].Service.forEach((xmlObj) => {
+            try {
                 var obj = xmlObj['$'];
                 var addrMatches = obj.server.match(/(.*)\:(\d*)$/);
                 var ashost = addrMatches[1];
@@ -30,8 +30,8 @@ export async function getSapLogonConnections() {
                     ashost,
                     saprouter
                 });
-            });
-        } catch { }
+            } catch { }
+        });
     }
     return systems;
 }
