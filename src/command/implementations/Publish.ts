@@ -13,9 +13,9 @@ export class Publish extends AbstractCommand {
         this.registerOpts.requiresTrmDependencies = true;
         if (this.name === 'pack') {
             this.command.description(`Export a package to local file.`);
+            this.command.argument(`<package>`, `Name of the package`);
+            this.command.argument(`<version>`, `Version of the release`);
             this.command.argument(`[filename]`, `Name (or path) of the output file.`);
-            this.command.option(`--package <package>`, `Name of the package`);
-            this.command.option(`--version <version>`, `Version of the release`);
         } else {
             this.registerOpts.requiresRegistry = true;
             this.command.description(`Publish a package to a registry.`);

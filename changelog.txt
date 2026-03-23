@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2026-03-23 v7.7.0
+-------------------
+* pack command usage
+
 2026-03-11 v7.6.0
 -------------------
 * show subcommands in --help
