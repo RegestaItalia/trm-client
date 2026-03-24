@@ -4,6 +4,7 @@
 [![trm-client License](https://img.shields.io/github/license/RegestaItalia/trm-client)](https://github.com/RegestaItalia/trm-client)
 [![trm-client Latest version](https://img.shields.io/npm/v/trm-client)](https://www.npmjs.com/package/trm-client)
 [![trm-client Installs](https://img.shields.io/npm/dt/trm-client)](https://www.npmjs.com/package/trm-client)
+[![View Code Wiki](https://assets.codewiki.google/readme-badge/static.svg)](https://codewiki.google/github.com/regestaitalia/trm-docs)
 
 | 🚀 This project is funded and maintained by 🏦  | 🔗                                                             |
 |-------------------------------------------------|----------------------------------------------------------------|
