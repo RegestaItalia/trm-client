@@ -11,6 +11,7 @@ Legend
 2026-04-16 v8.0.0
 -------------------
 ! trm-core ^9.0.0
+! trm-commons ^3.7.1
 + dirty command
 
 2026-03-23 v7.7.1
