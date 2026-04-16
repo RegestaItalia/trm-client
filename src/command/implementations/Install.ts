@@ -190,9 +190,6 @@ export class Install extends AbstractCommand {
             }
         });
         var sOutput = `${result.manifest.name} v${result.manifest.version} installed`;
-        if (result.installTransport) {
-            sOutput += `, use ${result.installTransport.trkorr} transport in landscape`;
-        }
         Logger.success(sOutput);
     }
 

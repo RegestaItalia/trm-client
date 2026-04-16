@@ -1,5 +1,5 @@
 import { Logger, TreeLog } from "trm-commons";
-import { RegistryType, SystemConnector } from "trm-core";
+import { RegistryType, SystemConnector, Transport } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import chalk from "chalk";
 
@@ -14,33 +14,37 @@ export class List extends AbstractCommand {
 
     protected async handler(): Promise<void> {
         const dest = SystemConnector.getDest();
+        var iDirtyPackages = 0;
         var aPackages = await this.getSystemPackages();
         var iLocals = aPackages.filter(o => o.registry.getRegistryType() === RegistryType.LOCAL).length;
         if (!this.args.locals) {
             aPackages = aPackages.filter(o => o.registry.getRegistryType() !== RegistryType.LOCAL);
         }
         if (aPackages.length > 0) {
-            const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `TRM transport`, `Landscape transport`];
+            const tableHead = [`Name`, `Version`, `Registry`, `Devclass`, `Transport`, `Dirty`];
             var tableData = [];
             for (const oPackage of aPackages) {
                 try {
-                    const packageName = oPackage.packageName || '';
-                    const version = oPackage.manifest.get().version || '';
+                    var packageName = oPackage.packageName || '';
+                    var version = oPackage.manifest.get().version || '';
                     const registry = oPackage.registry.getRegistryType() === RegistryType.LOCAL ? chalk.bold(oPackage.registry.name) : oPackage.registry.name;
                     const devclass = oPackage.getDevclass() || '';
                     const linkedTransport = oPackage.manifest.getLinkedTransport();
-                    const landscapeTransport = await oPackage.getWbTransport();
-                    var importTransport = '';
-                    if (linkedTransport && (await linkedTransport.isImported())) {
-                        importTransport = linkedTransport.trkorr;
+                    const transport = linkedTransport ? linkedTransport.trkorr : '';
+                    var dirty = '';
+                    if(oPackage.isDirty()){
+                        iDirtyPackages++;
+                        dirty = chalk.bgYellowBright(chalk.bold(`⚠ Manifest does not match content!`));
+                        packageName = chalk.strikethrough(packageName);
+                        version = chalk.strikethrough(version);
                     }
                     tableData.push([
                         packageName,
                         version,
                         registry,
                         devclass,
-                        importTransport,
-                        landscapeTransport ? landscapeTransport.trkorr : ''
+                        transport,
+                        dirty
                     ]);
                 } catch (e) {
                     Logger.error(e, true);
@@ -66,19 +70,19 @@ export class List extends AbstractCommand {
                         var packageTree: TreeLog = {
                             text: chalk.bold(`${p[0]} v${p[1]}`),
                             children: [{
-                                text: `SAP Package: ${p[3]}`,
+                                text: p[3],
                                 children: []
                             }]
                         };
                         if(p[4]){
                             packageTree.children.push({
-                                text: `Import transport: ${p[4]}`,
+                                text: `${Transport.getTransportIcon()}  ${p[4]}`,
                                 children: []
                             });
                         }
                         if(p[5]){
                             packageTree.children.push({
-                                text: `Landscape transport: ${p[5]}`,
+                                text: p[5],
                                 children: []
                             });
                         }
@@ -91,6 +95,9 @@ export class List extends AbstractCommand {
             }
             if (iLocals > 0 && !this.args.locals) {
                 Logger.warning(`There ${iLocals === 1 ? 'is' : 'are'} ${iLocals} local package${iLocals === 1 ? '' : 's'}. Run with option -L (--locals) to list ${iLocals === 1 ? 'it' : 'them'}.`);
+            }
+            if(iDirtyPackages > 0){
+                Logger.warning(`There ${iDirtyPackages === 1 ? 'is' : 'are'} ${iDirtyPackages} dirty package${iDirtyPackages === 1 ? '' : 's'}. Run command "trm dirty <package>" to view ${iLocals === 1 ? 'it' : 'them'}.`);
             }
         } else {
             Logger.info(`${dest} has 0 packages.`);

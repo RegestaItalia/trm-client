@@ -8,6 +8,11 @@ Legend
 + : added
 - : removed
 
+2026-04-16 v8.0.0
+-------------------
+! trm-core ^9.0.0
++ dirty command
+
 2026-03-23 v7.7.1
 -------------------
 * sapgui connections

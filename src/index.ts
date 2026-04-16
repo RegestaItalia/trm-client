@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion } from "./utils";
-import { Alias, Cg3y, Cg3z, ClearCache, Compare, Content, Deprecate, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
+import { Alias, Cg3y, Cg3z, ClearCache, Compare, Content, Deprecate, Dirty, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
 import { Transport } from 'trm-core';
 
 dotenv.config({
@@ -19,7 +19,7 @@ Full documentation available at https://docs.trmregistry.com/
 Public registry at https://trmregistry.com/
 
 © 2023 RegestaItalia https://regestaitalia.eu/`)
-    .version(getClientVersion());
+    .version(process.env.DEVELOPMENT && process.env.DEVELOPMENT.toLowerCase().trim() === 'true' ? 'Development' : getClientVersion());
 
 program.configureHelp({
     sortSubcommands: true,
@@ -74,6 +74,7 @@ new List(program, 'list', ['ls']).register();
 new Content(program, 'content', ['contents']).register();
 new View(program, 'view').register();
 new Compare(program, 'compare').register();
+new Dirty(program, 'dirty').register();
 
 new FindDependencies(program, 'find-dependencies').register();
 

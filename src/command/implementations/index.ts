@@ -20,6 +20,7 @@ export * from "./List";
 export * from "./Content";
 export * from "./View";
 export * from "./Compare";
+export * from "./Dirty";
 
 export * from "./FindDependencies";
 

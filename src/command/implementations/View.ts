@@ -1,5 +1,5 @@
 import { Logger } from "trm-commons";
-import { PUBLIC_RESERVED_KEYWORD, SystemConnector, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
+import { PUBLIC_RESERVED_KEYWORD, SystemConnector, Transport, TrmManifest, TrmManifestDependency, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import chalk from "chalk";
 import { DummyConnector } from "../../utils";
@@ -17,8 +17,7 @@ type PrintManifest = {
     license?: string,
     authors?: string,
     keywords?: string,
-    importTransport?: string,
-    workbenchTransport?: string
+    transport?: string
 }
 
 export class View extends AbstractCommand {
@@ -34,12 +33,15 @@ If the package is not found on the system, it will automatically fall back to th
         this.command.argument(`<package>`, `Name of the package.`)
     }
 
-    private printHeaderSection() {
+    private printHeaderSection(sapPackage?: string) {
         Logger.info(`Package name: ${chalk.bold(this.args.package)}`);
         Logger.info(`Registry: ${this.getRegistry().name}`);
+        if (sapPackage) {
+            Logger.info(`SAP Package: ${sapPackage}`);
+        }
     }
 
-    private printVersionSection(systemPackage?: TrmPackage, registryView?: Package) {
+    private printVersionSection(isDirty: boolean, systemPackage?: TrmPackage, registryView?: Package) {
         if (!systemPackage && !registryView) {
             return;
         }
@@ -49,7 +51,11 @@ If the package is not found on the system, it will automatically fall back to th
             if (systemPackage) {
                 oSystemManifest = systemPackage.manifest.get();
                 Logger.success(`Installed on ${SystemConnector.getDest()}: Yes`);
-                console.log(`Installed version: ${oSystemManifest.version}`);
+                console.log(chalk.strikethrough(`Installed version: ${oSystemManifest.version}`));
+                if (isDirty) {
+                    Logger.warning(`${chalk.bold('WARNING')}: Package is flagged as "dirty": one or more objects of the package don't match with release declared in manifest`);
+                    Logger.warning(`${chalk.bold('WARNING')}: Run command "trm dirty <package>" to see a list of local changes.`);
+                }
             } else {
                 Logger.error(`Installed on ${SystemConnector.getDest()}: No`);
             }
@@ -72,14 +78,8 @@ If the package is not found on the system, it will automatically fall back to th
 
     private printManifestSection(manifest: PrintManifest) {
         console.log(''); //new line
-        if (manifest.devclass !== undefined) {
-            console.log(`SAP Package: ${manifest.devclass}`);
-        }
-        if (manifest.importTransport !== undefined) {
-            console.log(`TRM transport: ${manifest.importTransport}`);
-        }
-        if (manifest.workbenchTransport !== undefined) {
-            console.log(`Landscape transport: ${manifest.workbenchTransport}`);
+        if (manifest.transport !== undefined) {
+            console.log(`${Transport.getTransportIcon()}  ${manifest.transport}`);
         }
         if (manifest.private !== undefined) {
             if (manifest.private) {
@@ -155,10 +155,12 @@ If the package is not found on the system, it will automatically fall back to th
         var keywords: string;
         var printManifest: PrintManifest;
         var dependencies: TrmManifestDependency[];
+        var isDirty: boolean = false;
         if (oSystemView) {
             if (!oSystemView.manifest) {
                 throw new Error(`Package "${packageName}" found, but manifest is missing on ${dest}!`);
             }
+            isDirty = oSystemView.isDirty();
             const oSystemManifest = oSystemView.manifest.get();
             if (Array.isArray(oSystemManifest.authors)) {
                 authors = oSystemManifest.authors.map(o => {
@@ -184,13 +186,9 @@ If the package is not found on the system, it will automatically fall back to th
             } else {
                 keywords = oSystemManifest.keywords;
             }
-            var importTransport: string;
-            var workbenchTransport: string;
+            var transport: string;
             try {
-                importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
-            } catch (e) { }
-            try {
-                workbenchTransport = (await oSystemView.getWbTransport()).trkorr;
+                transport = oSystemView.manifest.getLinkedTransport().trkorr;
             } catch (e) { }
             dependencies = oSystemManifest.dependencies || [];
             printManifest = {
@@ -203,8 +201,7 @@ If the package is not found on the system, it will automatically fall back to th
                 license: oSystemManifest.license,
                 authors,
                 keywords,
-                importTransport,
-                workbenchTransport
+                transport
             };
         } else if (oRegistryView) {
             dependencies = [];
@@ -219,8 +216,8 @@ If the package is not found on the system, it will automatically fall back to th
             throw new Error(`Package "${packageName}" does not exist or insufficient view permissions.`);
         }
 
-        this.printHeaderSection();
-        this.printVersionSection(oSystemView, oRegistryView);
+        this.printHeaderSection(printManifest.devclass);
+        this.printVersionSection(isDirty, oSystemView, oRegistryView);
         this.printManifestSection(printManifest);
         this.printDependenciesSection(dependencies);
     }
