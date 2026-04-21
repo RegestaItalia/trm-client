@@ -114,4 +114,7 @@ export class DummyConnector implements ISystemConnector {
     getTimezone = async () => {
         return 'UTC';
     };
+    createCustTransport = async () => this._throw();
+    getObjectsLocks = async () => this._throw();
+    updateTrmPackageData = async () => this._throw();
 }
