@@ -111,7 +111,7 @@ export abstract class AbstractCommand {
                 this.systemPackages = [];
             } else {
                 Commons.Logger.loading(`Reading "${Core.SystemConnector.getDest()}" packages...`);
-                this.systemPackages = await Core.SystemConnector.getInstalledPackages(true, true, true);
+                this.systemPackages = await Core.SystemConnector.getInstalledPackages(true, true);
             }
         }
         return this.systemPackages;
