@@ -11,10 +11,11 @@ export class FindDependencies extends AbstractCommand {
         this.command.argument(`<sap package>`, `Name of the SAP package to check.`);
         this.command.option(`--sap-entries`, `Show list of required SAP entries/objects.`, false);
         this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
+        this.command.option(`--trm-found-in`, `Expand TRM dependencies with "Found in" objects.`, false);
     }
 
     protected async handler(): Promise<void> {
-        const dependencies = await SystemConnector.getPackageDependencies(this.args.sapPackage.toUpperCase(), true, true);
+        const dependencies = await SystemConnector.getPackageDependencies(this.args.sapPackage.toUpperCase(), true);
         const trmPackageDependencies = dependencies.trmPackageDependencies;
         const sapPackageDependencies = dependencies.abapPackageDependencies.filter(o => !o.isCustomerPackage);
         const custPackageDependencies = dependencies.abapPackageDependencies.filter(o => o.isCustomerPackage);
@@ -23,7 +24,7 @@ export class FindDependencies extends AbstractCommand {
             children: [{
                 text: `TRM Packages (${trmPackageDependencies.length})`,
                 children: trmPackageDependencies.map(o => {
-                    return {
+                    var packageLog = {
                         text: `${o.trmPackage.packageName}`,
                         children: [{
                             text: `Registry: ${o.trmPackage.registry.getRegistryType() === RegistryType.PUBLIC ? 'public' : o.trmPackage.registry.endpoint}`,
@@ -32,7 +33,19 @@ export class FindDependencies extends AbstractCommand {
                             text: `Version: ^${o.trmPackage.manifest.get().version}`,
                             children: []
                         }]
+                    };
+                    if (this.args.trmFoundIn) {
+                        packageLog.children.push({
+                            text: `Found in ${o.foundIn.length} object${o.foundIn.length > 1 ? 's' : ''}`,
+                            children: o.foundIn.map(f => {
+                                return {
+                                    text: `${f.object} ${f.objName}`,
+                                    children: []
+                                };
+                            })
+                        });
                     }
+                    return packageLog;
                 })
             }, {
                 text: `Customer packages (${custPackageDependencies.length})`,
@@ -102,6 +115,9 @@ export class FindDependencies extends AbstractCommand {
             }
         }
         Logger.tree(tree);
+        if(trmPackageDependencies.length > 0 && !this.args.trmFoundIn){
+            Logger.warning(`To expand and see where TRM dependencies were found, execute with option --trm-found-in`);
+        }
     }
 
 }
