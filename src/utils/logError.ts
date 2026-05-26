@@ -50,7 +50,11 @@ export async function logError(err: any) {
             if (restClientError.restError.status === 404) {
                 aError.push(`${chalk.black.bgRed(restClientError.restError.status)} Service cannot be reached (Check if trm-rest is installed and activated correctly).`);
             }
-            sError = `${chalk.black.bgRed(restClientError.restError.status)} ${sError}`;
+            if (restClientError.restError.status) {
+                sError = `${chalk.black.bgRed(restClientError.restError.status)} ${sError}`;
+            } else {
+                sError = `${sError}`;
+            }
         }
     }
     if (sError) {
