@@ -364,6 +364,9 @@ export abstract class AbstractCommand {
             Commons.Inquirer.inquirer = this.getInquirer(InquirerType.CLI);
             Commons.Logger.logger = this.getLogger(this.args.logger, this.args.debug, this.args.loggerOutDir);
 
+            /*
+            TODO: this is now useless as r3trans is now optional; needs a refactor?
+
             const useDocker = GlobalContext.getInstance().getSettings().r3transDocker;
             if (this.registerOpts.requiresR3trans && useDocker) {
                 Commons.Logger.info(`This command needs R3trans program dockerized.`);
@@ -375,6 +378,7 @@ export abstract class AbstractCommand {
                     throw new Error(`Command needs R3trans dockerized, docker engine is not currently running.`);
                 }
             }
+            */
             if (process.platform !== 'win32' && process.platform !== 'darwin' && process.platform !== 'linux') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
