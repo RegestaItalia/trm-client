@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "9.4.0",
+  "version": "9.4.1",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "!dist/dev_rfc.log"
   ],
   "bin": {
-    "trm": "dist/index.js"
+    "trm": "dist/cli.js"
   },
   "scripts": {
     "cleanBuild": "rimraf dist/",
