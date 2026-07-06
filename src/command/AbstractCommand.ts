@@ -414,17 +414,19 @@ export abstract class AbstractCommand {
     public async run(args: any = {}, options: AbstractCommandRunOptions = {}): Promise<void> {
         this.args = this.normalizeArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
-        await this.executePrepared(false, options);
+        this.registry = options.registry;
+        try{
+            await this.handler();
+        }catch(e){
+            await logError(e);
+            throw new Error("Action failed.");
+        }
     }
 
     private async execute(...args: any[]): Promise<void> {
+        var exitCode = 0;
         this.args = this.parseCommandArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
-        const exitCode = await this.executePrepared(true);
-        process.exit(exitCode);
-    }
-
-    private async executePrepared(logErrors: boolean, options: AbstractCommandRunOptions = {}): Promise<number> {
         try {
             await GlobalContext.getInstance().load();
             await Commons.Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
@@ -458,9 +460,7 @@ export abstract class AbstractCommand {
             if (this.registerOpts.requiresRegistry) {
                 var registryAlias: RegistryAlias;
                 var registry: Core.AbstractRegistry;
-                if (options.registry) {
-                    registry = options.registry;
-                } else if (this.args.registry) {
+                if (this.args.registry) {
                     registryAlias = RegistryAlias.get(this.args.registry);
                 } else if (this.args.registryEndpoint) {
                     registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint, this.parseJsonArg('registryAuth'));
@@ -540,14 +540,9 @@ export abstract class AbstractCommand {
             if (Commons.Logger.logger instanceof Commons.CliLogger || Commons.Logger.logger instanceof Commons.CliLogFileLogger) {
                 Commons.Logger.logger.forceStop();
             }
-
-            return 0;
         } catch (e) {
-            if (logErrors) {
-                await logError(e);
-                return 1;
-            }
-            throw e;
+            await logError(e);
+            exitCode = 1;
         } finally {
             if (Core.SystemConnector.systemConnector) {
                 try {
@@ -562,6 +557,7 @@ export abstract class AbstractCommand {
                 const logFilePath = Commons.Logger.logger.getFilePath();
                 Commons.Logger.info(`Saved log output "${logFilePath}" for session ID ${sessionId}.`);
             }
+            process.exit(exitCode);
         }
     }
 
