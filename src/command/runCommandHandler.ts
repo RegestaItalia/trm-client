@@ -1,8 +1,13 @@
 import { getCommand, getCommandMetadata } from "./implementations";
+import type * as Core from "trm-core";
 
 export type CommandHandlerValues = Record<string, unknown>;
 
-export async function runCommandHandler(id: string, values: CommandHandlerValues = {}): Promise<void> {
+export interface CommandHandlerOptions {
+    registry?: Core.AbstractRegistry;
+}
+
+export async function runCommandHandler(id: string, values: CommandHandlerValues = {}, options: CommandHandlerOptions = {}): Promise<void> {
     const commandClass = getCommand(id);
     const metadata = getCommandMetadata(id);
 
@@ -11,5 +16,5 @@ export async function runCommandHandler(id: string, values: CommandHandlerValues
     }
 
     const command = new commandClass(metadata.command, metadata.aliases, metadata.subcommand);
-    await command.run(values);
+    await command.run(values, options);
 }

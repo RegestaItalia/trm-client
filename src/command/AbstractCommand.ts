@@ -17,6 +17,10 @@ import sanitize from "sanitize-filename";
 import { CommandMetadata, CommandMetadataExport } from "./metadata/CommandMetadata";
 import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
 
+export interface AbstractCommandRunOptions {
+    registry?: Core.AbstractRegistry;
+}
+
 export abstract class AbstractCommand {
 
     protected command: Command;
@@ -407,10 +411,10 @@ export abstract class AbstractCommand {
         }
     }
 
-    public async run(args: any = {}): Promise<void> {
+    public async run(args: any = {}, options: AbstractCommandRunOptions = {}): Promise<void> {
         this.args = this.normalizeArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
-        await this.executePrepared(false);
+        await this.executePrepared(false, options);
     }
 
     private async execute(...args: any[]): Promise<void> {
@@ -420,7 +424,7 @@ export abstract class AbstractCommand {
         process.exit(exitCode);
     }
 
-    private async executePrepared(logErrors: boolean): Promise<number> {
+    private async executePrepared(logErrors: boolean, options: AbstractCommandRunOptions = {}): Promise<number> {
         try {
             await GlobalContext.getInstance().load();
             await Commons.Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
@@ -454,14 +458,18 @@ export abstract class AbstractCommand {
             if (this.registerOpts.requiresRegistry) {
                 var registryAlias: RegistryAlias;
                 var registry: Core.AbstractRegistry;
-                if (this.args.registry) {
+                if (options.registry) {
+                    registry = options.registry;
+                } else if (this.args.registry) {
                     registryAlias = RegistryAlias.get(this.args.registry);
                 } else if (this.args.registryEndpoint) {
                     registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint, this.parseJsonArg('registryAuth'));
                 } else {
                     registryAlias = await pickRegistry();
                 }
-                registry = registryAlias.getRegistry();
+                if (registryAlias) {
+                    registry = registryAlias.getRegistry();
+                }
                 try {
                     Commons.Logger.loading(`Connecting to registry "${registry.name}" (${registry.endpoint})...`);
                     const registryPing = await registry.ping();
@@ -487,7 +495,7 @@ export abstract class AbstractCommand {
                     }
                 }
                 this.registry = registry;
-                this.registryAuthData = !!registryAlias.authData;
+                this.registryAuthData = !!registryAlias?.authData;
                 Core.RegistryProvider.registry.push(registry);
             }
 
