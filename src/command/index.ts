@@ -3,3 +3,4 @@ export * from "./InquirerType";
 export * from "./LoggerType";
 export * from "./RegisterCommandOpts";
 export * from "./metadata";
+export * from "./runCommandHandler";

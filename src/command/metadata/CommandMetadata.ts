@@ -72,5 +72,6 @@ export interface CommandMetadataProvider {
 }
 
 export interface CommandClass extends CommandMetadataProvider {
-    new (...args: ConstructorParameters<typeof AbstractCommand>): AbstractCommand;
+    new (program: import("commander").Command, name: string, aliases?: string[], subcommand?: string): AbstractCommand;
+    new (name: string, aliases?: string[], subcommand?: string): AbstractCommand;
 }

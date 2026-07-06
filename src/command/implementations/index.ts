@@ -87,3 +87,12 @@ export function getCommand(id: string): CommandClass | undefined {
         return metadata.some(command => command.id === id);
     });
 }
+
+export function getCommandMetadata(id: string) {
+    const commandClass = getCommand(id);
+    if (!commandClass) {
+        return undefined;
+    }
+    const metadata = Array.isArray(commandClass.metadata) ? commandClass.metadata : [commandClass.metadata];
+    return metadata.find(command => command.id === id);
+}
