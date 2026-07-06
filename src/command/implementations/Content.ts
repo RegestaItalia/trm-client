@@ -13,8 +13,9 @@ export class Content extends AbstractCommand {
         aliases: ["contents"],
         title: "Package content",
         group: "registry",
+        groupPriority: 7,
         description: "View the contents of a package release in registry.",
-        icon: "ListTree",
+        icon: "FolderTree",
         arguments: [
             argument(0, { name: "package", label: "Package", description: "Package name." }),
             argument(1, { name: "version", label: "Version", description: "Package version or distribution tag.", required: false, defaultValue: "latest" })

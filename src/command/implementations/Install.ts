@@ -14,18 +14,18 @@ type PM = "npm" | "pnpm" | "yarn1";
 export class Install extends AbstractCommand {
 
     private static readonly installOptions = [
-        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer." }),
-        option("--no-deps", { name: "deps", label: "Dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true }),
-        option("--no-obj-type", { name: "objType", label: "Object type checks", description: "Skip object type checks before import.", control: "checkbox", defaultValue: true }),
-        option("--no-obj-check", { name: "objCheck", label: "Object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true }),
-        option("--no-sap-entries", { name: "sapEntries", label: "SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true }),
-        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true }),
-        option("--no-cust-tr", { name: "custTr", label: "Customizing transports", description: "Skip customizing transport import.", control: "checkbox", defaultValue: true }),
-        option("--no-install-tr", { name: "installTr", label: "Install transport", description: "Do not create an install transport.", control: "checkbox", defaultValue: true }),
+        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer.", control: "transport-layer-picker" }),
+        option("--no-deps", { name: "deps", label: "Dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-obj-type", { name: "objType", label: "Object type checks", description: "Skip object type checks before import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-obj-check", { name: "objCheck", label: "Object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-sap-entries", { name: "sapEntries", label: "SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-cust-tr", { name: "custTr", label: "Customizing transports", description: "Skip customizing transport import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-install-tr", { name: "installTr", label: "Install transport", description: "Do not create an install transport.", control: "checkbox", defaultValue: true, negated: true }),
         option("--namespace", { name: "namespace", label: "Customer namespace", description: "Import the customer namespace.", control: "checkbox" }),
         option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
-        option("--install-tr-target <target>", { name: "installTrTarget", label: "Install transport target", description: "Target system for the install transport." }),
-        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false })
+        option("--install-tr-target <target>", { name: "installTrTarget", label: "Install transport target", description: "Target system for the install transport.", control: "transport-target-picker" }),
+        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
     public static readonly metadata: CommandMetadata[] = [
@@ -37,7 +37,7 @@ export class Install extends AbstractCommand {
             group: "package",
             groupPriority: 10,
             description: "Install a package from the registry into the connected system.",
-            icon: "PackageCheck",
+            icon: "PackagePlus",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
                 argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
@@ -64,7 +64,7 @@ export class Install extends AbstractCommand {
                 argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
             ],
             options: [
-                option("-L, --lock-file", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", defaultValue: "trm-lock.json" }),
+                option("-L, --lock-file", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", pickerType: "input", defaultValue: "trm-lock.json" }),
                 ...Install.installOptions
             ],
             requirements: {
@@ -102,9 +102,9 @@ export class Install extends AbstractCommand {
             group: "package",
             groupPriority: 8,
             description: "Import a package file into the connected system.",
-            icon: "Upload",
+            icon: "FolderUp",
             arguments: [
-                argument(0, { name: "filename", label: "Package file", description: "Package file name or path.", control: "file-picker" })
+                argument(0, { name: "filename", label: "Package file", description: "Package file name or path.", control: "file-picker", pickerType: "input" })
             ],
             options: Install.installOptions,
             requirements: {

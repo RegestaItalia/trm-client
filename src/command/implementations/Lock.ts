@@ -17,7 +17,7 @@ export class Lock extends AbstractCommand {
         icon: "LockKeyhole",
         arguments: [
             argument(0, { name: "package", label: "Package", description: "Package to lock." }),
-            argument(1, { name: "outputPath", cliName: "output path", label: "Output path", description: "Path where the lockfile will be written.", required: false, defaultValue: "trm-lock.json", control: "file-picker" })
+            argument(1, { name: "outputPath", cliName: "output path", label: "Output path", description: "Path where the lockfile will be written.", required: false, defaultValue: "trm-lock.json", control: "file-picker", pickerType: "output" })
         ],
         options: [],
         requirements: {

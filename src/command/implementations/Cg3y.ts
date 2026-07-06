@@ -14,11 +14,12 @@ export class Cg3y extends AbstractCommand {
         command: "cg3y",
         title: "Download transport",
         group: "utility",
+        groupPriority: 8,
         description: "Download a released transport from the connected system.",
         icon: "Download",
         arguments: [
             argument(0, { name: "transport", label: "Transport", description: "Transport request number." }),
-            argument(1, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker" })
+            argument(1, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker", pickerType: "output" })
         ],
         options: [],
         requirements: {

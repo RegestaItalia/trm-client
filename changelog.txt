@@ -8,6 +8,13 @@ Legend
 + : added
 - : removed
 
+2026-07-06 v10.0.1
+-------------------
++ picker type in metadata
++ custom pickers in metadata
++ negated in metadata
+! commands gui relevance, icons and grouping
+
 2026-07-06 v10.0.0
 -------------------
 + expose commands metadata

@@ -11,12 +11,12 @@ import { argument, option } from "../metadata/helpers";
 export class Publish extends AbstractCommand {
 
     private static readonly releaseOptions = [
-        option("-P, --sap-package <sap package>", { name: "sapPackage", label: "SAP package", description: "SAP package that owns the release objects." }),
-        option("-T, --target <target>", { name: "target", label: "Transport target", description: "Target system for release transports." }),
-        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true }),
-        option("--no-cust-tr", { name: "custTr", label: "Customizing transport", description: "Skip customizing transport generation.", control: "checkbox", defaultValue: true }),
+        option("-P, --sap-package <sap package>", { name: "sapPackage", label: "SAP package", description: "SAP package that owns the release objects.", control: "sap-package-picker" }),
+        option("-T, --target <target>", { name: "target", label: "Transport target", description: "Target system for release transports.", control: "transport-target-picker" }),
+        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-cust-tr", { name: "custTr", label: "Customizing transport", description: "Skip customizing transport generation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--cust <customizing>", { name: "cust", label: "Customizing transports", description: "Customizing transport requests, separated by commas.", multiple: true }),
-        option("--no-auto-deps", { name: "autoDeps", label: "Automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true }),
+        option("--no-auto-deps", { name: "autoDeps", label: "Automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true, negated: true }),
         option("--authors <authors>", { name: "authors", label: "Authors", description: "Release authors, separated by commas.", multiple: true }),
         option("--backwards-compatible", { name: "backwardsCompatible", label: "Backwards compatible", description: "Mark the release as backwards compatible.", control: "checkbox" }),
         option("--description <description>", { name: "description", label: "Description", description: "Release description." }),
@@ -27,7 +27,7 @@ export class Publish extends AbstractCommand {
         option("--dependencies <dependencies>", { name: "dependencies", label: "Dependencies", description: "Release dependencies as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--sap-entries <sap entries>", { name: "sapEntries", label: "SAP entries", description: "Release SAP entries as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--post-activities <post activities>", { name: "postActivities", label: "Post activities", description: "Release post activities as JSON, or a path to a JSON file.", control: "textarea" }),
-        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false })
+        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
     public static readonly metadata: CommandMetadata[] = [
@@ -38,7 +38,7 @@ export class Publish extends AbstractCommand {
             group: "package",
             groupPriority: 9,
             description: "Publish a package release to the registry.",
-            icon: "PackagePlus",
+            icon: "Rocket",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
                 argument(1, { name: "version", label: "Version", description: "Release version to publish.", required: false })
@@ -50,7 +50,7 @@ export class Publish extends AbstractCommand {
                 option("--tag <tag>", { name: "tag", label: "Tags", description: "Release distribution tags, separated by commas.", multiple: true }),
                 option("--private", { name: "private", label: "Private", description: "Mark the package as private. Registry visibility may not be changeable after the first publish.", control: "checkbox" }),
                 option("--readme <readme>", { name: "readme", label: "Readme", description: "Release readme as Markdown, or a path to a Markdown file.", control: "textarea" }),
-                option("--no-keep-manifest", { name: "keepManifest", label: "Reuse manifest", description: "Do not reuse values from the previous release manifest.", control: "checkbox", defaultValue: true }),
+                option("--no-keep-manifest", { name: "keepManifest", label: "Reuse manifest", description: "Do not reuse values from the previous release manifest.", control: "checkbox", defaultValue: true, negated: true }),
                 ...Publish.releaseOptions
             ],
             requirements: {
@@ -67,11 +67,11 @@ export class Publish extends AbstractCommand {
             group: "package",
             groupPriority: 7,
             description: "Export a package release to a local file.",
-            icon: "PackageOpen",
+            icon: "FolderDown",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
                 argument(1, { name: "version", label: "Version", description: "Release version." }),
-                argument(2, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker" })
+                argument(2, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker", pickerType: "output" })
             ],
             options: Publish.releaseOptions,
             requirements: {

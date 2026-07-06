@@ -14,6 +14,7 @@ export class Registry extends AbstractCommand {
             subcommand: "add",
             title: "Add registry",
             group: "registry",
+            guiRelevant: false,
             description: "Add a registry alias.",
             icon: "DatabaseZap",
             arguments: [
@@ -32,6 +33,7 @@ export class Registry extends AbstractCommand {
             subcommand: "rm",
             title: "Remove registry",
             group: "registry",
+            guiRelevant: false,
             description: "Remove a registry alias.",
             icon: "DatabaseX",
             arguments: [
