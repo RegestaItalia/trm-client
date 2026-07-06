@@ -12,14 +12,15 @@ export class FindDependencies extends AbstractCommand {
         command: "find-dependencies",
         title: "Find dependencies",
         group: "utility",
+        groupPriority: 9,
         description: "Find TRM, customer package, and SAP object dependencies for an SAP package.",
         icon: "Search",
         arguments: [
-            argument(0, { name: "sapPackage", cliName: "sap package", label: "SAP package", description: "SAP package to inspect." })
+            argument(0, { name: "sapPackage", cliName: "sap package", label: "SAP package", description: "SAP package to inspect.", control: "sap-package-picker" })
         ],
         options: [
             option("--sap-entries", { name: "sapEntries", label: "SAP entries", description: "Include required SAP table entries and objects.", control: "checkbox", defaultValue: false }),
-            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true }),
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, negated: true }),
             option("--trm-found-in", { name: "trmFoundIn", label: "Dependency references", description: "Show which objects reference each TRM dependency.", control: "checkbox", defaultValue: false })
         ],
         requirements: {

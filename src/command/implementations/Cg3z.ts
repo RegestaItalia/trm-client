@@ -14,10 +14,11 @@ export class Cg3z extends AbstractCommand {
         command: "cg3z",
         title: "Upload transport",
         group: "utility",
+        groupPriority: 7,
         description: "Upload a released transport archive to the connected system.",
         icon: "Upload",
         arguments: [
-            argument(0, { name: "filename", label: "Transport archive", description: "Transport archive file name or path.", control: "file-picker" })
+            argument(0, { name: "filename", label: "Transport archive", description: "Transport archive file name or path.", control: "file-picker", pickerType: "input" })
         ],
         options: [],
         requirements: {

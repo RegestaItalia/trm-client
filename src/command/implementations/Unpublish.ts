@@ -11,6 +11,7 @@ export class Unpublish extends AbstractCommand {
         command: "unpublish",
         title: "Unpublish release",
         group: "registry",
+        groupPriority: 6,
         description: "Unpublish a package release from the registry.",
         icon: "PackageX",
         arguments: [

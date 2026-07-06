@@ -14,6 +14,7 @@ export class Alias extends AbstractCommand {
             command: "alias",
             title: "Manage aliases",
             group: "system",
+            guiRelevant: false,
             description: "Create, view, edit, check, or delete system aliases.",
             icon: "Network",
             arguments: [],

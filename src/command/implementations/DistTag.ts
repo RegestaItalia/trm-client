@@ -12,8 +12,9 @@ export class DistTag extends AbstractCommand {
             subcommand: "add",
             title: "Add distribution tag",
             group: "registry",
+            groupPriority: 9,
             description: "Add a distribution tag to a package release.",
-            icon: "Tag",
+            icon: "TagPlus",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
                 argument(1, { name: "version", label: "Version", description: "Release version." }),
@@ -29,9 +30,10 @@ export class DistTag extends AbstractCommand {
             command: "dist-tag",
             subcommand: "rm",
             title: "Remove distribution tag",
-            group: "package",
+            group: "registry",
+            groupPriority: 8,
             description: "Remove a distribution tag from a package.",
-            icon: "Tag",
+            icon: "TagX",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
                 argument(1, { name: "tag", label: "Tag", description: "Distribution tag to remove." })

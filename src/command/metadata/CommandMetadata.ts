@@ -9,7 +9,10 @@ export type CommandControlType =
     | "select"
     | "multiselect"
     | "file-picker"
-    | "textarea";
+    | "textarea"
+    | "transport-layer-picker"
+    | "transport-target-picker"
+    | "sap-package-picker";
 
 export interface CommandValueChoice {
     label: string;
@@ -24,6 +27,7 @@ export interface CommandFieldMetadata {
     description: string;
     required: boolean;
     control: CommandControlType;
+    pickerType?: "input" | "output";
     defaultValue?: unknown;
     choices?: CommandValueChoice[];
     placeholder?: string;
@@ -40,6 +44,7 @@ export interface CommandArgumentMetadata extends CommandFieldMetadata {
 export interface CommandOptionMetadata extends CommandFieldMetadata {
     kind: "option";
     flags: string;
+    negated?: boolean;
 }
 
 export type CommandGroup =
