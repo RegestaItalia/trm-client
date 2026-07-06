@@ -2,18 +2,30 @@ import { Logger, TreeLog } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { RegistryType, SystemConnector } from "trm-core";
 import chalk from "chalk";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class FindDependencies extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.command.description(`Find SAP package dependencies with custom packages/trm packages/SAP entries/objects.`);
-        this.command.argument(`<sap package>`, `Name of the SAP package to check.`);
-        this.command.option(`--sap-entries`, `Show list of required SAP entries/objects.`, false);
-        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
-        this.command.option(`--trm-found-in`, `Expand TRM dependencies with "Found in" objects.`, false);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "find-dependencies",
+        command: "find-dependencies",
+        title: "Find dependencies",
+        group: "utility",
+        description: "Find TRM, customer package, and SAP object dependencies for an SAP package.",
+        icon: "Search",
+        arguments: [
+            argument(0, { name: "sapPackage", cliName: "sap package", label: "SAP package", description: "SAP package to inspect." })
+        ],
+        options: [
+            option("--sap-entries", { name: "sapEntries", label: "SAP entries", description: "Include required SAP table entries and objects.", control: "checkbox", defaultValue: false }),
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true }),
+            option("--trm-found-in", { name: "trmFoundIn", label: "Dependency references", description: "Show which objects reference each TRM dependency.", control: "checkbox", defaultValue: false })
+        ],
+        requirements: {
+            requiresConnection: true
+        }
+    };
     protected async handler(): Promise<void> {
         const dependencies = await SystemConnector.getPackageDependencies(this.args.sapPackage.toUpperCase(), true);
         const trmPackageDependencies = dependencies.trmPackageDependencies;

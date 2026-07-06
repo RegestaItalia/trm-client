@@ -1,22 +1,47 @@
 import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument } from "../metadata/helpers";
 
 export class DistTag extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        if (this.subcommand === 'add') {
-            this.command.description(`Tag a release.`);
-            this.command.argument(`<package>`, `Name of the package.`)
-            this.command.argument(`<version>`, `Release version of the package.`)
-            this.command.argument(`<tag>`, `Tag to assign to release.`)
-        } else if (this.subcommand === 'rm') {
-            this.command.description(`Remove tag from a release.`);
-            this.command.argument(`<package>`, `Name of the package.`)
-            this.command.argument(`<tag>`, `Tag to remove.`)
+    public static readonly metadata: CommandMetadata[] = [
+        {
+            id: "dist-tag:add",
+            command: "dist-tag",
+            subcommand: "add",
+            title: "Add distribution tag",
+            group: "registry",
+            description: "Add a distribution tag to a package release.",
+            icon: "Tag",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "version", label: "Version", description: "Release version." }),
+                argument(2, { name: "tag", label: "Tag", description: "Distribution tag to assign." })
+            ],
+            options: [],
+            requirements: {
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "dist-tag:rm",
+            command: "dist-tag",
+            subcommand: "rm",
+            title: "Remove distribution tag",
+            group: "package",
+            description: "Remove a distribution tag from a package.",
+            icon: "Tag",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "tag", label: "Tag", description: "Distribution tag to remove." })
+            ],
+            options: [],
+            requirements: {
+                requiresRegistry: true
+            }
         }
-    }
-
+    ];
     protected async handler(): Promise<void> {
         if (this.subcommand === 'add') {
             await this.getRegistry().addDistTag(this.args.package, {

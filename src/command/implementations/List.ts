@@ -2,16 +2,29 @@ import { Logger, TreeLog } from "trm-commons";
 import { RegistryType, SystemConnector, Transport } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import chalk from "chalk";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { option } from "../metadata/helpers";
 
 export class List extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.command.description(`List TRM packages in a system.`);
-        this.command.option(`-L, --locals`, `Include local packages (imported and exported)`, false);
-        this.command.option(`-o, --output-type`, `Output type (TREE or TABLE)`, 'TREE');
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "list",
+        command: "list",
+        aliases: ["ls"],
+        title: "List packages",
+        group: "system",
+        guiRelevant: false,
+        description: "List TRM packages installed in the connected system.",
+        icon: "List",
+        arguments: [],
+        options: [
+            option("-L, --locals", { name: "locals", label: "Include local packages", description: "Include imported and exported local packages.", control: "checkbox", defaultValue: false }),
+            option("-o, --output-type", { name: "outputType", label: "Output format", description: "Output format: TREE or TABLE.", control: "select", defaultValue: "TREE" })
+        ],
+        requirements: {
+            requiresConnection: true
+        }
+    };
     protected async handler(): Promise<void> {
         const dest = SystemConnector.getDest();
         var iDirtyPackages = 0;

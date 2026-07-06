@@ -14,12 +14,17 @@ import { Package } from "trm-registry-types";
 import { basename, dirname, resolve } from "path";
 import constants from "constants";
 import sanitize from "sanitize-filename";
+import { CommandMetadata, CommandMetadataExport } from "./metadata/CommandMetadata";
+import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
 
 export abstract class AbstractCommand {
 
     protected command: Command;
     protected registerOpts: RegisterCommandOpts = {};
     protected args: any = {};
+    protected readonly name: string;
+    protected readonly aliases?: string[];
+    protected readonly subcommand?: string;
 
     private cliVersionStatus: CliVersionStatus;
     private registry: Core.AbstractRegistry;
@@ -27,25 +32,53 @@ export abstract class AbstractCommand {
     private registryAuthFailed: Error;
     private systemPackages: Core.TrmPackage[];
     private trmDependenciesCheck: Core.CheckTrmDependencies;
+    private metadata: CommandMetadata;
 
-    constructor(program: Command, protected readonly name: string, protected readonly aliases?: string[], protected readonly subcommand?: string) {
-        const index = program.commands.findIndex(c => c.name() === this.name);
-        if (index >= 0) {
-            if (subcommand) {
-                this.command = program.commands[index];
+    constructor(program: Command, name: string, aliases?: string[], subcommand?: string);
+    constructor(name: string, aliases?: string[], subcommand?: string);
+    constructor(
+        programOrName: Command | string,
+        nameOrAliases?: string | string[],
+        aliasesOrSubcommand?: string[] | string,
+        subcommandArg?: string
+    ) {
+        const program = typeof programOrName === "string" ? undefined : programOrName;
+        this.name = typeof programOrName === "string" ? programOrName : nameOrAliases as string;
+        this.aliases = typeof programOrName === "string" ? nameOrAliases as string[] : aliasesOrSubcommand as string[];
+        this.subcommand = typeof programOrName === "string" ? aliasesOrSubcommand as string : subcommandArg;
+
+        this.metadata = this.getMetadata();
+        if (this.metadata) {
+            this.registerOpts = { ...this.metadata.requirements };
+        }
+
+        if (program) {
+            const index = program.commands.findIndex(c => c.name() === this.name);
+            if (index >= 0) {
+                if (this.subcommand) {
+                    this.command = program.commands[index];
+                } else {
+                    throw new Error(`Command "${this.name}" declared multiple times without subcommand.`);
+                }
             } else {
-                throw new Error(`Command "${this.name}" declared multiple times without subcommand.`);
+                this.command = program.command(this.name);
             }
-        } else {
-            this.command = program.command(this.name);
+            if (this.subcommand) {
+                this.command = this.command.command(this.subcommand);
+            }
+            if (this.aliases) {
+                this.command.aliases(this.aliases);
+            }
+            if (this.metadata) {
+                applyCommandMetadata(this.command, this.metadata);
+            }
         }
-        if (this.subcommand) {
-            this.command = this.command.command(this.subcommand);
-        }
-        if (aliases) {
-            this.command.aliases(aliases);
-        }
-        this.init();
+    }
+
+    private getMetadata(): CommandMetadata | undefined {
+        const metadata = (this.constructor as typeof AbstractCommand & { metadata?: CommandMetadataExport }).metadata;
+        const entries = Array.isArray(metadata) ? metadata : metadata ? [metadata] : [];
+        return entries.find(entry => entry.command === this.name && entry.subcommand === this.subcommand);
     }
 
     public async getCliVersionStatus(): Promise<CliVersionStatus> {
@@ -125,10 +158,12 @@ export abstract class AbstractCommand {
         return this.trmDependenciesCheck;
     }
 
-    protected abstract init(): void;
     protected abstract handler(): Promise<void>;
 
     public register() {
+        if (!this.command) {
+            throw new Error(`Command "${this.name}" cannot be registered without a Commander program.`);
+        }
         const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
 
@@ -191,23 +226,42 @@ export abstract class AbstractCommand {
         }
     }
 
-    private parseCommandArgs(argsValues: string[]): any {
-        var args: any = {};
-        const commandOpts = this.command['_optionValues'] || {};
-        const commandArgs = this.command["_args"] || [];
-        commandArgs.forEach((a, i) => {
-            if (typeof (argsValues[i]) === 'string') {
-                args[a.name()] = argsValues[i];
-            }
-        });
-        args = { ...commandOpts, ...args };
-        // transform arguments with spaces into camel case
-        args = Object.entries(args).reduce((acc, [key, value]) => {
-            const newKey = key.includes(" ") ? key.replace(/ (\w)/g, (_, char) => char.toUpperCase()) : key;
+    private normalizeArgs(args: any = {}): any {
+        const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
+        const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
+        const normalized = {
+            logger: defaultLogger,
+            loggerOutDir: logOutputFolder,
+            debug: false
+        };
+
+        if (this.metadata) {
+            [...this.metadata.arguments, ...this.metadata.options].forEach(field => {
+                if (field.defaultValue !== undefined) {
+                    normalized[field.name] = field.defaultValue;
+                }
+            });
+        }
+
+        const providedArgs = Object.entries(args).reduce((acc, [key, value]) => {
+            const newKey = key.replace(/[ -](\w)/g, (_, char) => char.toUpperCase());
             acc[newKey] = value;
             return acc;
         }, {} as any);
-        return args;
+
+        return { ...normalized, ...providedArgs };
+    }
+
+    private parseCommandArgs(argsValues: any[]): any {
+        var args: any = {};
+        const commandOpts = this.command ? this.command.opts() : {};
+        const commandArgs = this.metadata ? [...this.metadata.arguments].sort((a, b) => a.position - b.position) : [];
+        commandArgs.forEach((a, i) => {
+            if (typeof (argsValues[i]) === 'string') {
+                args[a.name] = argsValues[i];
+            }
+        });
+        return this.normalizeArgs({ ...commandOpts, ...args });
     }
 
     public validateOutputFileArg(argValue: string): void {
@@ -353,10 +407,20 @@ export abstract class AbstractCommand {
         }
     }
 
+    public async run(args: any = {}): Promise<void> {
+        this.args = this.normalizeArgs(args);
+        this.onArgs(); // optionally used in implementations to trigger some changes based on args
+        await this.executePrepared(false);
+    }
+
     private async execute(...args: any[]): Promise<void> {
         this.args = this.parseCommandArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
-        var exitCode: number;
+        const exitCode = await this.executePrepared(true);
+        process.exit(exitCode);
+    }
+
+    private async executePrepared(logErrors: boolean): Promise<number> {
         try {
             await GlobalContext.getInstance().load();
             await Commons.Plugin.call<{ core: typeof Core }>("client", "loadCore", { core: Core });
@@ -469,11 +533,13 @@ export abstract class AbstractCommand {
                 Commons.Logger.logger.forceStop();
             }
 
-            //Disappear like man was never here!
-            exitCode = 0;
+            return 0;
         } catch (e) {
-            await logError(e);
-            exitCode = 1;
+            if (logErrors) {
+                await logError(e);
+                return 1;
+            }
+            throw e;
         } finally {
             if (Core.SystemConnector.systemConnector) {
                 try {
@@ -488,7 +554,6 @@ export abstract class AbstractCommand {
                 const logFilePath = Commons.Logger.logger.getFilePath();
                 Commons.Logger.info(`Saved log output "${logFilePath}" for session ID ${sessionId}.`);
             }
-            process.exit(exitCode);
         }
     }
 

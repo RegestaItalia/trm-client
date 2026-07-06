@@ -2,19 +2,31 @@ import { Logger, TreeLog } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder, GlobalContext } from "../../utils";
 import chalk from "chalk";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class Content extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.requiresR3trans = true;
-        this.command.description(`Extract and list content of a package.`);
-        this.command.addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`);
-        this.command.argument(`<package>`, `Name of the package.`);
-        this.command.argument(`[version]`, `Version or tag of the package`, 'latest');
-        this.command.option(`--full`, `Show all transport entries of the package`, false);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "content",
+        command: "content",
+        aliases: ["contents"],
+        title: "Package content",
+        group: "registry",
+        description: "View the contents of a package release in registry.",
+        icon: "ListTree",
+        arguments: [
+            argument(0, { name: "package", label: "Package", description: "Package name." }),
+            argument(1, { name: "version", label: "Version", description: "Package version or distribution tag.", required: false, defaultValue: "latest" })
+        ],
+        options: [
+            option("--full", { name: "full", label: "Full content", description: "Show all transport entries in the package.", control: "checkbox", defaultValue: false })
+        ],
+        requirements: {
+            requiresRegistry: true,
+            requiresR3trans: true
+        }
+    };
     protected async handler(): Promise<void> {
         //build output tree
         var transports: any = {};

@@ -6,16 +6,26 @@ import { gte, eq, maxSatisfying } from "semver";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { CommandMetadata } from "../metadata/CommandMetadata";
 
 export class Info extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.addNoConnection = true;
-        this.registerOpts.requiresTrmDependencies = true;
-        this.command.description(`TRM Client/Server Info. Shows installed and available updates.`);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "info",
+        command: "info",
+        title: "Client and server information",
+        group: "utility",
+        guiRelevant: false,
+        description: "Show TRM client and server information, including installed versions and available updates.",
+        icon: "Info",
+        arguments: [],
+        options: [],
+        requirements: {
+            requiresConnection: true,
+            addNoConnection: true,
+            requiresTrmDependencies: true
+        }
+    };
     protected onTrmDepMissing(dependency: string): boolean {
         // dependency is missing don't throw -> status will appear later in command
         return false;
