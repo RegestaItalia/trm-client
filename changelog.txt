@@ -13,6 +13,8 @@ Legend
 + expose commands metadata
 ! format commands descriptions and longtexts
 - execa dependency
+- support for dockerized trm
+* cache management
 
 2026-07-02 v9.4.1
 -------------------

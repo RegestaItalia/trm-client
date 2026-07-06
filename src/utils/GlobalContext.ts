@@ -1,5 +1,5 @@
 import path from "path";
-import { CacheData, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
+import { Cache, CacheData, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from ".";
 import * as ini from "ini";
@@ -36,10 +36,7 @@ export class GlobalContext {
     private _connections: IConnect[] = [];
     private _plugins: PluginModule[] = [];
 
-    private _dockerized: boolean;
-
     constructor() {
-        this._dockerized = process.env.TRM_DOCKERIZED === 'true';
         //load settings
         this._settings = this.getSettingsInternal();
         //load cache
@@ -58,13 +55,16 @@ export class GlobalContext {
 
     public getGlobalNodeModules(): string {
         //called before load
-        if (!this._cache.globalNpmPath) {
+        if (!this.isStringCacheEntryValid(this._cache.globalNpmPath, this.getSettings().npmGlobalPathCheckCache)) {
             this.setGlobalNpmPathInternal();
         }
         return this._cache.globalNpmPath.data;
     }
 
     public getLatestVersion(): string {
+        if (!this.isStringCacheEntryValid(this._cache.latestVersion)) {
+            throw new Error(`Client latest version cache is not loaded.`);
+        }
         return this._cache.latestVersion.data;
     }
 
@@ -73,7 +73,7 @@ export class GlobalContext {
         this.setGlobalNpmPathInternal();
         //latest version
         const latestVersionCache = this._cache.latestVersion;
-        if (!latestVersionCache || (latestVersionCache.ts && Date.now() - latestVersionCache.ts > this.getSettings().cliUpdateCheckCache * 1000)) {
+        if (!this.isStringCacheEntryValid(latestVersionCache, this.getSettings().cliUpdateCheckCache)) {
             Logger.loading(`Cache expired, setting client latest version...`, true);
             const version = (await getNpmPackageLatestVersion('trm-client')).latest;
             Logger.log(`Client latest version set to ${version}`, true);
@@ -164,20 +164,9 @@ export class GlobalContext {
 
     private setGlobalNpmPathInternal(): void {
         var path;
-        if(this._dockerized){
-            Logger.log(`TRM running in docker environment, ignoring cache and recalculating NPM global path`, true);
-            path = commonsGetGlobalNodeModules();
-            this._cache['globalNpmPath'] = {
-                ts: -1,
-                data: path
-            };
-            Logger.log(`Npm global modules path set to ${path}`, true);
-            return;
-        }
         const globalNpmPathCache = this._cache.globalNpmPath;
-        const isValid = !!globalNpmPathCache && !!globalNpmPathCache.ts && (Date.now() - globalNpmPathCache.ts) < this.getSettings().npmGlobalPathCheckCache * 1000;
-        if (isValid) {
-            return globalNpmPathCache.data; 
+        if (this.isStringCacheEntryValid(globalNpmPathCache, this.getSettings().npmGlobalPathCheckCache)) {
+            return globalNpmPathCache.data;
         }
         Logger.loading(`Cache expired, setting npm global modules path...`, true);
         path = commonsGetGlobalNodeModules();
@@ -217,22 +206,37 @@ export class GlobalContext {
 
     public clearCache(): void {
         const filePath = this.getCacheFilePath();
-        this.generateCacheFile({}, filePath);
+        this._cache = {};
+        this.generateCacheFile(this._cache, filePath);
     }
 
     private getCacheInternal(): CacheData {
         const filePath = this.getCacheFilePath();
         if (fs.existsSync(filePath)) {
             try {
-                var data = JSON.parse(fs.readFileSync(filePath).toString());
-                if(this._dockerized){
-                    delete data.globalNpmPath;
+                const data = JSON.parse(fs.readFileSync(filePath).toString());
+                if (this.isCacheData(data)) {
+                    return data;
                 }
-                return data;
             } catch (e) { }
         }
         this.generateCacheFile({}, filePath);
         return {};
+    }
+
+    private isCacheData(data: any): data is CacheData {
+        return !!data && typeof data === 'object' && !Array.isArray(data);
+    }
+
+    private isCacheEntryValid(cache: Cache, ttlSeconds?: number): cache is Cache {
+        if (!cache || typeof cache !== 'object' || typeof cache.ts !== 'number' || Number.isNaN(cache.ts) || cache.data === undefined || cache.data === null) {
+            return false;
+        }
+        return ttlSeconds === undefined || Date.now() - cache.ts < ttlSeconds * 1000;
+    }
+
+    private isStringCacheEntryValid(cache: Cache, ttlSeconds?: number): cache is Cache {
+        return this.isCacheEntryValid(cache, ttlSeconds) && typeof cache.data === 'string' && cache.data.length > 0;
     }
 
     private generateSettingsFile(data: SettingsData, filePath: string): void {
