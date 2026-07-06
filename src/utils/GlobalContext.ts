@@ -5,6 +5,7 @@ import { SettingsData } from ".";
 import * as ini from "ini";
 import { IConnect, Logger, RESTConnect, RFCConnect, Plugin, getGlobalNodeModules as commonsGetGlobalNodeModules, PluginModule } from "trm-commons";
 import { ISystemConnector, RESTSystemConnector, RFCSystemConnector } from "trm-core";
+import { RegistryAlias } from "../registryAlias";
 
 const CACHE_FILE_NAME = ".cache";
 const SETTINGS_FILE_NAME = "settings.ini";
@@ -148,11 +149,15 @@ export class GlobalContext {
         if (!sapLandscape || !fs.existsSync(sapLandscape)) {
             sapLandscape = undefined;
         }
+        const registryAliases = RegistryAlias.getAll();
         return {
             loggerType: 'CLI',
             logOutputFolder: 'default',
             cliUpdateCheckCache: 60,
             npmGlobalPathCheckCache: 180,
+            guiRegistryAutoconnect: registryAliases.length === 1,
+            guiRegistryAutoconnectAlias: registryAliases.length === 1 ? registryAliases[0].alias : undefined,
+            guiSystemAutoconnect: false,
             sapLandscape
         }
     }
