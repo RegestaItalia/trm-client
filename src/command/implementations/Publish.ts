@@ -13,10 +13,10 @@ export class Publish extends AbstractCommand {
     private static readonly releaseOptions = [
         option("-P, --sap-package <sap package>", { name: "sapPackage", label: "SAP package", description: "SAP package that owns the release objects.", control: "sap-package-picker" }),
         option("-T, --target <target>", { name: "target", label: "Transport target", description: "Target system for release transports.", control: "transport-target-picker" }),
-        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true, negated: true }),
-        option("--no-cust-tr", { name: "custTr", label: "Customizing transport", description: "Skip customizing transport generation.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-lang-tr", { name: "langTr", label: "No language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-cust-tr", { name: "custTr", label: "No customizing transport", description: "Skip customizing transports generation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--cust <customizing>", { name: "cust", label: "Customizing transports", description: "Customizing transport requests, separated by commas.", multiple: true }),
-        option("--no-auto-deps", { name: "autoDeps", label: "Automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-auto-deps", { name: "autoDeps", label: "No automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true, negated: true }),
         option("--authors <authors>", { name: "authors", label: "Authors", description: "Release authors, separated by commas.", multiple: true }),
         option("--backwards-compatible", { name: "backwardsCompatible", label: "Backwards compatible", description: "Mark the release as backwards compatible.", control: "checkbox" }),
         option("--description <description>", { name: "description", label: "Description", description: "Release description." }),
