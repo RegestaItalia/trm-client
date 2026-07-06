@@ -2,18 +2,36 @@ import { Inquirer } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { RegistryAlias } from "../../registryAlias";
 import { AuthenticationType } from "trm-registry-types";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { option } from "../metadata/helpers";
 
 export class Login extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.onlyRegistryAlias = true;
-        this.registerOpts.registryAuthBlacklist = [AuthenticationType.NO_AUTH];
-        this.command.description(`Log into a registry.`);
-        this.command.addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`);
-        this.command.option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file).`); //<- copy from abstract registry
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "login",
+        command: "login",
+        title: "Log in",
+        group: "registry",
+        guiRelevant: false,
+        description: "Log in to a registry.",
+        longDescription: "This command has no effect for registries that do not require authentication.",
+        icon: "LogIn",
+        arguments: [],
+        options: [
+            option("-A, --registry-auth <authentication>", {
+                name: "registryAuth",
+                label: "Authentication data",
+                description: "Registry authentication data as JSON, or a path to a JSON file.",
+                control: "textarea",
+                sensitive: true
+            })
+        ],
+        requirements: {
+            requiresRegistry: true,
+            onlyRegistryAlias: true,
+            registryAuthBlacklist: [AuthenticationType.NO_AUTH]
+        }
+    };
     protected async handler(): Promise<void> {
         const registry = this.getRegistry();
         var authData: any;

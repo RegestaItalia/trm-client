@@ -1,18 +1,31 @@
 import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { writeFileSync } from "fs";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument } from "../metadata/helpers";
 
 export class Lock extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.ignoreRegistryUnreachable = true;
-        this.command.description(`Generate a lockfile for a TRM package.`);
-        this.command.argument(`<package>`, `Name of the package to generate lock file.`);
-        this.command.argument(`[output path]`, `Output path.`, 'trm-lock.json');
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "lock",
+        command: "lock",
+        aliases: ["lock-file"],
+        title: "Generate lockfile",
+        group: "package",
+        groupPriority: 6,
+        description: "Generate a lockfile for an installed TRM package.",
+        icon: "LockKeyhole",
+        arguments: [
+            argument(0, { name: "package", label: "Package", description: "Package to lock." }),
+            argument(1, { name: "outputPath", cliName: "output path", label: "Output path", description: "Path where the lockfile will be written.", required: false, defaultValue: "trm-lock.json", control: "file-picker" })
+        ],
+        options: [],
+        requirements: {
+            requiresConnection: true,
+            requiresRegistry: true,
+            ignoreRegistryUnreachable: true
+        }
+    };
     protected async handler(): Promise<void> {
         const packages = await this.getSystemPackages();
         Logger.loading(`Generating lock file...`);

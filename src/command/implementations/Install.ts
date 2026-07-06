@@ -2,54 +2,118 @@ import { Logger } from "trm-commons";
 import { AbstractRegistry, FileSystem, install, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder, GlobalContext } from "../../utils";
-import { execa } from "execa";
 import os from "node:os";
+import { spawn } from "node:child_process";
 import { Lockfile } from "trm-core/dist/lockfile";
 import { extname } from "node:path";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 type PM = "npm" | "pnpm" | "yarn1";
 
 export class Install extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresTrmDependencies = true;
-        this.registerOpts.requiresR3trans = true;
-        if (this.name === 'update') {
-            this.registerOpts.requiresRegistry = true;
-            this.command.argument(`[package]`, `Name of the package.`);
-            this.command.argument(`[version]`, `Version (or tag) of the release.`, `latest`);
-            this.command.description(`Update trm-client / Update package from registry into system.`);
-            this.command.addHelpText(`before`, `When no package name is specified, trm-client will self-update; all options are invalid, in this case.`);
-        } else if (this.name === 'install') {
-            this.registerOpts.requiresRegistry = true;
-            this.command.argument(`<package>`, `Name of the package.`);
-            this.command.argument(`[version]`, `Version (or tag) of the release.`, `latest`);
-            this.command.description(`Install package from registry into system.`);
-        } else if (this.name === 'clean-install') {
-            this.registerOpts.requiresRegistry = true;
-            this.command.argument(`<package>`, `Name of the package.`);
-            this.command.argument(`[version]`, `Version (or tag) of the release.`, `latest`);
-            this.command.description(`Clean install package from registry into system (requires lockfile).`);
-            this.command.option(`-L, --lock-file`, `Install lockfile`, `trm-lock.json`);
-        } else if (this.name === 'import') {
-            this.command.argument(`<filename>`, `Name (or path) of the file.`);
-            this.command.description(`Import a package (as a file) into system.`);
-        }
-        this.command.option(`-T, --transport-layer <transport layer>`, `Package transport layer. (default: System default)`);
-        this.command.option(`--no-deps`, `Do not install dependencies.`);
-        this.command.option(`--no-obj-type`, `Do not check object types before import.`);
-        this.command.option(`--no-obj-check`, `Do not check if objects exist before import.`);
-        this.command.option(`--no-sap-entries`, `Do not check SAP entries before import.`);
-        this.command.option(`--no-lang-tr`, `Do not import language (translation) transport.`);
-        this.command.option(`--no-cust-tr`, `Do not import customizing transports.`);
-        this.command.option(`--no-install-tr`, `Do not create install transport.`);
-        this.command.option(`--namespace`, `Import customer namespace.`);
-        this.command.option(`--package-replacements <replacements>`, `SAP Package replacements (JSON or path to JSON file)`);
-        this.command.option(`--install-tr-target <target>`, `Install transport target system`);
-        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
-    }
+    private static readonly installOptions = [
+        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer." }),
+        option("--no-deps", { name: "deps", label: "Dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true }),
+        option("--no-obj-type", { name: "objType", label: "Object type checks", description: "Skip object type checks before import.", control: "checkbox", defaultValue: true }),
+        option("--no-obj-check", { name: "objCheck", label: "Object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true }),
+        option("--no-sap-entries", { name: "sapEntries", label: "SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true }),
+        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true }),
+        option("--no-cust-tr", { name: "custTr", label: "Customizing transports", description: "Skip customizing transport import.", control: "checkbox", defaultValue: true }),
+        option("--no-install-tr", { name: "installTr", label: "Install transport", description: "Do not create an install transport.", control: "checkbox", defaultValue: true }),
+        option("--namespace", { name: "namespace", label: "Customer namespace", description: "Import the customer namespace.", control: "checkbox" }),
+        option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
+        option("--install-tr-target <target>", { name: "installTrTarget", label: "Install transport target", description: "Target system for the install transport." }),
+        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false })
+    ];
 
+    public static readonly metadata: CommandMetadata[] = [
+        {
+            id: "install",
+            command: "install",
+            aliases: ["i"],
+            title: "Install package",
+            group: "package",
+            groupPriority: 10,
+            description: "Install a package from the registry into the connected system.",
+            icon: "PackageCheck",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
+            ],
+            options: Install.installOptions,
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true,
+                requiresR3trans: true,
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "clean-install",
+            command: "clean-install",
+            aliases: ["ci"],
+            title: "Clean install",
+            group: "package",
+            groupPriority: 5,
+            description: "Install a package from the registry using a lockfile.",
+            icon: "PackageCheck",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
+            ],
+            options: [
+                option("-L, --lock-file", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", defaultValue: "trm-lock.json" }),
+                ...Install.installOptions
+            ],
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true,
+                requiresR3trans: true,
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "update",
+            command: "update",
+            title: "Update package or client",
+            group: "package",
+            guiRelevant: false,
+            description: "Update the client, or update a package from the registry.",
+            longDescription: "When no package name is provided, this command updates trm-client itself and ignores package options.",
+            icon: "RefreshCw",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name.", required: false }),
+                argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
+            ],
+            options: Install.installOptions,
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true,
+                requiresR3trans: true,
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "import",
+            command: "import",
+            title: "Import package file",
+            group: "package",
+            groupPriority: 8,
+            description: "Import a package file into the connected system.",
+            icon: "Upload",
+            arguments: [
+                argument(0, { name: "filename", label: "Package file", description: "Package file name or path.", control: "file-picker" })
+            ],
+            options: Install.installOptions,
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true,
+                requiresR3trans: true
+            }
+        }
+    ];
     private async selfUpdate(): Promise<void> {
         const pm = this.detectPackageManager();
         const target = `trm-client@latest`;
@@ -62,7 +126,7 @@ export class Install extends AbstractCommand {
                     : { bin: "npm", args: ["install", "-g", target] }; // default
 
         try {
-            await execa(command.bin, command.args, { stdio: "inherit" });
+            await this.spawnCommand(command.bin, command.args);
             Logger.success(`Client updated successfully.`);
         } catch (err: any) {
             if (this.isPermsError(err)) {
@@ -75,6 +139,22 @@ export class Install extends AbstractCommand {
             }
             throw err;
         }
+    }
+
+    private spawnCommand(bin: string, args: string[]): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const child = spawn(bin, args, { stdio: "inherit" });
+            child.on("error", reject);
+            child.on("close", exitCode => {
+                if (exitCode === 0) {
+                    resolve();
+                    return;
+                }
+                const error = new Error(`Command failed with exit code ${exitCode}: ${[bin, ...args].join(" ")}`);
+                (error as any).exitCode = exitCode;
+                reject(error);
+            });
+        });
     }
 
     private detectPackageManager(): PM {

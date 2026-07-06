@@ -14,6 +14,8 @@ import { Package } from "trm-registry-types";
 import { basename, dirname, resolve } from "path";
 import constants from "constants";
 import sanitize from "sanitize-filename";
+import { CommandMetadata, CommandMetadataExport } from "./metadata/CommandMetadata";
+import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
 
 export abstract class AbstractCommand {
 
@@ -27,6 +29,7 @@ export abstract class AbstractCommand {
     private registryAuthFailed: Error;
     private systemPackages: Core.TrmPackage[];
     private trmDependenciesCheck: Core.CheckTrmDependencies;
+    private metadata: CommandMetadata;
 
     constructor(program: Command, protected readonly name: string, protected readonly aliases?: string[], protected readonly subcommand?: string) {
         const index = program.commands.findIndex(c => c.name() === this.name);
@@ -45,7 +48,17 @@ export abstract class AbstractCommand {
         if (aliases) {
             this.command.aliases(aliases);
         }
-        this.init();
+        this.metadata = this.getMetadata();
+        if (this.metadata) {
+            this.registerOpts = { ...this.metadata.requirements };
+            applyCommandMetadata(this.command, this.metadata);
+        }
+    }
+
+    private getMetadata(): CommandMetadata | undefined {
+        const metadata = (this.constructor as typeof AbstractCommand & { metadata?: CommandMetadataExport }).metadata;
+        const entries = Array.isArray(metadata) ? metadata : metadata ? [metadata] : [];
+        return entries.find(entry => entry.command === this.name && entry.subcommand === this.subcommand);
     }
 
     public async getCliVersionStatus(): Promise<CliVersionStatus> {
@@ -125,7 +138,6 @@ export abstract class AbstractCommand {
         return this.trmDependenciesCheck;
     }
 
-    protected abstract init(): void;
     protected abstract handler(): Promise<void>;
 
     public register() {

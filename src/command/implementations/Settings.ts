@@ -1,16 +1,28 @@
 import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { GlobalContext } from "../../utils";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { option } from "../metadata/helpers";
 
 export class Settings extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresTrmDependencies = true;
-        this.command.description(`Show/Set settings.`);
-        this.command.option(`-s, --set <property>`, `Property as KEY=VALUE.`);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "settings",
+        command: "settings",
+        title: "Settings",
+        group: "utility",
+        guiRelevant: false,
+        description: "Show or update client settings.",
+        icon: "Settings",
+        arguments: [],
+        options: [
+            option("-s, --set <property>", { name: "set", label: "Set property", description: "Setting to update, in KEY=VALUE format." })
+        ],
+        requirements: {
+            requiresConnection: true,
+            requiresTrmDependencies: true
+        }
+    };
     protected async handler(): Promise<void> {
         const setArgument = this.args.set;
         if (setArgument) {

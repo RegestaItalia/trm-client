@@ -2,21 +2,49 @@ import { LOCAL_RESERVED_KEYWORD, PUBLIC_RESERVED_KEYWORD } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { Inquirer, Logger } from "trm-commons";
 import { RegistryAlias } from "../../registryAlias";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class Registry extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        if (this.subcommand === 'add') {
-            this.command.description(`Add a new registry.`);
-            this.command.argument(`<registry name>`, `Name of the registry to generate. Name "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be used.`);
-        } else if (this.subcommand === 'rm') {
-            this.command.description(`Remove a registry.`);
-            this.command.argument(`<registry name>`, `Name of the registry to delete. Registries "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be deleted.`);
+    public static readonly metadata: CommandMetadata[] = [
+        {
+            id: "registry:add",
+            command: "registry",
+            subcommand: "add",
+            title: "Add registry",
+            group: "registry",
+            description: "Add a registry alias.",
+            icon: "DatabaseZap",
+            arguments: [
+                argument(0, { name: "registryName", cliName: "registry name", label: "Registry name", description: `Registry alias to create. "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are reserved and cannot be used.` })
+            ],
+            options: [
+                option("-E, --registry-endpoint <endpoint>", { name: "registryEndpoint", label: "Registry endpoint", description: "Endpoint URL for the registry." })
+            ],
+            requirements: {
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "registry:rm",
+            command: "registry",
+            subcommand: "rm",
+            title: "Remove registry",
+            group: "registry",
+            description: "Remove a registry alias.",
+            icon: "DatabaseX",
+            arguments: [
+                argument(0, { name: "registryName", cliName: "registry name", label: "Registry name", description: `Registry alias to remove. "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be deleted.` })
+            ],
+            options: [
+                option("-E, --registry-endpoint <endpoint>", { name: "registryEndpoint", label: "Registry endpoint", description: "Endpoint URL for the registry." })
+            ],
+            requirements: {
+                requiresRegistry: true
+            }
         }
-        this.command.option(`-E, --registry-endpoint <endpoint>`, `Registry endpoint.`);
-    }
-
+    ];
     protected async handler(): Promise<void> {
         const registryName = this.args.registryName.trim();
         if (this.subcommand === 'add') {

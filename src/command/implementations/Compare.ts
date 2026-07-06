@@ -4,19 +4,32 @@ import { AbstractCommand } from "../AbstractCommand";
 import { SystemAlias } from "../../systemAlias";
 import { Package } from "trm-registry-types";
 import { connect } from "../prompts";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class Compare extends AbstractCommand {
 
+    public static readonly metadata: CommandMetadata = {
+        id: "compare",
+        command: "compare",
+        title: "Compare package",
+        group: "package",
+        guiRelevant: false,
+        description: "Compare a package across multiple systems.",
+        icon: "GitCompare",
+        arguments: [
+            argument(0, { name: "package", label: "Package", description: "Package name." })
+        ],
+        options: [
+            option("-c, --connections <json>", { name: "connections", label: "Connections", description: "System connection aliases as JSON, or a path to a JSON file.", control: "textarea" })
+        ],
+        requirements: {
+            requiresRegistry: true,
+            ignoreRegistryUnreachable: true
+        }
+    };
+
     private connections: ISystemConnector[] = [];
-
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.ignoreRegistryUnreachable = true;
-        this.command.description(`Compare a package between different systems.`);
-        this.command.argument(`<package>`, `Name of the package.`);
-        this.command.option(`-c, --connections <json>`, `Array of system connection aliases (JSON or path to JSON file).`);
-    }
-
     private async promptConnections(): Promise<boolean> {
         if (this.connections.length > 0) {
             Logger.info(`Compare systems: ${this.connections.map(o => o.getDest()).join(', ')}`);

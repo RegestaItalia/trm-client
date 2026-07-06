@@ -4,17 +4,28 @@ import { cg3z, SystemConnector, Transport } from "trm-core";
 import { getTempFolder, GlobalContext } from "../../utils";
 import { readFile } from "fs/promises";
 import { extname } from "path";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument } from "../metadata/helpers";
 
 export class Cg3z extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresTrmDependencies = true;
-        this.registerOpts.requiresR3trans = true;
-        this.command.description(`Upload any released transport.`);
-        this.command.argument(`<filename>`, `Name (or path) of the file.`);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "cg3z",
+        command: "cg3z",
+        title: "Upload transport",
+        group: "utility",
+        description: "Upload a released transport archive to the connected system.",
+        icon: "Upload",
+        arguments: [
+            argument(0, { name: "filename", label: "Transport archive", description: "Transport archive file name or path.", control: "file-picker" })
+        ],
+        options: [],
+        requirements: {
+            requiresConnection: true,
+            requiresTrmDependencies: true,
+            requiresR3trans: true
+        }
+    };
     protected async handler(): Promise<void> {
         const extension = extname(this.args.filename);
         var transportLayer;

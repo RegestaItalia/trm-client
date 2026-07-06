@@ -3,21 +3,54 @@ import { AbstractCommand } from "../AbstractCommand";
 import { connect, createAlias, deleteAlias } from "../prompts";
 import { SystemAlias, SystemAliasData } from "../../systemAlias";
 import { GlobalContext } from "../../utils";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument } from "../metadata/helpers";
 
 export class Alias extends AbstractCommand {
 
-    protected init(): void {
-        if (this.subcommand === 'create') {
-            this.command.description(`Create a new system alias.`);
-            this.command.argument(`<alias>`, `Alias name.`);
-        } else if (this.subcommand === 'delete') {
-            this.command.description(`Delete a system alias.`);
-            this.command.argument(`<alias>`, `Alias name.`);
-        } else {
-            this.command.description(`Manage system aliases.`);
+    public static readonly metadata: CommandMetadata[] = [
+        {
+            id: "alias",
+            command: "alias",
+            title: "Manage aliases",
+            group: "system",
+            description: "Create, view, edit, check, or delete system aliases.",
+            icon: "Network",
+            arguments: [],
+            options: [],
+            requirements: {}
+        },
+        {
+            id: "alias:create",
+            command: "alias",
+            subcommand: "create",
+            title: "Create alias",
+            group: "system",
+            guiRelevant: false,
+            description: "Create a system alias.",
+            icon: "Network",
+            arguments: [
+                argument(0, { name: "alias", label: "Alias", description: "Name of the system alias." })
+            ],
+            options: [],
+            requirements: {}
+        },
+        {
+            id: "alias:delete",
+            command: "alias",
+            subcommand: "delete",
+            title: "Delete alias",
+            group: "system",
+            guiRelevant: false,
+            description: "Delete a system alias.",
+            icon: "Network",
+            arguments: [
+                argument(0, { name: "alias", label: "Alias", description: "Name of the system alias." })
+            ],
+            options: [],
+            requirements: {}
         }
-    }
-
+    ];
     private view(alias: SystemAliasData) {
         const connection = GlobalContext.getInstance().getConnections().find(o => o.name === alias.type);
         if (!connection) {

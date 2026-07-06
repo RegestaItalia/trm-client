@@ -2,18 +2,31 @@ import { Logger } from "trm-commons";
 import { Transport, ZTRM_DIRTY } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import chalk from "chalk";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class Dirty extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.ignoreRegistryUnreachable = true;
-        this.command.description(`Show local objetcs that flagged a package as dirty.`);
-        this.command.argument(`<package>`, `Name of the dirty package to check.`);
-        this.command.option(`--latest-only`, `Show only the latest transports with changes`, false);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "dirty",
+        command: "dirty",
+        title: "Show dirty entries",
+        group: "package",
+        guiRelevant: false,
+        description: "Show objects that caused a package to be marked as dirty.",
+        icon: "TriangleAlert",
+        arguments: [
+            argument(0, { name: "package", label: "Package", description: "Package to inspect." })
+        ],
+        options: [
+            option("--latest-only", { name: "latestOnly", label: "Latest only", description: "Show only the latest transports that contain changes.", control: "checkbox", defaultValue: false })
+        ],
+        requirements: {
+            requiresConnection: true,
+            requiresRegistry: true,
+            ignoreRegistryUnreachable: true
+        }
+    };
     private keepFirstByKey(entries: ZTRM_DIRTY[]): ZTRM_DIRTY[] {
         const seen = new Set<string>();
 

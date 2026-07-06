@@ -5,49 +5,81 @@ import { getTempFolder } from "../../utils";
 import { valid } from "semver";
 import { extname, join } from "path";
 import sanitize from "sanitize-filename";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument, option } from "../metadata/helpers";
 
 export class Publish extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.requiresTrmDependencies = true;
-        if (this.name === 'pack') {
-            this.command.description(`Export a package to local file.`);
-            this.command.argument(`<package>`, `Name of the package`);
-            this.command.argument(`<version>`, `Version of the release`);
-            this.command.argument(`[filename]`, `Name (or path) of the output file.`);
-        } else {
-            this.registerOpts.requiresRegistry = true;
-            this.command.description(`Publish a package to a registry.`);
-            this.command.argument(`<package>`, `Name of the package.`);
-            this.command.argument(`[version]`, `Optional: Version of the release to publish.`);
-            this.command.option(`-i, --increment <increment>`, `Semantic versioning increment (used when no version is specified)`, `patch`);
-            this.command.option(`--pre-release`, `Publish as pre release`, false);
-            this.command.option(`--pre-release-identifier <identifier>`, `Identifier (needs to pre a pre release)`);
-            this.command.option(`--tag <tag>`, `Release tag(s) (separated by comma)`);
-            this.command.option(`--private`, `Package marked as private. Depending on the registry, visibility might not be changed after first publish.`);
-            this.command.option(`--readme <readme>`, `Release readme (markdown or path to markdown file)`);
-            this.command.option(`--no-keep-manifest`, `Don't default to previous release manifest values.`);
-        }
-        this.command.option(`-P, --sap-package <sap package>`, `SAP Package.`);
-        this.command.option(`-T, --target <target>`, `Transport release target.`);
-        this.command.option(`--no-lang-tr`, `Do not generate language (translation) transport.`);
-        this.command.option(`--no-cust-tr`, `Do not generate customizing transport.`);
-        this.command.option(`--cust <customizing>`, `Customizing transport(s) (separated by comma).`);
-        this.command.option(`--no-auto-deps`, `Do not look for dependencies.`);
-        this.command.option(`--authors <authors>`, `Release author(s) (separated by comma)`);
-        this.command.option(`--backwards-compatible`, `Backwards-compatible release (reserved for future use)`);
-        this.command.option(`--description <description>`, `Release description`);
-        this.command.option(`--git <git url>`, `Release git URL`);
-        this.command.option(`--keywords <keywords>`, `Release keyword(s) (separated by comma)`);
-        this.command.option(`--license <license>`, `Release license`);
-        this.command.option(`--website <website url>`, `Release website URL`);
-        this.command.option(`--dependencies <dependencies>`, `Release dependencies (JSON or path to JSON file)`);
-        this.command.option(`--sap-entries <sap entries>`, `Release SAP entries (JSON or path to JSON file)`);
-        this.command.option(`--post-activities <post activities>`, `Release post activities (JSON or path to JSON file)`);
-        this.command.option(`--no-prompts`, `No prompts (will force some decisions).`);
-    }
+    private static readonly releaseOptions = [
+        option("-P, --sap-package <sap package>", { name: "sapPackage", label: "SAP package", description: "SAP package that owns the release objects." }),
+        option("-T, --target <target>", { name: "target", label: "Transport target", description: "Target system for release transports." }),
+        option("--no-lang-tr", { name: "langTr", label: "Language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true }),
+        option("--no-cust-tr", { name: "custTr", label: "Customizing transport", description: "Skip customizing transport generation.", control: "checkbox", defaultValue: true }),
+        option("--cust <customizing>", { name: "cust", label: "Customizing transports", description: "Customizing transport requests, separated by commas.", multiple: true }),
+        option("--no-auto-deps", { name: "autoDeps", label: "Automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true }),
+        option("--authors <authors>", { name: "authors", label: "Authors", description: "Release authors, separated by commas.", multiple: true }),
+        option("--backwards-compatible", { name: "backwardsCompatible", label: "Backwards compatible", description: "Mark the release as backwards compatible.", control: "checkbox" }),
+        option("--description <description>", { name: "description", label: "Description", description: "Release description." }),
+        option("--git <git url>", { name: "git", label: "Git URL", description: "Release Git repository URL." }),
+        option("--keywords <keywords>", { name: "keywords", label: "Keywords", description: "Release keywords, separated by commas.", multiple: true }),
+        option("--license <license>", { name: "license", label: "License", description: "Release license." }),
+        option("--website <website url>", { name: "website", label: "Website", description: "Release website URL." }),
+        option("--dependencies <dependencies>", { name: "dependencies", label: "Dependencies", description: "Release dependencies as JSON, or a path to a JSON file.", control: "textarea" }),
+        option("--sap-entries <sap entries>", { name: "sapEntries", label: "SAP entries", description: "Release SAP entries as JSON, or a path to a JSON file.", control: "textarea" }),
+        option("--post-activities <post activities>", { name: "postActivities", label: "Post activities", description: "Release post activities as JSON, or a path to a JSON file.", control: "textarea" }),
+        option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false })
+    ];
 
+    public static readonly metadata: CommandMetadata[] = [
+        {
+            id: "publish",
+            command: "publish",
+            title: "Publish package",
+            group: "package",
+            groupPriority: 9,
+            description: "Publish a package release to the registry.",
+            icon: "PackagePlus",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "version", label: "Version", description: "Release version to publish.", required: false })
+            ],
+            options: [
+                option("-i, --increment <increment>", { name: "increment", label: "Version increment", description: "Semantic version increment to use when no version is provided.", control: "select", defaultValue: "patch" }),
+                option("--pre-release", { name: "preRelease", label: "Pre-release", description: "Publish the release as a pre-release.", control: "checkbox", defaultValue: false }),
+                option("--pre-release-identifier <identifier>", { name: "preReleaseIdentifier", label: "Pre-release identifier", description: "Identifier to append to a pre-release version." }),
+                option("--tag <tag>", { name: "tag", label: "Tags", description: "Release distribution tags, separated by commas.", multiple: true }),
+                option("--private", { name: "private", label: "Private", description: "Mark the package as private. Registry visibility may not be changeable after the first publish.", control: "checkbox" }),
+                option("--readme <readme>", { name: "readme", label: "Readme", description: "Release readme as Markdown, or a path to a Markdown file.", control: "textarea" }),
+                option("--no-keep-manifest", { name: "keepManifest", label: "Reuse manifest", description: "Do not reuse values from the previous release manifest.", control: "checkbox", defaultValue: true }),
+                ...Publish.releaseOptions
+            ],
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true,
+                requiresRegistry: true
+            }
+        },
+        {
+            id: "pack",
+            command: "pack",
+            aliases: ["export"],
+            title: "Export package",
+            group: "package",
+            groupPriority: 7,
+            description: "Export a package release to a local file.",
+            icon: "PackageOpen",
+            arguments: [
+                argument(0, { name: "package", label: "Package", description: "Package name." }),
+                argument(1, { name: "version", label: "Version", description: "Release version." }),
+                argument(2, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker" })
+            ],
+            options: Publish.releaseOptions,
+            requirements: {
+                requiresConnection: true,
+                requiresTrmDependencies: true
+            }
+        }
+    ];
     private validateVersion(v: string): true | string {
         if (valid(v)) {
             return true;

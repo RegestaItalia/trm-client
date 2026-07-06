@@ -6,6 +6,8 @@ import { DummyConnector } from "../../utils";
 import { Package } from "trm-registry-types";
 import { eq } from "semver";
 import { RegistryAlias } from "../../registryAlias";
+import { CommandMetadata } from "../metadata/CommandMetadata";
+import { argument } from "../metadata/helpers";
 
 type PrintManifest = {
     devclass?: string,
@@ -22,19 +24,28 @@ type PrintManifest = {
 
 export class View extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresConnection = true;
-        this.registerOpts.addNoConnection = true;
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.ignoreRegistryUnreachable = true;
-        this.command.description(`View package.`);
-        this.command.addHelpText(`before`, `Shows package details.
-If the package is not found on the system, it will automatically fall back to the data provided by the registry, granted it exists.`);
-        this.command.argument(`<package>`, `Name of the package.`)
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "view",
+        command: "view",
+        title: "View package",
+        group: "package",
+        guiRelevant: false,
+        description: "Show package details.",
+        longDescription: `Shows package details from the connected system.
+If the package is not installed, the command falls back to registry data when available.`,
+        icon: "Eye",
+        arguments: [
+            argument(0, { name: "package", label: "Package", description: "Package name." })
+        ],
+        options: [],
+        requirements: {
+            requiresConnection: true,
+            addNoConnection: true,
+            requiresRegistry: true,
+            ignoreRegistryUnreachable: true
+        }
+    };
     private printHeaderSection(sapPackage?: string) {
-        Logger.info(`Package name: ${chalk.bold(this.args.package)}`);
         Logger.info(`Registry: ${this.getRegistry().name}`);
         if (sapPackage) {
             Logger.info(`SAP Package: ${sapPackage}`);

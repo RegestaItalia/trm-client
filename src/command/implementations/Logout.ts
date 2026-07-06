@@ -2,17 +2,27 @@ import { Logger } from "trm-commons";
 import { RegistryAlias } from "../../registryAlias";
 import { AbstractCommand } from "../AbstractCommand";
 import { AuthenticationType } from "trm-registry-types";
+import { CommandMetadata } from "../metadata/CommandMetadata";
 
 export class Logout extends AbstractCommand {
 
-    protected init(): void {
-        this.registerOpts.requiresRegistry = true;
-        this.registerOpts.onlyRegistryAlias = true;
-        this.registerOpts.registryAuthBlacklist = [AuthenticationType.NO_AUTH];
-        this.command.description(`Log out of a registry.`);
-        this.command.addHelpText(`before`, `This command has no effect when trying to login into a registry that doesn't require authentication.`);
-    }
-
+    public static readonly metadata: CommandMetadata = {
+        id: "logout",
+        command: "logout",
+        title: "Log out",
+        group: "registry",
+        guiRelevant: false,
+        description: "Log out of a registry.",
+        longDescription: "This command has no effect for registries that do not require authentication.",
+        icon: "LogOut",
+        arguments: [],
+        options: [],
+        requirements: {
+            requiresRegistry: true,
+            onlyRegistryAlias: true,
+            registryAuthBlacklist: [AuthenticationType.NO_AUTH]
+        }
+    };
     protected async handler(): Promise<void> {
         const registry = this.getRegistry();
         if (this.hasRegistryAuthData()) {
