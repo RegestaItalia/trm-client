@@ -145,7 +145,7 @@ export class SystemAlias {
         }
     }
 
-    public static async createIfNotExists(connection: IConnect): Promise<void> {
+    public static async createIfNotExists(connection: IConnect): Promise<string | undefined> {
         const aAlias = this.getAll();
         const parsedData = connection.getData();
         if (!aAlias.find(o => this.deepEqual(o, parsedData))) {
@@ -164,6 +164,7 @@ export class SystemAlias {
             }])).alias;
             if (aliasName) {
                 this.create(aliasName, connection.name, parsedData);
+                return aliasName
             }
         }
     }
