@@ -101,10 +101,6 @@ export class GlobalContext {
     }
 
     public setSetting(key: string, value: string): void {
-        // ensure the key is an allowed/defined setting key
-        if (!Object.prototype.hasOwnProperty.call(this._settings, key)) {
-            throw new Error(`Invalid key ${key}.`);
-        }
         const filePath = this.getSettingsFilePath();
         this._settings[key] = value;
         this.generateSettingsFile(this._settings, filePath);
