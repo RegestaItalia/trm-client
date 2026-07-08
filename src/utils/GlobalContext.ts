@@ -101,7 +101,8 @@ export class GlobalContext {
     }
 
     public setSetting(key: string, value: string): void {
-        if (this._settings[key] === undefined) {
+        // ensure the key is an allowed/defined setting key
+        if (!Object.prototype.hasOwnProperty.call(this._settings, key)) {
             throw new Error(`Invalid key ${key}.`);
         }
         const filePath = this.getSettingsFilePath();
@@ -202,10 +203,6 @@ export class GlobalContext {
             }
             if (!settingsData.guiRegistryAutoConnectAlias) {
                 settingsData.guiRegistryAutoConnectAlias = defaultSettings.guiRegistryAutoConnectAlias;
-                this.generateSettingsFile(settingsData, filePath);
-            }
-            if (!settingsData.guiSystemAutoConnectAlias) {
-                settingsData.guiSystemAutoConnectAlias = defaultSettings.guiSystemAutoConnectAlias;
                 this.generateSettingsFile(settingsData, filePath);
             }
             // clear from legacy versions that had the node root in settings
