@@ -87,10 +87,10 @@ export class Alias extends AbstractCommand {
                 force: true
             }
         }, false);
-        const newData = connectionArgs.getData();
+        const newData = connectionArgs.connect.getData();
         try {
             SystemAlias.delete(alias.alias);
-            await SystemAlias.create(alias.alias, connectionArgs.name, newData).getConnection().connect(false);
+            await SystemAlias.create(alias.alias, connectionArgs.connect.name, newData).getConnection().connect(false);
         } catch (e) {
             connectionSuccess = false;
             throw e;

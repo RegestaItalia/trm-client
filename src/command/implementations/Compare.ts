@@ -45,7 +45,7 @@ export class Compare extends AbstractCommand {
         askConnection = inq1.continue !== undefined ? inq1.continue : askConnection;
         if (askConnection) {
             const connectArgs = await connect({}, false, false);
-            const systemConnector = connectArgs.getSystemConnector() as ISystemConnector;
+            const systemConnector = connectArgs.connect.getSystemConnector() as ISystemConnector;
             await systemConnector.connect(false);
             this.connections.push(systemConnector);
             return true;

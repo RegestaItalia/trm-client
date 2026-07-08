@@ -74,12 +74,13 @@ class NoConnection implements IConnect {
     }
 }
 
-export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<IConnect> {
+export async function connect(commandArgs: ConnectArguments, createAliasIfNotExist: boolean = true, addNoConnection?: boolean): Promise<{ connect: IConnect, alias?: string }> {
     const noSystemAlias = commandArgs.noSystemAlias ? true : false;
     const force = commandArgs.force ? true : false;
     var type = commandArgs.type;
     var aInputType = [];
     var aSapLogonConnections = [];
+    var selectedAlias: string;
     const aAlias = SystemAlias.getAll();
     if (getNodeRfcPackage()) { //only if node-rfc is installed
         try {
@@ -117,7 +118,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }
 
     if (inputType === 'none') {
-        return new NoConnection();
+        return { connect: new NoConnection() };
     } else if (inputType === 'alias') {
         const inq2 = (await Inquirer.prompt({
             type: `list`,
@@ -142,7 +143,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             SystemAlias.delete(inq2.alias);
             SystemAlias.create(inq2.alias, inq2.type, connection.getData());
         }
-        return connection;
+        selectedAlias = inq2.alias;
+        return { connect: connection, alias: selectedAlias };
     } else {
         if (inputType === 'logon') {
             const logonConnection = (await Inquirer.prompt({
@@ -236,8 +238,8 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             await connectionType.onAfterLoginData(force, commandArgs);
         }
         if (createAliasIfNotExist) {
-            await SystemAlias.createIfNotExists(connectionType);
+            selectedAlias = await SystemAlias.createIfNotExists(connectionType);
         }
-        return connectionType;
+        return { connect : connectionType, alias: selectedAlias };
     }
 }

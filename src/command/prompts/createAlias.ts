@@ -9,11 +9,11 @@ export async function createAlias(alias: string) {
         force: true
     }, false, false);
     //create alias first because if it already exists it will throw an exception
-    SystemAlias.create(alias, connection.name, connection.getData());
+    SystemAlias.create(alias, connection.connect.name, connection.connect.getData());
     Logger.loading(`Connecting to "${alias}"...`);
     var connectionSuccess = true;
     try {
-        await (connection.getSystemConnector() as ISystemConnector).connect(true);
+        await (connection.connect.getSystemConnector() as ISystemConnector).connect(true);
     } catch (e) {
         connectionSuccess = false;
         throw e;

@@ -524,7 +524,7 @@ export abstract class AbstractCommand {
                             true,
                             this.registerOpts.addNoConnection
                         )
-                    ).getSystemConnector() as Core.ISystemConnector;
+                    ).connect.getSystemConnector() as Core.ISystemConnector;
                 }
                 await system.connect(false);
                 Core.SystemConnector.systemConnector = system;
