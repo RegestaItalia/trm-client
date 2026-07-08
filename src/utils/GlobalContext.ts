@@ -155,9 +155,9 @@ export class GlobalContext {
             logOutputFolder: 'default',
             cliUpdateCheckCache: 60,
             npmGlobalPathCheckCache: 180,
-            guiRegistryAutoconnect: registryAliases.length === 1,
-            guiRegistryAutoconnectAlias: registryAliases.length === 1 ? registryAliases[0].alias : undefined,
-            guiSystemAutoconnect: false,
+            guiRegistryAutoConnect: registryAliases.length === 1,
+            guiRegistryAutoConnectAlias: registryAliases.length === 1 ? registryAliases[0].alias : undefined,
+            guiSystemAutoConnect: false,
             sapLandscape
         }
     }
@@ -190,6 +190,22 @@ export class GlobalContext {
             }
             if (!settingsData.npmGlobalPathCheckCache) {
                 settingsData.npmGlobalPathCheckCache = defaultSettings.npmGlobalPathCheckCache;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (settingsData.guiRegistryAutoConnect === undefined) {
+                settingsData.guiRegistryAutoConnect = defaultSettings.guiRegistryAutoConnect;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (settingsData.guiSystemAutoConnect === undefined) {
+                settingsData.guiSystemAutoConnect = defaultSettings.guiSystemAutoConnect;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.guiRegistryAutoConnectAlias) {
+                settingsData.guiRegistryAutoConnectAlias = defaultSettings.guiRegistryAutoConnectAlias;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (!settingsData.guiSystemAutoConnectAlias) {
+                settingsData.guiSystemAutoConnectAlias = defaultSettings.guiSystemAutoConnectAlias;
                 this.generateSettingsFile(settingsData, filePath);
             }
             // clear from legacy versions that had the node root in settings
