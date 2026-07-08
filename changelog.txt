@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2026-07-07 v10.0.8
+-------------------
+* gui settings
+
 2026-07-07 v10.0.7
 -------------------
 * gui settings
