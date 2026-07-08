@@ -12,7 +12,7 @@ export class Lock extends AbstractCommand {
         aliases: ["lock-file"],
         title: "Generate lockfile",
         group: "package",
-        groupPriority: 6,
+        guiRelevant: false,
         description: "Generate a lockfile for an installed TRM package.",
         icon: "LockKeyhole",
         arguments: [

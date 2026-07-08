@@ -8,6 +8,11 @@ Legend
 + : added
 - : removed
 
+2026-07-07 v10.0.4
+-------------------
+- gui visibility for lock command
+- required registry for registry command
+
 2026-07-06 v10.0.3
 -------------------
 * programmatic command handler

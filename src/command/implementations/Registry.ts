@@ -23,9 +23,7 @@ export class Registry extends AbstractCommand {
             options: [
                 option("-E, --registry-endpoint <endpoint>", { name: "registryEndpoint", label: "Registry endpoint", description: "Endpoint URL for the registry." })
             ],
-            requirements: {
-                requiresRegistry: true
-            }
+            requirements: {}
         },
         {
             id: "registry:rm",
@@ -39,12 +37,8 @@ export class Registry extends AbstractCommand {
             arguments: [
                 argument(0, { name: "registryName", cliName: "registry name", label: "Registry name", description: `Registry alias to remove. "${PUBLIC_RESERVED_KEYWORD}" and "${LOCAL_RESERVED_KEYWORD}" are protected and cannot be deleted.` })
             ],
-            options: [
-                option("-E, --registry-endpoint <endpoint>", { name: "registryEndpoint", label: "Registry endpoint", description: "Endpoint URL for the registry." })
-            ],
-            requirements: {
-                requiresRegistry: true
-            }
+            options: [],
+            requirements: {}
         }
     ];
     protected async handler(): Promise<void> {
