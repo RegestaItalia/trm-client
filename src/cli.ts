@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import { Command } from "commander";
 import { getClientVersion } from "./utils";
-import { Alias, Cg3y, Cg3z, ClearCache, Compare, Content, Deprecate, Dirty, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
+import { Alias, Cg3y, Cg3z, Changelog, ClearCache, Compare, Content, Deprecate, Dirty, DistTag, FindDependencies, Info, Install, List, Lock, Login, Logout, Ping, Publish, Registry, Settings, Unpublish, View, WhoAmI } from './command/implementations';
 import { Transport } from 'trm-core';
 
 dotenv.config({
@@ -73,6 +73,7 @@ new Install(program, 'import').register();
 new List(program, 'list', ['ls']).register();
 new Content(program, 'content', ['contents']).register();
 new View(program, 'view').register();
+new Changelog(program, 'changelog').register();
 new Compare(program, 'compare').register();
 new Dirty(program, 'dirty').register();
 
