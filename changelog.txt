@@ -8,9 +8,11 @@ Legend
 + : added
 - : removed
 
-2026-07-20 v10.1.0
+2026-07-22 v11.0.0
 -------------------
-! trm-core ^9.9.0
+! trm-core ^9.10.0
+! trm-registry-types ^2.4.0
++ changelog command
 
 2026-07-07 v10.0.7
 -------------------

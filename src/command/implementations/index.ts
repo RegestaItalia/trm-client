@@ -22,6 +22,7 @@ import { Cg3y } from "./Cg3y";
 import { Cg3z } from "./Cg3z";
 import { Settings } from "./Settings";
 import { ClearCache } from "./ClearCache";
+import { Changelog } from "./Changelog";
 
 export * from "./Ping";
 export * from "./Info";
@@ -44,6 +45,7 @@ export * from "./Install";
 export * from "./List";
 export * from "./Content";
 export * from "./View";
+export * from "./Changelog";
 export * from "./Compare";
 export * from "./Dirty";
 
@@ -74,6 +76,7 @@ export const commands = [
     View,
     Compare,
     Dirty,
+    Changelog,
     FindDependencies,
     Cg3y,
     Cg3z,
