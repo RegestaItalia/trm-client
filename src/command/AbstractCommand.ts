@@ -19,6 +19,7 @@ import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
 
 export interface AbstractCommandRunOptions {
     registry?: Core.AbstractRegistry;
+    systemPackages?: Core.TrmPackage[];
 }
 
 export abstract class AbstractCommand {
@@ -415,6 +416,9 @@ export abstract class AbstractCommand {
         this.args = this.normalizeArgs(args);
         this.onArgs(); // optionally used in implementations to trigger some changes based on args
         this.registry = options.registry;
+        if (options.systemPackages !== undefined) {
+            this.systemPackages = options.systemPackages;
+        }
         try{
             await this.handler();
         }catch(e){

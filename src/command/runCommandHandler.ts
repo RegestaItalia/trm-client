@@ -1,11 +1,9 @@
 import { getCommand, getCommandMetadata } from "./implementations";
-import type * as Core from "trm-core";
+import type { AbstractCommandRunOptions } from "./AbstractCommand";
 
 export type CommandHandlerValues = Record<string, unknown>;
 
-export interface CommandHandlerOptions {
-    registry?: Core.AbstractRegistry;
-}
+export type CommandHandlerOptions = AbstractCommandRunOptions;
 
 export async function runCommandHandler(id: string, values: CommandHandlerValues = {}, options: CommandHandlerOptions = {}): Promise<void> {
     const commandClass = getCommand(id);
