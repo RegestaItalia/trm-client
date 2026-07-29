@@ -1,5 +1,5 @@
 import path from "path";
-import { Cache, CacheData, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
+import { Cache, CacheData, getNodeRfcPackage, getNpmPackageLatestVersion, getRoamingFolder, getRoamingPath, getTempFolder } from ".";
 import * as fs from "fs";
 import { SettingsData } from ".";
 import * as ini from "ini";
@@ -87,7 +87,7 @@ export class GlobalContext {
             });
             Logger.log(`Loaded ${this._plugins.length} plugins: ${this._plugins.map(o => o.name).join(', ')}`, true);
             Logger.loading(`Calling event onContextLoadConnections...`, true);
-            this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", [new RESTConnectExtended(), new RFCConnectExtended()]);
+            this._connections = await Plugin.call<IConnect[]>("client", "onContextLoadConnections", getNodeRfcPackage() ? [new RFCConnectExtended(), new RESTConnectExtended()] : [new RESTConnectExtended()]);
             this._pluginsLoaded = true;
         }
     }
