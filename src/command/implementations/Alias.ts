@@ -67,9 +67,10 @@ export class Alias extends AbstractCommand {
 
     private async check(alias: SystemAliasData) {
         Logger.loading(`Checking connection with alias "${alias.alias}"...`);
-        const oSystemAlias = new SystemAlias(alias.type, alias.data);
+        const oSystemAlias = new SystemAlias(alias.type, alias.data, alias.alias);
         try {
             await oSystemAlias.getConnection().connect(false);
+            oSystemAlias.saveChanges();
             Logger.success(`Connection to alias "${alias.alias}" OK.`);
         } catch (e) {
             Logger.error(`Connection failed!`);
