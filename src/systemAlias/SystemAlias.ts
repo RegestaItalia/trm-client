@@ -10,7 +10,9 @@ const SYSTEM_FILE_NAME = "systems.ini";
 
 export class SystemAlias {
 
-    constructor(public type: string, private _data: any) { }
+    private _connection: IConnect;
+
+    constructor(public type: string, private _data: any, private _name?: string) { }
 
     public getConnection(): ISystemConnector {
         const connection = GlobalContext.getInstance().getConnections().find(o => o.name === this.type);
@@ -18,7 +20,31 @@ export class SystemAlias {
             throw new Error(`Unknown connection type "${this.type}". Possible values are ${GlobalContext.getInstance().getConnections().map(k => k.name).join(', ')}.`);
         }
         connection.setData(this._data.data || this._data); //fallback to this._data for backward compatibility
+        this._connection = connection;
         return connection.getSystemConnector() as ISystemConnector;
+    }
+
+    /**
+     * Saves connection data changed while connecting (e.g. rotated tokens), call after the system connector is connected.
+     */
+    public saveChanges(): void {
+        if (!this._name || !this._connection) {
+            return;
+        }
+        const normalize = (data: any) => {
+            const normalized = {};
+            Object.keys(data || {}).sort().forEach(key => {
+                if (key !== 'type' && data[key] !== undefined && data[key] !== null) {
+                    normalized[key] = `${data[key]}`;
+                }
+            });
+            return normalized;
+        };
+        const newData = this._connection.getData();
+        if (!SystemAlias.deepEqual(normalize(this._data.data || this._data), normalize(newData))) {
+            SystemAlias.update(this._name, newData);
+            this._data = newData;
+        }
     }
 
     private static generateFile(content: SystemAliasData[], filePath?: string): void {
@@ -69,7 +95,7 @@ export class SystemAlias {
         const aAlias = this.getAll();
         const alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
         if (alias) {
-            return new SystemAlias(alias.type, alias);
+            return new SystemAlias(alias.type, alias, alias.alias);
         } else {
             throw new Error(`System alias "${name}" not found.`);
         }
@@ -92,6 +118,16 @@ export class SystemAlias {
             this.generateFile(aAlias);
         }
         return new SystemAlias(type, data);
+    }
+
+    public static update(name: string, data: any): void {
+        const aAlias = this.getAll();
+        const alias = aAlias.find(o => o.alias.trim().toUpperCase() === name.trim().toUpperCase());
+        if (!alias) {
+            throw new Error(`System alias "${name}" not found.`);
+        }
+        alias.data = data;
+        this.generateFile(aAlias);
     }
 
     public static delete(name: string): void {

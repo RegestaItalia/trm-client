@@ -29,10 +29,10 @@ export class Compare extends AbstractCommand {
         }
     };
 
-    private connections: ISystemConnector[] = [];
+    private connections: { connector: ISystemConnector, alias?: SystemAlias }[] = [];
     private async promptConnections(): Promise<boolean> {
         if (this.connections.length > 0) {
-            Logger.info(`Compare systems: ${this.connections.map(o => o.getDest()).join(', ')}`);
+            Logger.info(`Compare systems: ${this.connections.map(o => o.connector.getDest()).join(', ')}`);
         }
         var askConnection = true;
         const inq1 = await Inquirer.prompt([{
@@ -46,8 +46,10 @@ export class Compare extends AbstractCommand {
         if (askConnection) {
             const connectArgs = await connect({}, false, false);
             const systemConnector = connectArgs.connect.getSystemConnector() as ISystemConnector;
+            // connection check, systems are then read one at a time
             await systemConnector.connect(false);
-            this.connections.push(systemConnector);
+            await systemConnector.closeConnection();
+            this.connections.push({ connector: systemConnector });
             return true;
         }else{
             return false;
@@ -63,8 +65,7 @@ export class Compare extends AbstractCommand {
             for (const sAlias of inputConnections) {
                 if (typeof (sAlias) === 'string') {
                     const oAlias = SystemAlias.get(sAlias);
-                    const oConnection = oAlias.getConnection();
-                    this.connections.push(oConnection);
+                    this.connections.push({ connector: oAlias.getConnection(), alias: oAlias });
                 }
             }
         } else {
@@ -74,7 +75,7 @@ export class Compare extends AbstractCommand {
             }
         }
 
-        Logger.info(`Compare systems: ${this.connections.map(o => o.getDest()).join(', ')}`);
+        Logger.info(`Compare systems: ${this.connections.map(o => o.connector.getDest()).join(', ')}`);
 
         const tableHead = [`System`, `Installed`, `Version`, `Devclass`, `Import transport`];
         var tableData = [];
@@ -87,14 +88,29 @@ export class Compare extends AbstractCommand {
 
         Logger.loading(`Reading system data...`);
 
-        for (const oConnection of this.connections) {
+        for (const { connector: oConnection, alias: oAlias } of this.connections) {
+            // one system at a time: some connections (e.g. tunnels) can't be open at the same time
+            await oConnection.connect(false);
+            if (oAlias) {
+                try {
+                    oAlias.saveChanges();
+                } catch (e) {
+                    Logger.error(e, true);
+                }
+            }
             SystemConnector.systemConnector = oConnection;
             const system = SystemConnector.getDest() || '';
             var installed;
             var version;
             var devclass;
             var importTransport;
-            const aSystemPackages = await SystemConnector.getInstalledPackages(true);
+            var aSystemPackages;
+            try {
+                aSystemPackages = await SystemConnector.getInstalledPackages(true);
+            } finally {
+                await oConnection.closeConnection();
+                SystemConnector.systemConnector = undefined; // already closed
+            }
             const oSystemView = aSystemPackages.find(o => o.compareName(packageName) && o.compareRegistry(registry));
             if (oSystemView && oSystemView.manifest) {
                 installed = 'Yes';

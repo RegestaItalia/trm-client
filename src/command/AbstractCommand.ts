@@ -569,8 +569,10 @@ export abstract class AbstractCommand {
 
             if (this.registerOpts.requiresConnection) {
                 var system: Core.ISystemConnector;
+                var systemAlias: SystemAlias;
                 if (this.args.alias) {
-                    system = SystemAlias.get(this.args.alias).getConnection();
+                    systemAlias = SystemAlias.get(this.args.alias);
+                    system = systemAlias.getConnection();
                 } else {
                     const connectArgs = this.getConnectArgs();
                     system = (
@@ -582,6 +584,14 @@ export abstract class AbstractCommand {
                     ).connect.getSystemConnector() as Core.ISystemConnector;
                 }
                 await system.connect(false);
+                if (systemAlias) {
+                    try {
+                        systemAlias.saveChanges();
+                    } catch (e) {
+                        Commons.Logger.warning(`Couldn't update system alias "${this.args.alias}" data.`);
+                        Commons.Logger.error(e, true);
+                    }
+                }
                 Core.SystemConnector.systemConnector = system;
                 await Commons.Plugin.call<Core.ISystemConnector>("client", "onInitializeSystemConnector", Core.SystemConnector.systemConnector);
                 if (this.registerOpts.requiresTrmDependencies) {
