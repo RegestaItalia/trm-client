@@ -1,6 +1,6 @@
 import { SystemAlias } from "../../systemAlias";
 import { GlobalContext, DummyConnector, getSapLogonConnections, getNodeRfcPackage } from "../../utils";
-import { IConnect, Inquirer } from "trm-commons";
+import { IConnect, Inquirer, Logger } from "trm-commons";
 import { isEqual } from "lodash";
 import { ISystemConnector } from "trm-core";
 
@@ -17,8 +17,27 @@ export type ConnectArguments = {
     noSystemAlias?: boolean,
     force?: boolean,
     endpoint?: string,
-    forwardRfcDest?: string,
-    connection?: ISystemConnector
+    forwardRfcDest?: string | boolean,
+    connection?: ISystemConnector,
+    connectionArgs?: Record<string, any>
+}
+
+type ConnectArgumentDeclaration = { name: string, description: string, secret?: boolean };
+
+// merges connection specific arguments (e.g. --connection-args) into command args, passed to the connection hooks
+function applyConnectionArgs(connection: IConnect, commandArgs: ConnectArguments): ConnectArguments {
+    const connectionArgs = commandArgs.connectionArgs;
+    if (!connectionArgs) {
+        return commandArgs;
+    }
+    const declared = (connection as IConnect & { connectionArgs?: ConnectArgumentDeclaration[] }).connectionArgs;
+    if (Array.isArray(declared)) {
+        const unknown = Object.keys(connectionArgs).filter(k => !declared.find(o => o.name === k));
+        if (unknown.length > 0) {
+            Logger.warning(`Connection "${connection.name}" doesn't support argument(s) ${unknown.join(', ')}. Supported arguments: ${declared.map(o => o.name).join(', ') || 'none'}.`);
+        }
+    }
+    return { ...commandArgs, ...connectionArgs };
 }
 
 const languageList = [
@@ -136,7 +155,7 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         }
         connection.setData(inq2.data);
         if (connection.onAfterLoginData) {
-            await connection.onAfterLoginData(force, commandArgs);
+            await connection.onAfterLoginData(force, applyConnectionArgs(connection, commandArgs));
         }
         //check for changes to login data and update alias
         if (!isEqual(inq2.data, connection.getData())) {
@@ -179,8 +198,9 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
         }
         const connectionType = GlobalContext.getInstance().getConnections().find(o => o.name === type);
         if (!connectionType) {
-            throw new Error(`Invalid connection type "${type}"`);
+            throw new Error(`Invalid connection type "${type}". Possible values are ${GlobalContext.getInstance().getConnections().map(o => o.name).join(', ')}.`);
         }
+        commandArgs = applyConnectionArgs(connectionType, commandArgs);
         if (connectionType.onConnectionData) {
             await connectionType.onConnectionData(force, commandArgs);
         }

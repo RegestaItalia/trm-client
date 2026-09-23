@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "11.1.2",
+  "version": "11.2.0",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,13 +46,13 @@
     "lodash": "^4.17.21",
     "sanitize-filename": "^1.6.3",
     "semver": "^7.7.4",
-    "trm-commons": "^5.0.1",
-    "trm-core": "^9.10.5",
+    "trm-commons": "^5.1.0",
+    "trm-core": "^9.10.6",
     "trm-registry-types": "^2.4.0",
     "xml2js": "^0.6.2"
   },
   "peerDependencies": {
-    "trm-commons": "^5.0.1"
+    "trm-commons": "^5.1.0"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",

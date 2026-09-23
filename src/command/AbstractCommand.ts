@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import { RegisterCommandOpts } from "./RegisterCommandOpts";
 import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning } from "../utils";
 import { LoggerType } from "./LoggerType";
@@ -188,7 +188,9 @@ export abstract class AbstractCommand {
                 .option(`-r, --sap-router <sap router>`, `RFC SAP Router.`)
                 .option(`-n, --sys-nr <sysnr>`, `Instance number.`)
                 .option(`-e, --endpoint <endpoint>`, `REST endpoint.`)
-                .option(`-x, --forward-rfc-dest [destination]`, `REST forward destination.`, `NONE`);
+                .option(`-x, --forward-rfc-dest [destination]`, `REST forward RFC destination.`)
+                .addOption(new Option(`--connection-type <type>`, `Connection type (e.g. RFC, REST or a plugin connection type), skips the connection prompt.`).env(`TRM_CONNECTION_TYPE`))
+                .addOption(new Option(`--connection-args <arguments>`, `Connection arguments, passed to the connection type (JSON or path to JSON file).`).env(`TRM_CONNECTION_ARGS`));
             if (!this.registerOpts.noSystemAlias) {
                 this.command
                     .option(`-a, --alias <alias>`, `System Alias.`);
@@ -396,6 +398,54 @@ export abstract class AbstractCommand {
         }
     }
 
+    // maps cli option names to the keys expected by connections (original keys are kept for backwards compatibility)
+    private getConnectArgs(): any {
+        const connectArgs = { ...this.args };
+        const mapping: [string, string][] = [
+            ['client', 'mandt'],
+            ['passwd', 'password'],
+            ['ashost', 'applicationServer'],
+            ['sysnr', 'sysNr'],
+            ['saprouter', 'sapRouter']
+        ];
+        mapping.forEach(([key, cliKey]) => {
+            if (connectArgs[key] === undefined && connectArgs[cliKey] !== undefined) {
+                connectArgs[key] = connectArgs[cliKey];
+            }
+        });
+        if (this.args.connectionType) {
+            connectArgs.type = this.args.connectionType;
+            // non interactive connection: don't prompt for forward rfc destination
+            if (typeof connectArgs.forwardRfcDest !== 'string') {
+                connectArgs.forwardRfcDest = 'NONE';
+            }
+        }
+        connectArgs.connectionArgs = this.parseConnectionArgs();
+        return connectArgs;
+    }
+
+    private parseConnectionArgs(): Record<string, any> | undefined {
+        if (!this.args.connectionArgs) {
+            return undefined;
+        }
+        var sValue: string;
+        try {
+            sValue = readFileSync(this.args.connectionArgs).toString();
+        } catch {
+            sValue = this.args.connectionArgs;
+        }
+        var value: any;
+        try {
+            value = JSON.parse(sValue);
+        } catch {
+            throw new Error(`Invalid connection arguments: expected a JSON object or the path to a JSON file.`);
+        }
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+            throw new Error(`Invalid connection arguments: expected a JSON object.`);
+        }
+        return value;
+    }
+
     public parseArrayArg(name: string): string[] {
         if (this.args[name]) {
             try {
@@ -522,10 +572,11 @@ export abstract class AbstractCommand {
                 if (this.args.alias) {
                     system = SystemAlias.get(this.args.alias).getConnection();
                 } else {
+                    const connectArgs = this.getConnectArgs();
                     system = (
                         await connect(
-                            this.args as any,
-                            true,
+                            connectArgs,
+                            !this.args.connectionType, //non interactive connection: don't prompt for alias creation
                             this.registerOpts.addNoConnection
                         )
                     ).connect.getSystemConnector() as Core.ISystemConnector;
