@@ -169,7 +169,7 @@ export abstract class AbstractCommand {
         if (!this.command) {
             throw new Error(`Command "${this.name}" cannot be registered without a Commander program.`);
         }
-        const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
+        const defaultLogger = this.getDefaultLoggerType();
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
 
         this.command
@@ -226,6 +226,14 @@ export abstract class AbstractCommand {
         }
     }
 
+    private getDefaultLoggerType(): LoggerType {
+        const configured = GlobalContext.getInstance().getSettings().loggerType;
+        if (configured && configured.toUpperCase() !== 'AUTO') {
+            return configured as LoggerType;
+        }
+        return process.stdout.isTTY ? LoggerType.CLI : LoggerType.CONSOLE;
+    }
+
     private getInquirer(type: InquirerType): Commons.IInquirer {
         switch (type) {
             case InquirerType.CLI: return new Commons.CliInquirer();
@@ -234,7 +242,7 @@ export abstract class AbstractCommand {
     }
 
     private normalizeArgs(args: any = {}): any {
-        const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
+        const defaultLogger = this.getDefaultLoggerType();
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
         const normalized = {
             logger: defaultLogger,

@@ -148,7 +148,7 @@ export class GlobalContext {
         }
         const registryAliases = RegistryAlias.getAll();
         return {
-            loggerType: 'CLI',
+            loggerType: 'AUTO',
             logOutputFolder: 'default',
             cliUpdateCheckCache: 60,
             npmGlobalPathCheckCache: 180,
