@@ -1,7 +1,7 @@
 import { Logger } from "trm-commons";
 import { AbstractRegistry, FileSystem, install, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
-import { getTempFolder, GlobalContext } from "../../utils";
+import { getTempFolder } from "../../utils";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { Lockfile } from "trm-core/dist/lockfile";
@@ -16,15 +16,19 @@ export class Install extends AbstractCommand {
     private static readonly installOptions = [
         option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer.", control: "transport-layer-picker" }),
         option("--no-deps", { name: "deps", label: "Ignore dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true, negated: true }),
-        option("--no-obj-type", { name: "objType", label: "Avoid object type checks", description: "Skip object type checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-obj-check", { name: "objCheck", label: "Avoid object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-sap-entries", { name: "sapEntries", label: "Avoid SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-lang-tr", { name: "langTr", label: "No language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-cust-tr", { name: "custTr", label: "No customizing transports", description: "Skip customizing transports import.", control: "checkbox", defaultValue: true, negated: true }),
-        option("--no-install-tr", { name: "installTr", label: "No install transport generation", description: "Do not create an install transport.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-engines", { name: "engines", label: "Check engines", description: "Skip manifest engine validation.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--allow-downgrade", { name: "allowDowngrade", label: "Allow downgrade", description: "Allow dependency downgrades without confirmation.", control: "checkbox" }),
+        option("--keep-original", { name: "keepOriginal", label: "Keep original packages", description: "Preserve publisher SAP package names.", control: "checkbox" }),
+        option("--skip-post-activities", { name: "skipPostActivities", label: "Skip post activities", description: "Skip all manifest post-install activities.", control: "checkbox" }),
+        option("--overwrite", { name: "overwrite", label: "Overwrite", description: "Allow reinstalling the same release.", control: "checkbox" }),
+        option("--integrity <integrity>", { name: "integrity", label: "Integrity", description: "Expected release SHA-512 integrity in base64." }),
         option("--namespace", { name: "namespace", label: "Customer namespace", description: "Import the customer namespace.", control: "checkbox" }),
         option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
-        option("--install-tr-target <target>", { name: "installTrTarget", label: "Install transport target", description: "Target system for the install transport.", control: "transport-target-picker" }),
+        option("--landscape-tr-target <target>", { name: "landscapeTrTarget", label: "Landscape transport target", description: "TMS target for the generated landscape transport.", control: "transport-target-picker" }),
         option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
@@ -46,7 +50,6 @@ export class Install extends AbstractCommand {
             requirements: {
                 requiresConnection: true,
                 requiresTrmDependencies: true,
-                requiresR3trans: true,
                 requiresRegistry: true
             }
         },
@@ -64,13 +67,12 @@ export class Install extends AbstractCommand {
                 argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
             ],
             options: [
-                option("-L, --lock-file", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", pickerType: "input", defaultValue: "trm-lock.json" }),
+                option("-L, --lock-file <path>", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", pickerType: "input", defaultValue: "trm-lock.json" }),
                 ...Install.installOptions
             ],
             requirements: {
                 requiresConnection: true,
                 requiresTrmDependencies: true,
-                requiresR3trans: true,
                 requiresRegistry: true
             }
         },
@@ -91,7 +93,6 @@ export class Install extends AbstractCommand {
             requirements: {
                 requiresConnection: true,
                 requiresTrmDependencies: true,
-                requiresR3trans: true,
                 requiresRegistry: true
             }
         },
@@ -110,7 +111,6 @@ export class Install extends AbstractCommand {
             requirements: {
                 requiresConnection: true,
                 requiresTrmDependencies: true,
-                requiresR3trans: true
             }
         }
     ];
@@ -216,7 +216,7 @@ export class Install extends AbstractCommand {
         if (this.name === 'import') {
             const extension = extname(this.args.filename);
             if (extension !== '.trm') {
-                this.args.filename = this.args.filename + 'trm';
+                this.args.filename = this.args.filename + '.trm';
             }
             this.validateInputFileArg(this.args.filename);
             registry = new FileSystem(this.args.filename);
@@ -226,46 +226,39 @@ export class Install extends AbstractCommand {
         const packages = await this.getSystemPackages();
         const result = await install({
             contextData: {
-                r3transOptions: {
-                    tempDirPath: getTempFolder(),
-                    r3transDirPath: this.args.r3transPath,
-                    useDocker: GlobalContext.getInstance().getSettings().r3transDocker,
-                    dockerOptions: {
-                        name: GlobalContext.getInstance().getSettings().r3transDockerName
-                    }
-                },
+                logTemporaryFolder: getTempFolder(),
                 noInquirer: !this.args.prompts,
-                systemPackages: packages,
-                noR3transInfo: false
+                systemPackages: packages
             },
             packageData: {
                 registry,
                 name: this.args.package,
                 version: this.args.version,
-                overwrite: this.name === 'update'
+                overwrite: this.name === 'update' || this.args.overwrite,
+                integrity: this.args.integrity
             },
             installData: {
                 checks: {
                     noDependencies: !this.args.deps,
-                    noObjectTypes: !this.args.objType,
+                    noEngines: !this.args.engines,
+                    allowDowngrade: this.args.allowDowngrade,
                     noSapEntries: !this.args.sapEntries,
                     noExistingObjects: !this.args.objCheck,
                     lockfile: this.args.lockFile ? Lockfile.fromJson(this.parseJsonArg('lockFile')) : undefined
                 },
                 import: {
                     noLang: !this.args.langTr,
-                    noCust: !this.args.custTr,
-                    replaceExistingTransports: false
+                    noCust: !this.args.custTr
                 },
                 installDevclass: {
-                    keepOriginal: false,
+                    keepOriginal: this.args.keepOriginal,
                     transportLayer: this.args.transportLayer,
                     replacements: this.parseJsonArg('packageReplacements'),
                     skipNamespace: !this.args.namespace
                 },
-                installTransport: {
-                    create: this.args.installTr,
-                    targetSystem: this.args.installTrTarget
+                skipPostActivities: this.args.skipPostActivities,
+                landscapeTransport: {
+                    targetSystem: this.args.landscapeTrTarget
                 }
             }
         });

@@ -455,6 +455,9 @@ export abstract class AbstractCommand {
     }
 
     public parseArrayArg(name: string): string[] {
+        if (Array.isArray(this.args[name])) {
+            return this.args[name];
+        }
         if (this.args[name]) {
             try {
                 return this.args[name].split(',').map(s => s.trim());

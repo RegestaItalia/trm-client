@@ -1,6 +1,5 @@
 import { Logger, TreeLog } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
-import { getTempFolder, GlobalContext } from "../../utils";
 import chalk from "chalk";
 import { CommandMetadata } from "../metadata/CommandMetadata";
 import { argument, option } from "../metadata/helpers";
@@ -24,8 +23,7 @@ export class Content extends AbstractCommand {
             option("--full", { name: "full", label: "Full content", description: "Show all transport entries in the package.", control: "checkbox", defaultValue: false })
         ],
         requirements: {
-            requiresRegistry: true,
-            requiresR3trans: true
+            requiresRegistry: true
         }
     };
     protected async handler(): Promise<void> {
@@ -44,48 +42,24 @@ export class Content extends AbstractCommand {
         const artifact = await registry.downloadArtifact(this.args.package, this.args.version);
 
         Logger.loading(`Reading content...`);
-        const packageContent = await artifact.getContent({
-            tempDirPath: getTempFolder(),
-            r3transDirPath: this.args.r3transPath,
-            useDocker: GlobalContext.getInstance().getSettings().r3transDocker,
-            dockerOptions: {
-                name: GlobalContext.getInstance().getSettings().r3transDockerName
+        const packageTransports = await artifact.getTransportBinaries();
+        let otherEntries = 0;
+        for (const transport of packageTransports) {
+            const type = transport.type || 'TADIR';
+            transports[type] = [...(transports[type] || []), transport.trkorr];
+            const entries = this.args.full ? transport.entries : { tadir: transport.entries.tadir };
+            if (!this.args.full) {
+                otherEntries += transport.entries.e071.length + transport.entries.tdevc.length + transport.entries.tdevct.length;
             }
-        });
-        if (this.args.tadirOnly) {
-            transports.TADIR = packageContent.TADIR.trkorr;
-            aNodes.push({
-                tableName: 'TADIR',
-                content: packageContent.TADIR.content.TADIR
-            });
-            Object.keys(packageContent).forEach(type => {
-                if (type === 'TADIR') {
-                    return;
-                }
-                Object.keys(packageContent[type].content).forEach(tableName => {
-                    iOtherEntries += packageContent[type].content[tableName].length;
+            for (const [tableName, records] of Object.entries(entries)) {
+                if (!records.length) continue;
+                aNodes.push({
+                    tableName: `${tableName.toUpperCase()} (${type} ${transport.trkorr})`,
+                    content: records.map(record => ({ ...record }))
                 });
-            })
-        } else {
-            Object.keys(packageContent).forEach(type => {
-                transports[type] = packageContent[type].trkorr;
-                Object.keys(packageContent[type].content).forEach(tableName => {
-                    var nodeIndex = aNodes.findIndex(o => o.tableName === tableName);
-                    if (nodeIndex < 0) {
-                        nodeIndex = (aNodes.push({
-                            tableName,
-                            content: []
-                        })) - 1;
-                    }
-                    aNodes[nodeIndex].content = aNodes[nodeIndex].content.concat(packageContent[type].content[tableName].map(o => {
-                        o.__isDevc = type === 'DEVC';
-                        o.__isLang = type === 'LANG';
-                        o.__isCust = type === 'CUST';
-                        return o;
-                    }));
-                });
-            });
+            }
         }
+        iOtherEntries = otherEntries;
         var tree: TreeLog = {
             text: `${chalk.bold(this.args.package)} v${data.manifest.version} content`,
             children: []
@@ -97,92 +71,17 @@ export class Content extends AbstractCommand {
                     children: []
                 };
                 node.content.forEach(record => {
-                    var sRecord = [];
-                    Object.keys(record).filter(k => !k.startsWith('__')).forEach(field => {
-                        var fieldValue = record[field];
-                        if (field && fieldValue) {
-                            if (node.tableName === 'TADIR') {
-                                if (field === 'SRCSYSTEM') {
-                                    fieldValue = chalk.strikethrough(fieldValue);
-                                } else if (field === 'DEVCLASS') {
-                                    fieldValue = chalk.italic(fieldValue);
-                                }
-                            }
-                            sRecord.push(`${chalk.bold(field)}: ${fieldValue}`);
-                        }
-                    });
-                    if (sRecord.length > 0) {
-                        if (record.__isDevc) {
-                            tableNode.children.push({
-                                text: chalk.bgGrey(sRecord.join(', ')),
-                                children: []
-                            });
-                        } else if (record.__isLang) {
-                            tableNode.children.push({
-                                text: chalk.bgGreen(sRecord.join(', ')),
-                                children: []
-                            });
-                        } else if (record.__isCust) {
-                            tableNode.children.push({
-                                text: chalk.bgYellow(sRecord.join(', ')),
-                                children: []
-                            });
-                        } else {
-                            tableNode.children.push({
-                                text: sRecord.join(', '),
-                                children: []
-                            });
-                        }
-                    }
+                    const fields = Object.entries(record)
+                        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+                        .map(([field, value]) => `${chalk.bold(field)}: ${value}`);
+                    tableNode.children.push({ text: fields.join(', '), children: [] });
                 });
                 tree.children.push(tableNode);
             }
         });
         Logger.tree(tree);
 
-        var header = ['', 'Namespace', 'ABAP Package', 'TRM Transport', 'Customizing', 'Translations'];
-        var row1 = [''];
-        var row2 = ['Highlight color'];
-        if (data.manifest.namespace) {
-            row1.push(`${data.manifest.namespace.ns || 'Yes'} ${data.manifest.namespace.replicense}`);
-            row2.push(``);
-        } else {
-            row1.push(`No`);
-            row2.push(``);
-        }
-        if (Object.keys(packageContent).includes('DEVC')) {
-            row1.push(packageContent['DEVC'].trkorr);
-            row2.push(`${chalk.bgGrey('Grey')}`);
-        } else {
-            row1.push(`No`);
-            row2.push(``);
-        }
-        if (Object.keys(packageContent).includes('TADIR')) {
-            row1.push(packageContent['TADIR'].trkorr);
-            row2.push(``);
-        } else {
-            row1.push(`No`);
-            row2.push(``);
-        }
-        if (Object.keys(packageContent).includes('CUST')) {
-            row1.push(packageContent['CUST'].trkorr);
-            row2.push(`${chalk.bgYellow('Yellow')}`);
-        } else {
-            row1.push(`No`);
-            row2.push(``);
-        }
-        if (Object.keys(packageContent).includes('LANG')) {
-            row1.push(packageContent['LANG'].trkorr);
-            row2.push(`${chalk.bgGreen('Green')}`);
-        } else {
-            row1.push(`No`);
-            row2.push(``);
-        }
-        if (row2.filter(s => s.length > 0).length > 0) {
-            Logger.table(header, [row1, row2]);
-        } else {
-            Logger.table(header, [row1]);
-        }
+        Logger.table(['Type', 'Transports'], Object.entries(transports).map(([type, requests]) => [type, (requests as string[]).join(', ')]));
 
         if (iOtherEntries > 0) {
             Logger.warning(`There are ${iOtherEntries} other entries to show. Run with option "--full" in order to see them.`);
