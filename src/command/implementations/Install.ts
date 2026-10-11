@@ -20,6 +20,8 @@ export class Install extends AbstractCommand {
         option("--no-sap-entries", { name: "sapEntries", label: "Avoid SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-lang-tr", { name: "langTr", label: "No language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-cust-tr", { name: "custTr", label: "No customizing transports", description: "Skip customizing transports import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--lang-tr", { name: "langTr", label: "Language transport", description: "Import the language transport without asking.", control: "checkbox", guiRelevant: false }),
+        option("--cust-tr", { name: "custTr", label: "Customizing transports", description: "Import all customizing transports without asking.", control: "checkbox", guiRelevant: false }),
         option("--no-engines", { name: "engines", label: "Check engines", description: "Skip manifest engine validation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--allow-downgrade", { name: "allowDowngrade", label: "Allow downgrade", description: "Allow dependency downgrades without confirmation.", control: "checkbox" }),
         option("--keep-original", { name: "keepOriginal", label: "Keep original packages", description: "Preserve publisher SAP package names.", control: "checkbox" }),
@@ -27,6 +29,7 @@ export class Install extends AbstractCommand {
         option("--overwrite", { name: "overwrite", label: "Overwrite", description: "Allow reinstalling the same release.", control: "checkbox" }),
         option("--integrity <integrity>", { name: "integrity", label: "Integrity", description: "Expected release SHA-512 integrity in base64." }),
         option("--namespace", { name: "namespace", label: "Customer namespace", description: "Import the customer namespace.", control: "checkbox" }),
+        option("--no-namespace", { name: "namespace", label: "No customer namespace", description: "Don't import the customer namespace, without asking.", control: "checkbox", negated: true, guiRelevant: false }),
         option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--landscape-tr-target <target>", { name: "landscapeTrTarget", label: "Landscape transport target", description: "TMS target for the generated landscape transport.", control: "transport-target-picker" }),
         option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })

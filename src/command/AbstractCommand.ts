@@ -202,7 +202,7 @@ export abstract class AbstractCommand {
             if (!this.registerOpts.onlyRegistryAlias) {
                 this.command
                     .option(`-E, --registry-endpoint <endpoint>`, `Registry endpoint.`)
-                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file).`);
+                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
             }
         }
         if (this.registerOpts.requiresR3trans) {

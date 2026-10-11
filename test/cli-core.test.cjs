@@ -106,6 +106,10 @@ test('install import options are prompted only when not passed and prompts are e
     }
     assert.deepEqual(await run(['--no-lang-tr', '--no-cust-tr', '--namespace']), [true, true, false]);
     assert.deepEqual(await run(['--no-prompts']), [false, false, true]);
+    // explicit answers without prompting
+    assert.deepEqual(await run(['--lang-tr', '--cust-tr', '--no-namespace']), [false, false, true]);
+    assert.deepEqual(await run(['--lang-tr']), [false, undefined, undefined]);
+    assert.deepEqual(await run(['--no-prompts', '--no-namespace']), [false, false, true]);
     assert.deepEqual(await run(['--no-prompts', '--no-lang-tr', '--no-cust-tr', '--namespace']), [true, true, false]);
     // programmatic run (no Commander parsing): values are explicit, metadata defaults apply
     const programmatic = new commands.Install('install');

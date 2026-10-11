@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { Logger } from "trm-commons";
 
 const _getUnauthorizedError = (): string => {
-    return `User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/#/server/docs/setup?id=user-authorization-maintenance.`;
+    return `User "${SystemConnector.getLogonUser()}" is not authorized to execute TRM RFC functions. Follow this guide https://docs.trmregistry.com/server/setup/#maintain-authorized-users .`;
 }
 
 export async function logError(err: any) {
