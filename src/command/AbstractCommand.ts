@@ -5,7 +5,7 @@ import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
 import * as Commons from "trm-commons";
-import { RegistryAlias } from "../registryAlias";
+import { RegistryAlias, authenticateRegistry } from "../registryAlias";
 import { SystemAlias } from "../systemAlias";
 import chalk from "chalk";
 import { connect, pickRegistry } from "./prompts";
@@ -169,7 +169,7 @@ export abstract class AbstractCommand {
         if (!this.command) {
             throw new Error(`Command "${this.name}" cannot be registered without a Commander program.`);
         }
-        const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
+        const defaultLogger = this.getDefaultLoggerType();
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
 
         this.command
@@ -202,7 +202,7 @@ export abstract class AbstractCommand {
             if (!this.registerOpts.onlyRegistryAlias) {
                 this.command
                     .option(`-E, --registry-endpoint <endpoint>`, `Registry endpoint.`)
-                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file).`);
+                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
             }
         }
         if (this.registerOpts.requiresR3trans) {
@@ -226,6 +226,14 @@ export abstract class AbstractCommand {
         }
     }
 
+    private getDefaultLoggerType(): LoggerType {
+        const configured = GlobalContext.getInstance().getSettings().loggerType;
+        if (configured && configured.toUpperCase() !== 'AUTO') {
+            return configured as LoggerType;
+        }
+        return process.stdout.isTTY ? LoggerType.CLI : LoggerType.CONSOLE;
+    }
+
     private getInquirer(type: InquirerType): Commons.IInquirer {
         switch (type) {
             case InquirerType.CLI: return new Commons.CliInquirer();
@@ -234,7 +242,7 @@ export abstract class AbstractCommand {
     }
 
     private normalizeArgs(args: any = {}): any {
-        const defaultLogger = GlobalContext.getInstance().getSettings().loggerType;
+        const defaultLogger = this.getDefaultLoggerType();
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
         const normalized = {
             logger: defaultLogger,
@@ -447,6 +455,9 @@ export abstract class AbstractCommand {
     }
 
     public parseArrayArg(name: string): string[] {
+        if (Array.isArray(this.args[name])) {
+            return this.args[name];
+        }
         if (this.args[name]) {
             try {
                 return this.args[name].split(',').map(s => s.trim());
@@ -541,7 +552,7 @@ export abstract class AbstractCommand {
                 }
                 if (registryAlias.authData) {
                     try {
-                        await registry.authenticate(registryAlias.authData);
+                        await authenticateRegistry(registry, registryAlias.authData);
                     } catch (e) {
                         this.registryAuthFailed = e;
                         Commons.Logger.error(e, true);
@@ -575,13 +586,22 @@ export abstract class AbstractCommand {
                     system = systemAlias.getConnection();
                 } else {
                     const connectArgs = this.getConnectArgs();
-                    system = (
-                        await connect(
-                            connectArgs,
-                            !this.args.connectionType, //non interactive connection: don't prompt for alias creation
-                            this.registerOpts.addNoConnection
-                        )
-                    ).connect.getSystemConnector() as Core.ISystemConnector;
+                    // prompts disabled: missing connection data stops the command instead of waiting for an answer
+                    const inquirer = Commons.Inquirer.inquirer;
+                    if (this.args.prompts === false) {
+                        Commons.Inquirer.inquirer = new Commons.NonInteractiveInquirer(inquirer, `Pass it with --connection-type and --connection-args (or TRM_CONNECTION_TYPE and TRM_CONNECTION_ARGS), or use a system alias (-a).`);
+                    }
+                    try {
+                        system = (
+                            await connect(
+                                connectArgs,
+                                !this.args.connectionType, //non interactive connection: don't prompt for alias creation
+                                this.registerOpts.addNoConnection
+                            )
+                        ).connect.getSystemConnector() as Core.ISystemConnector;
+                    } finally {
+                        Commons.Inquirer.inquirer = inquirer;
+                    }
                 }
                 await system.connect(false);
                 if (systemAlias) {

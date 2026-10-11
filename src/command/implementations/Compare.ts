@@ -116,8 +116,8 @@ export class Compare extends AbstractCommand {
                 installed = 'Yes';
                 version = oSystemView.manifest.get().version || 'Unknown';
                 devclass = oSystemView.getDevclass() || 'Unknown';
-                if (oSystemView.manifest.getLinkedTransport()) {
-                    importTransport = oSystemView.manifest.getLinkedTransport().trkorr;
+                if (oSystemView.getTransport()) {
+                    importTransport = oSystemView.getTransport().trkorr;
                 } else {
                     importTransport = 'Unknown';
                 }

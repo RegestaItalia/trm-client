@@ -17,6 +17,8 @@ export class Publish extends AbstractCommand {
         option("--no-cust-tr", { name: "custTr", label: "No customizing transport", description: "Skip customizing transports generation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--cust <customizing>", { name: "cust", label: "Customizing transports", description: "Customizing transport requests, separated by commas.", multiple: true }),
         option("--no-auto-deps", { name: "autoDeps", label: "No automatic dependencies", description: "Skip automatic dependency detection.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--engines <engines>", { name: "engines", label: "Engines", description: "Manifest engine requirements as JSON, or a JSON file path.", control: "textarea" }),
+        option("--changelog <changelog>", { name: "changelog", label: "Changelog", description: "Release changelog as Markdown, or a Markdown file path.", control: "textarea" }),
         option("--authors <authors>", { name: "authors", label: "Authors", description: "Release authors, separated by commas.", multiple: true }),
         option("--backwards-compatible", { name: "backwardsCompatible", label: "Backwards compatible", description: "Mark the release as backwards compatible.", control: "checkbox" }),
         option("--description <description>", { name: "description", label: "Description", description: "Release description." }),
@@ -49,8 +51,10 @@ export class Publish extends AbstractCommand {
                 option("--pre-release-identifier <identifier>", { name: "preReleaseIdentifier", label: "Pre-release identifier", description: "Identifier to append to a pre-release version." }),
                 option("--tag <tag>", { name: "tag", label: "Tags", description: "Release distribution tags, separated by commas.", multiple: true }),
                 option("--private", { name: "private", label: "Private", description: "Mark the package as private. Registry visibility may not be changeable after the first publish.", control: "checkbox" }),
+                option("--public", { name: "public", label: "Public", description: "Publish with public visibility, including when prompts are disabled.", control: "checkbox" }),
                 option("--readme <readme>", { name: "readme", label: "Readme", description: "Release readme as Markdown, or a path to a Markdown file.", control: "textarea" }),
                 option("--no-keep-manifest", { name: "keepManifest", label: "Reuse manifest", description: "Do not reuse values from the previous release manifest.", control: "checkbox", defaultValue: true, negated: true }),
+                option("--drop-cust <customizing>", { name: "dropCust", label: "Drop carried-over customizing", description: "Customizing transports of the previous release not to carry over, separated by commas, or \"all\".", multiple: true }),
                 ...Publish.releaseOptions
             ],
             requirements: {
@@ -91,7 +95,7 @@ export class Publish extends AbstractCommand {
     protected async handler(): Promise<void> {
         var registry: AbstractRegistry;
         if (this.name === 'pack') {
-            if (!this.args.prompts) {
+            if (this.args.prompts) {
                 const pack = await Inquirer.prompt([{
                     name: 'package',
                     type: 'input',
@@ -150,17 +154,20 @@ export class Publish extends AbstractCommand {
                     website: this.args.website,
                     dependencies: this.parseJsonArg('dependencies'),
                     sapEntries: this.parseJsonArg('sapEntries'),
-                    postActivities: this.parseJsonArg('postActivities')
+                    postActivities: this.parseJsonArg('postActivities'),
+                    engines: this.parseJsonArg('engines')
                 },
             },
             publishData: {
-                private: this.args.private,
+                private: this.args.public ? false : this.args.private,
                 keepLatestReleaseManifestValues: this.args.keepManifest,
                 noLanguageTransport: !this.args.langTr,
                 noDependenciesDetection: !this.args.autoDeps,
-                skipCustomizingTransports: !this.args.custTr,
-                customizingTransports: this.args.cust,
-                readme: this.parseTextArg('readme')
+                noCustomizingTransports: !this.args.custTr,
+                customizingTransports: this.parseArrayArg('cust'),
+                dropCustomizingTransports: this.parseArrayArg('dropCust'),
+                readme: this.parseTextArg('readme'),
+                changelog: this.parseTextArg('changelog')
             },
             systemData: {
                 transportTarget: this.args.target

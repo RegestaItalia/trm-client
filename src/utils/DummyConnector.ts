@@ -1,6 +1,24 @@
 import { ISystemConnector, SystemConnectorSupportedBulk, TADIR } from "trm-core";
 
 export class DummyConnector implements ISystemConnector {
+    lockTransportObjs = async () => this._throw();
+    deleteTemporaryPackage = async () => this._throw();
+    importTransportMultiple = async () => this._throw();
+    deleteInstallDevc = async () => this._throw();
+    restoreInstallMetadata = async () => this._throw();
+    setInstallTransports = async () => this._throw();
+    getTransportEntries = async () => this._throw();
+    acquireActionLocks = async () => this._throw();
+    releaseActionLocks = async () => this._throw();
+    getTrmPackageData = async () => this._throw();
+    getNamespacePackages = async () => this._throw();
+    getInstallTransports = async () => this._throw();
+    getSoftwareComponents = async () => this._throw();
+    getInstalledProducts = async () => this._throw();
+    getNoteStatus = async () => this._throw();
+    checkTableCondition = async () => this._throw();
+    getPostActivities = async () => this._throw();
+    getPostActivityParameters = async () => this._throw();
     _throw() {
         throw new Error(`No connection to SAP server.`);
         return null;

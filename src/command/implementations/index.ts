@@ -11,6 +11,7 @@ import { DistTag } from "./DistTag";
 import { Lock } from "./Lock";
 import { Unpublish } from "./Unpublish";
 import { Deprecate } from "./Deprecate";
+import { Uninstall } from "./Uninstall";
 import { Install } from "./Install";
 import { List } from "./List";
 import { Content } from "./Content";
@@ -41,6 +42,7 @@ export * from "./Unpublish";
 export * from "./Deprecate";
 
 export * from "./Install";
+export * from "./Uninstall";
 
 export * from "./List";
 export * from "./Content";
@@ -71,6 +73,7 @@ export const commands = [
     Unpublish,
     Deprecate,
     Install,
+    Uninstall,
     List,
     Content,
     View,

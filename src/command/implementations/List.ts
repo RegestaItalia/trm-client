@@ -19,7 +19,7 @@ export class List extends AbstractCommand {
         arguments: [],
         options: [
             option("-L, --locals", { name: "locals", label: "Include local packages", description: "Include imported and exported local packages.", control: "checkbox", defaultValue: false }),
-            option("-o, --output-type", { name: "outputType", label: "Output format", description: "Output format: TREE or TABLE.", control: "select", defaultValue: "TREE" })
+            option("-o, --output-type <type>", { name: "outputType", label: "Output format", description: "Output format: TREE or TABLE.", control: "select", defaultValue: "TREE" })
         ],
         requirements: {
             requiresConnection: true
@@ -42,7 +42,7 @@ export class List extends AbstractCommand {
                     var version = oPackage.manifest.get().version || '';
                     const registry = oPackage.registry.getRegistryType() === RegistryType.LOCAL ? chalk.bold(oPackage.registry.name) : oPackage.registry.name;
                     const devclass = oPackage.getDevclass() || '';
-                    const linkedTransport = oPackage.manifest.getLinkedTransport();
+                    const linkedTransport = oPackage.getTransport();
                     const transport = linkedTransport ? linkedTransport.trkorr : '';
                     var dirty = '';
                     if(oPackage.isDirty()){

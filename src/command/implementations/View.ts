@@ -199,7 +199,7 @@ If the package is not installed, the command falls back to registry data when av
             }
             var transport: string;
             try {
-                transport = oSystemView.manifest.getLinkedTransport().trkorr;
+                transport = oSystemView.getTransport().trkorr;
             } catch (e) { }
             dependencies = oSystemManifest.dependencies || [];
             printManifest = {

@@ -1,11 +1,10 @@
 import { Logger } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
 import { cg3z, SystemConnector, Transport } from "trm-core";
-import { getTempFolder, GlobalContext } from "../../utils";
 import { readFile } from "fs/promises";
 import { extname } from "path";
 import { CommandMetadata } from "../metadata/CommandMetadata";
-import { argument } from "../metadata/helpers";
+import { argument, option } from "../metadata/helpers";
 
 export class Cg3z extends AbstractCommand {
 
@@ -20,11 +19,13 @@ export class Cg3z extends AbstractCommand {
         arguments: [
             argument(0, { name: "filename", label: "Transport archive", description: "Transport archive file name or path.", control: "file-picker", pickerType: "input" })
         ],
-        options: [],
+        options: [
+            option("--overwrite", { name: "overwrite", label: "Overwrite transport", description: "Overwrite an existing transport without confirmation.", control: "checkbox" }),
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable interactive prompts.", control: "checkbox", defaultValue: true, negated: true })
+        ],
         requirements: {
             requiresConnection: true,
-            requiresTrmDependencies: true,
-            requiresR3trans: true
+            requiresTrmDependencies: true
         }
     };
     protected async handler(): Promise<void> {
@@ -40,14 +41,8 @@ export class Cg3z extends AbstractCommand {
         Logger.loading(`Reading file "${this.args.filename}"...`);
         const binaries = await readFile(this.args.filename);
         const result = await cg3z({
-            r3transOptions: {
-                tempDirPath: getTempFolder(),
-                r3transDirPath: this.args.r3transPath,
-                useDocker: GlobalContext.getInstance().getSettings().r3transDocker,
-                dockerOptions: {
-                    name: GlobalContext.getInstance().getSettings().r3transDockerName
-                }
-            },
+            contextData: { noInquirer: !this.args.prompts },
+            uploadData: { overwrite: this.args.overwrite },
             binaries
         });
         Logger.success(`Uploaded ${Transport.getTransportIcon()}  ${result.trkorr}`);
