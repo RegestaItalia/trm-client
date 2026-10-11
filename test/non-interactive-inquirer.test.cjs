@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const commons = require('trm-commons');
-const { NonInteractiveInquirer } = require('../dist/utils/NonInteractiveInquirer');
+const { NonInteractiveInquirer } = commons;
 const { GlobalContext } = require('../dist/utils/GlobalContext');
 const { connect } = require('../dist/command/prompts/connect');
 
