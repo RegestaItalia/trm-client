@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 import { RegisterCommandOpts } from "./RegisterCommandOpts";
-import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning } from "../utils";
+import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning, NonInteractiveInquirer } from "../utils";
 import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
@@ -586,13 +586,22 @@ export abstract class AbstractCommand {
                     system = systemAlias.getConnection();
                 } else {
                     const connectArgs = this.getConnectArgs();
-                    system = (
-                        await connect(
-                            connectArgs,
-                            !this.args.connectionType, //non interactive connection: don't prompt for alias creation
-                            this.registerOpts.addNoConnection
-                        )
-                    ).connect.getSystemConnector() as Core.ISystemConnector;
+                    // prompts disabled: missing connection data stops the command instead of waiting for an answer
+                    const inquirer = Commons.Inquirer.inquirer;
+                    if (this.args.prompts === false) {
+                        Commons.Inquirer.inquirer = new NonInteractiveInquirer(inquirer, `Pass it with --connection-type and --connection-args (or TRM_CONNECTION_TYPE and TRM_CONNECTION_ARGS), or use a system alias (-a).`);
+                    }
+                    try {
+                        system = (
+                            await connect(
+                                connectArgs,
+                                !this.args.connectionType, //non interactive connection: don't prompt for alias creation
+                                this.registerOpts.addNoConnection
+                            )
+                        ).connect.getSystemConnector() as Core.ISystemConnector;
+                    } finally {
+                        Commons.Inquirer.inquirer = inquirer;
+                    }
                 }
                 await system.connect(false);
                 if (systemAlias) {
