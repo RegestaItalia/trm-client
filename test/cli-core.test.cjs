@@ -49,7 +49,8 @@ test('installation variants forward current options and lockfile paths', async (
         const { command, values } = parse(commands.Install, name, argv);
         await command.run(values, { registry, systemPackages });
         const result = input();
-        assert.equal(result.packageData.version, 'latest');
+        //clean-install leaves the version to the lockfile root
+        assert.equal(result.packageData.version, name === 'clean-install' ? undefined : 'latest');
         assert.equal(result.contextData.noInquirer, true);
         assert.equal(result.installData.checks.noEngines, true);
         assert.equal(result.installData.checks.noDependencies, false);
@@ -82,6 +83,37 @@ test('import resolves an extensionless local artifact and uses install options',
     assert.equal(input().contextData.noInquirer, true);
 });
 
+test('install import options are prompted only when not passed and prompts are enabled', async () => {
+    const input = mockAction('install', { manifest: { name: 'demo', version: '1.0.0' } });
+    const run = async argv => {
+        const { command, values } = parse(commands.Install, 'install', ['demo', ...argv]);
+        await command.run(values, { registry, systemPackages });
+        const { import: imp, installDevclass } = input().installData;
+        return [imp.noLang, imp.noCust, installDevclass.skipNamespace];
+    };
+    for (const name of ['install', 'update', 'clean-install', 'import']) {
+        const argv = [name === 'import' ? path.join(tempDir, 'local') : 'demo'];
+        if (name === 'clean-install') {
+            const lockfile = path.join(tempDir, 'prompt-lock.json');
+            fs.writeFileSync(lockfile, JSON.stringify({ lockfileVersion: 1, source: 'DEV', packages: [] }));
+            argv.push('--lock-file', lockfile);
+        }
+        if (name === 'import') fs.writeFileSync(path.join(tempDir, 'local.trm'), 'artifact');
+        const { command, values } = parse(commands.Install, name, argv);
+        await command.run(values, { registry, systemPackages });
+        const { import: imp, installDevclass } = input().installData;
+        assert.deepEqual([imp.noLang, imp.noCust, installDevclass.skipNamespace], [undefined, undefined, undefined], name);
+    }
+    assert.deepEqual(await run(['--no-lang-tr', '--no-cust-tr', '--namespace']), [true, true, false]);
+    assert.deepEqual(await run(['--no-prompts']), [false, false, true]);
+    assert.deepEqual(await run(['--no-prompts', '--no-lang-tr', '--no-cust-tr', '--namespace']), [true, true, false]);
+    // programmatic run (no Commander parsing): values are explicit, metadata defaults apply
+    const programmatic = new commands.Install('install');
+    await programmatic.run({ package: 'demo' }, { registry, systemPackages });
+    const { import: imp, installDevclass } = input().installData;
+    assert.deepEqual([imp.noLang, imp.noCust, installDevclass.skipNamespace], [false, false, true]);
+});
+
 test('publish and pack map manifest engines, changelog and customizing arrays', async () => {
     const input = mockAction('publish', { trmPackage: { manifest: { get: () => ({ name: 'demo', version: '1.0.0' }) } } });
     for (const name of ['publish', 'pack']) {
@@ -97,6 +129,11 @@ test('publish and pack map manifest engines, changelog and customizing arrays', 
         assert.equal(input().publishData.noCustomizingTransports, true);
         if (name === 'publish') assert.equal(input().publishData.private, false);
     }
+    const { command, values } = parse(commands.Publish, 'publish', ['demo', '--no-prompts', '--public', '--drop-cust', 'DEVK1, DEVK2']);
+    await command.run(values, { registry, systemPackages });
+    assert.deepEqual(input().publishData.dropCustomizingTransports, ['DEVK1', 'DEVK2']);
+    assert.equal(input().publishData.noCustomizingTransports, false);
+    assert.ok(!commands.getCommandMetadata('pack').options.some(option => option.flags.includes('--drop-cust')));
 });
 
 test('uninstall invokes the new action with validation and landscape options', async () => {

@@ -1,6 +1,6 @@
 import { Inquirer } from "trm-commons";
 import { AbstractCommand } from "../AbstractCommand";
-import { RegistryAlias } from "../../registryAlias";
+import { RegistryAlias, isGithubOidcAuthData } from "../../registryAlias";
 import { AuthenticationType } from "trm-registry-types";
 import { CommandMetadata } from "../metadata/CommandMetadata";
 import { option } from "../metadata/helpers";
@@ -33,6 +33,9 @@ export class Login extends AbstractCommand {
         }
     };
     protected async handler(): Promise<void> {
+        if (isGithubOidcAuthData(this.parseJsonArg('registryAuth'))) {
+            throw new Error(`GitHub OIDC tokens are short-lived and can't be saved with login: pass -A '{"oidc":"github"}' on each command instead.`);
+        }
         const registry = this.getRegistry();
         var authData: any;
         if (this.parseJsonArg('registryAuth')) {

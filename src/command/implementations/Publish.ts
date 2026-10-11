@@ -54,6 +54,7 @@ export class Publish extends AbstractCommand {
                 option("--public", { name: "public", label: "Public", description: "Publish with public visibility, including when prompts are disabled.", control: "checkbox" }),
                 option("--readme <readme>", { name: "readme", label: "Readme", description: "Release readme as Markdown, or a path to a Markdown file.", control: "textarea" }),
                 option("--no-keep-manifest", { name: "keepManifest", label: "Reuse manifest", description: "Do not reuse values from the previous release manifest.", control: "checkbox", defaultValue: true, negated: true }),
+                option("--drop-cust <customizing>", { name: "dropCust", label: "Drop carried-over customizing", description: "Customizing transports of the previous release not to carry over, separated by commas, or \"all\".", multiple: true }),
                 ...Publish.releaseOptions
             ],
             requirements: {
@@ -164,6 +165,7 @@ export class Publish extends AbstractCommand {
                 noDependenciesDetection: !this.args.autoDeps,
                 noCustomizingTransports: !this.args.custTr,
                 customizingTransports: this.parseArrayArg('cust'),
+                dropCustomizingTransports: this.parseArrayArg('dropCust'),
                 readme: this.parseTextArg('readme'),
                 changelog: this.parseTextArg('changelog')
             },

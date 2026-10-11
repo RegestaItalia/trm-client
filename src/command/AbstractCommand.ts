@@ -5,7 +5,7 @@ import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
 import * as Commons from "trm-commons";
-import { RegistryAlias } from "../registryAlias";
+import { RegistryAlias, authenticateRegistry } from "../registryAlias";
 import { SystemAlias } from "../systemAlias";
 import chalk from "chalk";
 import { connect, pickRegistry } from "./prompts";
@@ -552,7 +552,7 @@ export abstract class AbstractCommand {
                 }
                 if (registryAlias.authData) {
                     try {
-                        await registry.authenticate(registryAlias.authData);
+                        await authenticateRegistry(registry, registryAlias.authData);
                     } catch (e) {
                         this.registryAuthFailed = e;
                         Commons.Logger.error(e, true);

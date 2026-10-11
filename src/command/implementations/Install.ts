@@ -61,10 +61,11 @@ export class Install extends AbstractCommand {
             group: "package",
             groupPriority: 5,
             description: "Install a package from the registry using a lockfile.",
+            longDescription: "The lockfile pins the package release, its integrity and its dependencies. When no version is provided, the version recorded in the lockfile is installed; a version that doesn't match it aborts the install.",
             icon: "PackageCheck",
             arguments: [
-                argument(0, { name: "package", label: "Package", description: "Package name." }),
-                argument(1, { name: "version", label: "Version", description: "Release version or distribution tag.", required: false, defaultValue: "latest" })
+                argument(0, { name: "package", label: "Package", description: "Package name. Must match the package of the lockfile." }),
+                argument(1, { name: "version", label: "Version", description: "Release version or distribution tag. Defaults to the lockfile version.", required: false })
             ],
             options: [
                 option("-L, --lock-file <path>", { name: "lockFile", label: "Lockfile", description: "Lockfile to use for installation.", control: "file-picker", pickerType: "input", defaultValue: "trm-lock.json" }),
@@ -207,6 +208,19 @@ export class Install extends AbstractCommand {
         return !trmPackage.compareName(this.args.package); // don't throw error if it's an install/update of a dependency not satisfied
     }
 
+    /**
+     * True when trm-core should prompt for the option: prompts are enabled and the option
+     * was not passed on the command line (Commander reports its value source as default or unset).
+     * Outside the CLI (programmatic run), option values are explicit.
+     */
+    private askIfNotPassed(name: string): boolean {
+        if (!this.args.prompts || !this.command) {
+            return false;
+        }
+        const source = this.command.getOptionValueSource(name);
+        return source === undefined || source === 'default';
+    }
+
     protected async handler(): Promise<void> {
         if (this.name === 'update' && !this.args.package) {
             await this.selfUpdate();
@@ -247,14 +261,14 @@ export class Install extends AbstractCommand {
                     lockfile: this.args.lockFile ? Lockfile.fromJson(this.parseJsonArg('lockFile')) : undefined
                 },
                 import: {
-                    noLang: !this.args.langTr,
-                    noCust: !this.args.custTr
+                    noLang: this.askIfNotPassed('langTr') ? undefined : !this.args.langTr,
+                    noCust: this.askIfNotPassed('custTr') ? undefined : !this.args.custTr
                 },
                 installDevclass: {
                     keepOriginal: this.args.keepOriginal,
                     transportLayer: this.args.transportLayer,
                     replacements: this.parseJsonArg('packageReplacements'),
-                    skipNamespace: !this.args.namespace
+                    skipNamespace: this.askIfNotPassed('namespace') ? undefined : !this.args.namespace
                 },
                 skipPostActivities: this.args.skipPostActivities,
                 landscapeTransport: {
