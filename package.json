@@ -1,6 +1,6 @@
 {
   "name": "trm-client",
-  "version": "12.0.0",
+  "version": "12.1.0",
   "description": "TRM (Transport Request Manager) Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

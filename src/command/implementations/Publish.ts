@@ -110,8 +110,8 @@ export class Publish extends AbstractCommand {
                     when: !this.args.version,
                     validate: this.validateVersion
                 }]);
-                this.args.package = pack.package;
-                this.args.version = pack.version;
+                this.args.package = pack.package ?? this.args.package;
+                this.args.version = pack.version ?? this.args.version;
             }
             if (this.validateVersion(this.args.version) !== true) {
                 throw new Error(this.validateVersion(this.args.version) as string);
