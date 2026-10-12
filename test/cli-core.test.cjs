@@ -140,6 +140,25 @@ test('publish and pack map manifest engines, changelog and customizing arrays', 
     assert.ok(!commands.getCommandMetadata('pack').options.some(option => option.flags.includes('--drop-cust')));
 });
 
+test('pack keeps package and version arguments when interactive prompts are skipped', async () => {
+    const input = mockAction('publish', { trmPackage: { manifest: { get: () => ({ name: 'trm-server', version: '7.0.1' }) } } });
+    const originalPrompt = commons.Inquirer.prompt;
+    commons.Inquirer.prompt = async questions => {
+        assert.ok(questions.every(question => question.when === false));
+        return {};
+    };
+
+    try {
+        const filename = path.join(tempDir, 'trm-server.trm');
+        const { command, values } = parse(commands.Publish, 'pack', ['trm-server', '7.0.1', filename]);
+        await command.run(values, { systemPackages });
+        assert.equal(input().packageData.name, 'trm-server');
+        assert.equal(input().packageData.version, '7.0.1');
+    } finally {
+        commons.Inquirer.prompt = originalPrompt;
+    }
+});
+
 test('uninstall invokes the new action with validation and landscape options', async () => {
     const input = mockAction('uninstall', { manifest: { name: 'demo', version: '1.0.0' } });
     const { command, values } = parse(commands.Uninstall, 'uninstall', ['demo', '--no-prompts', '--no-dependants', '--ignore-dirty', '--landscape-tr-target', 'QAS']);
