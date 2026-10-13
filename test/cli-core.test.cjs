@@ -211,3 +211,17 @@ test('removed install options are absent for all installation variants', () => {
 });
 
 test.after(() => fs.rmSync(tempDir, { recursive: true, force: true }));
+
+test('install of trm-rest is not blocked by an unsatisfied trm-server', () => {
+    const blocks = (name, unsatisfied) => {
+        const { command } = parse(commands.Install, 'install', ['demo']);
+        command.args = { package: name };
+        return command.onTrmDepVersionNotSatisfied({ compareName: o => o.trim().toLowerCase() === unsatisfied });
+    };
+    assert.equal(blocks('trm-server', 'trm-server'), false);
+    assert.equal(blocks('trm-rest', 'trm-server'), false);
+    assert.equal(blocks('demo', 'trm-server'), true);
+    assert.equal(blocks('trm-rest', 'other'), true);
+    assert.equal(blocks('TRM-REST ', 'trm-server'), false);
+    assert.equal(blocks(undefined, 'trm-server'), true);
+});

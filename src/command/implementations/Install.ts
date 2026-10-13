@@ -1,5 +1,5 @@
 import { Logger } from "trm-commons";
-import { AbstractRegistry, FileSystem, install, TrmPackage } from "trm-core";
+import { AbstractRegistry, FileSystem, install, TRM_REST_PACKAGE_NAME, TRM_SERVER_PACKAGE_NAME, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder } from "../../utils";
 import os from "node:os";
@@ -208,7 +208,14 @@ export class Install extends AbstractCommand {
     }
 
     protected onTrmDepVersionNotSatisfied(trmPackage: TrmPackage): boolean {
-        return !trmPackage.compareName(this.args.package); // don't throw error if it's an install/update of a dependency not satisfied
+        if (typeof this.args.package !== 'string') {
+            return true; // import: no package name to compare
+        }
+        if (trmPackage.compareName(this.args.package)) {
+            return false; // don't throw error if it's an install/update of a dependency not satisfied
+        }
+        // trm-rest depends on trm-server: its install/update upgrades the backend together
+        return !(trmPackage.compareName(TRM_SERVER_PACKAGE_NAME) && this.args.package.trim().toLowerCase() === TRM_REST_PACKAGE_NAME);
     }
 
     /**
