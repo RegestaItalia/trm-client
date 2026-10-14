@@ -8,6 +8,15 @@ Legend
 + : added
 - : removed
 
+2026-10-14 v13.3.0
+-------------------
++ JSON logger (--logger JSON): one JSON document on stdout with result data and collected logs
++ view: JSON output and all distribution tags
++ connection type "none" for commands that can run without a system connection
++ GitHub Actions: registry authentication defaults to GitHub OIDC when none is provided
+! registry authentication (-A) without endpoint (-E) uses the public registry
+! unknown options log a warning and are ignored instead of stopping the command
+
 2026-10-14 v13.2.2
 -------------------
 * default values in export command

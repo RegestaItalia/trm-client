@@ -1,21 +1,28 @@
 import { Command, Option } from "commander";
 import { RegisterCommandOpts } from "./RegisterCommandOpts";
-import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning } from "../utils";
+import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, JsonLogger } from "../utils";
 import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
 import * as Commons from "trm-commons";
-import { RegistryAlias, authenticateRegistry } from "../registryAlias";
+import { RegistryAlias, authenticateRegistry, getDefaultRegistryAuthData } from "../registryAlias";
 import { SystemAlias } from "../systemAlias";
 import chalk from "chalk";
 import { connect, pickRegistry } from "./prompts";
 import { accessSync, existsSync, readFileSync, statSync } from "fs";
-import { Package } from "trm-registry-types";
+import { AuthenticationType, Package } from "trm-registry-types";
 import { basename, dirname, resolve } from "path";
 import constants from "constants";
 import sanitize from "sanitize-filename";
 import { CommandMetadata, CommandMetadataExport } from "./metadata/CommandMetadata";
 import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
+
+const LOGGER_DESCRIPTION = `Logger type:
+  CLI      Interactive terminal output.
+  CLI_LOG  Interactive terminal output plus a session log file.
+  CONSOLE  Plain, non-interactive console output.
+  VOID     Suppress all log output.
+  JSON     A single machine-readable JSON document.`;
 
 export interface AbstractCommandRunOptions {
     registry?: Core.AbstractRegistry;
@@ -35,6 +42,7 @@ export abstract class AbstractCommand {
     private registry: Core.AbstractRegistry;
     private registryAuthData: boolean = false;
     private registryAuthFailed: Error;
+    private ignoredOptions: string[] = [];
     private systemPackages: Core.TrmPackage[];
     private trmDependenciesCheck: Core.CheckTrmDependencies;
     private metadata: CommandMetadata;
@@ -163,6 +171,18 @@ export abstract class AbstractCommand {
         return this.trmDependenciesCheck;
     }
 
+    /**
+     * Sets the command result returned as "data" with --logger JSON.
+     * @returns true if the JSON logger is active (the command can skip printing the human readable output)
+     */
+    protected setJsonOutput(data: any): boolean {
+        if (Commons.Logger.logger instanceof JsonLogger) {
+            Commons.Logger.logger.setData(data);
+            return true;
+        }
+        return false;
+    }
+
     protected abstract handler(): Promise<void>;
 
     public register() {
@@ -173,7 +193,7 @@ export abstract class AbstractCommand {
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
 
         this.command
-            .option(`--logger <logger type>`, `Logger type.`, defaultLogger)
+            .option(`--logger <logger type>`, LOGGER_DESCRIPTION, defaultLogger)
             .option(`--logger-out-dir <logger out dir>`, `Logger output directory.`, logOutputFolder)
             .option(`--debug`, `Debug.`, false);
 
@@ -189,7 +209,7 @@ export abstract class AbstractCommand {
                 .option(`-n, --sys-nr <sysnr>`, `Instance number.`)
                 .option(`-e, --endpoint <endpoint>`, `REST endpoint.`)
                 .option(`-x, --forward-rfc-dest [destination]`, `REST forward RFC destination.`)
-                .addOption(new Option(`--connection-type <type>`, `Connection type (e.g. RFC, REST or a plugin connection type), skips the connection prompt.`).env(`TRM_CONNECTION_TYPE`))
+                .addOption(new Option(`--connection-type <type>`, `Connection type (e.g. RFC, REST, a plugin connection type or "none" on commands that can run without a system), skips the connection prompt.`).env(`TRM_CONNECTION_TYPE`))
                 .addOption(new Option(`--connection-args <arguments>`, `Connection arguments, passed to the connection type (JSON or path to JSON file).`).env(`TRM_CONNECTION_ARGS`));
             if (!this.registerOpts.noSystemAlias) {
                 this.command
@@ -202,7 +222,7 @@ export abstract class AbstractCommand {
             if (!this.registerOpts.onlyRegistryAlias) {
                 this.command
                     .option(`-E, --registry-endpoint <endpoint>`, `Registry endpoint.`)
-                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
+                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), used for the public registry when no endpoint is given, e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
             }
         }
         if (this.registerOpts.requiresR3trans) {
@@ -210,7 +230,39 @@ export abstract class AbstractCommand {
                 .option(`--r3trans-path <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`);
         }
 
+        this.ignoreUnknownOptions();
         this.command.action(this.execute.bind(this));
+    }
+
+    // unknown options don't stop the command: they're dropped and a warning is logged when it runs
+    // (commander's allowUnknownOption would keep them as arguments)
+    private ignoreUnknownOptions(): void {
+        const command = this.command;
+        const parseOptions = command.parseOptions.bind(command);
+        command.parseOptions = (argv: string[]) => {
+            const parsed = parseOptions(argv);
+            if (command.commands.length > 0) {
+                return parsed; // unknown options may belong to a subcommand
+            }
+            const helpFlags = [(command as any)._helpLongFlag, (command as any)._helpShortFlag];
+            const unknown: string[] = [];
+            var literal = false;
+            parsed.unknown.forEach(arg => {
+                if (!literal && arg === '--') {
+                    literal = true; // what follows are arguments
+                } else if (literal) {
+                    parsed.operands.push(arg);
+                } else if (helpFlags.includes(arg)) {
+                    unknown.push(arg);
+                } else if (arg.length > 1 && arg[0] === '-') {
+                    this.ignoredOptions.push(arg);
+                } else {
+                    parsed.operands.push(arg);
+                }
+            });
+            parsed.unknown = unknown;
+            return parsed;
+        };
     }
 
     private getLogger(type: LoggerType, debug: boolean, logOutputFolder?: string): Commons.ILogger {
@@ -222,6 +274,7 @@ export abstract class AbstractCommand {
             case LoggerType.CLI_LOG: return new Commons.CliLogFileLogger(logOutputFolder, debug);
             case LoggerType.CONSOLE: return new Commons.ConsoleLogger(debug);
             case LoggerType.VOID: return new Commons.DummyLogger();
+            case LoggerType.JSON: return new JsonLogger(debug);
             default: throw new Error(`Unknown logger type "${type}". Possible values are ${Object.keys(LoggerType).map(k => LoggerType[k]).join(', ')}.`);
         }
     }
@@ -498,22 +551,11 @@ export abstract class AbstractCommand {
             await Commons.Plugin.call<{ commons: typeof Commons }>("client", "loadCommons", { commons: Commons });
             Commons.Inquirer.inquirer = this.getInquirer(InquirerType.CLI);
             Commons.Logger.logger = this.getLogger(this.args.logger, this.args.debug, this.args.loggerOutDir);
-
-            /*
-            TODO: this is now useless as r3trans is now optional; needs a refactor?
-
-            const useDocker = GlobalContext.getInstance().getSettings().r3transDocker;
-            if (this.registerOpts.requiresR3trans && useDocker) {
-                Commons.Logger.info(`This command needs R3trans program dockerized.`);
-                Commons.Logger.loading(`Checking if docker is running...`);
-                if (await isDockerRunning()) {
-                    const dockerName = GlobalContext.getInstance().getSettings().r3transDockerName;
-                    Commons.Logger.info(`Docker "${dockerName || 'local/r3trans'}" will be used.`);
-                } else {
-                    throw new Error(`Command needs R3trans dockerized, docker engine is not currently running.`);
-                }
+            if (Commons.Logger.logger instanceof JsonLogger) {
+                Commons.Logger.logger.captureConsole();
             }
-            */
+            this.ignoredOptions.forEach(o => Commons.Logger.warning(`Option "${o}" is not supported by this command and has no effect.`));
+
             if (process.platform !== 'win32' && process.platform !== 'darwin' && process.platform !== 'linux') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
@@ -527,17 +569,19 @@ export abstract class AbstractCommand {
                 var registry: Core.AbstractRegistry;
                 if (this.args.registry) {
                     registryAlias = RegistryAlias.get(this.args.registry);
-                } else if (this.args.registryEndpoint) {
-                    registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint, this.parseJsonArg('registryAuth'));
+                } else if (this.args.registryEndpoint || this.args.registryAuth) {
+                    // authentication without endpoint refers to the public registry
+                    registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint || Core.PUBLIC_RESERVED_KEYWORD, this.parseJsonArg('registryAuth'));
                 } else {
                     registryAlias = await pickRegistry();
                 }
                 if (registryAlias) {
                     registry = registryAlias.getRegistry();
                 }
+                var registryPing: Awaited<ReturnType<Core.AbstractRegistry['ping']>>;
                 try {
                     Commons.Logger.loading(`Connecting to registry "${registry.name}" (${registry.endpoint})...`);
-                    const registryPing = await registry.ping();
+                    registryPing = await registry.ping();
                     if (this.registerOpts.registryAuthBlacklist && this.registerOpts.registryAuthBlacklist.includes(registryPing.authentication_type)) {
                         throw new Error(`This command is not supported by registry "${registry.name}".`);
                     }
@@ -548,6 +592,12 @@ export abstract class AbstractCommand {
                     Commons.Logger.error(e, true);
                     if (!this.registerOpts.ignoreRegistryUnreachable) {
                         throw new Error(`Registry "${registry.name}" is unreachable.`);
+                    }
+                }
+                if (!registryAlias.authData && !this.registerOpts.noDefaultRegistryAuth && registryPing && registryPing.authentication_type !== AuthenticationType.NO_AUTH) {
+                    registryAlias.authData = getDefaultRegistryAuthData();
+                    if (registryAlias.authData) {
+                        Commons.Logger.log(`No registry authentication provided, using GitHub Actions OIDC`, true);
                     }
                 }
                 if (registryAlias.authData) {
@@ -641,6 +691,9 @@ export abstract class AbstractCommand {
                 const sessionId = Commons.Logger.logger.getSessionId();
                 const logFilePath = Commons.Logger.logger.getFilePath();
                 Commons.Logger.info(`Saved log output "${logFilePath}" for session ID ${sessionId}.`);
+            }
+            if (Commons.Logger.logger instanceof JsonLogger) {
+                Commons.Logger.logger.flush(exitCode === 0);
             }
             process.exit(exitCode);
         }

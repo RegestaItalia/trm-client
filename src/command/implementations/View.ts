@@ -84,6 +84,10 @@ If the package is not installed, the command falls back to registry data when av
             } else {
                 console.log(`Latest version available: unknown`);
             }
+            const distTags = Object.keys(registryView.dist_tags || {});
+            if (distTags.length > 0) {
+                console.log(`Distribution tags: ${distTags.map(tag => `${tag}: ${registryView.dist_tags[tag]}`).join(', ')}`);
+            }
         }
     }
 
@@ -227,6 +231,23 @@ If the package is not installed, the command falls back to registry data when av
             throw new Error(`Package "${packageName}" does not exist or insufficient view permissions.`);
         }
 
+        const connected = !(SystemConnector.systemConnector instanceof DummyConnector);
+        if (this.setJsonOutput({
+            name: packageName,
+            registry: this.getRegistry().name,
+            distTags: oRegistryView?.dist_tags || {},
+            latestVersion: oRegistryView?.dist_tags?.['latest'] || null,
+            system: connected ? {
+                dest,
+                installed: !!oSystemView,
+                version: oSystemView ? oSystemView.manifest.get().version : null,
+                dirty: isDirty
+            } : undefined,
+            manifest: printManifest,
+            dependencies
+        })) {
+            return;
+        }
         this.printHeaderSection(printManifest.devclass);
         this.printVersionSection(isDirty, oSystemView, oRegistryView);
         this.printManifestSection(printManifest);

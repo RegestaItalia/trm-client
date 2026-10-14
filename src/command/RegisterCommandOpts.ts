@@ -26,6 +26,10 @@ export interface RegisterCommandOpts {
      */
     registryAuthBlacklist?: AuthenticationType[],
     /**
+     * don't default to GitHub OIDC registry authentication in GitHub Actions when none is provided
+     */
+    noDefaultRegistryAuth?: boolean,
+    /**
      * skips alias creation during connection
      */
     noSystemAlias?: boolean,

@@ -221,6 +221,23 @@ test('non-interactive prompt options are hidden from GUI metadata', () => {
     }
 });
 
+test('--logger help lists and explains every logger type', () => {
+    const program = new Command();
+    const command = new commands.Info(program, 'info');
+    command.register();
+    const help = command.command.helpInformation();
+
+    for (const [logger, explanation] of [
+        ['CLI', 'Interactive terminal output.'],
+        ['CLI_LOG', 'Interactive terminal output plus a session log file.'],
+        ['CONSOLE', 'Plain, non-interactive console output.'],
+        ['VOID', 'Suppress all log output.'],
+        ['JSON', 'A single machine-readable JSON document.']
+    ]) {
+        assert.match(help, new RegExp(`${logger}\\s+${explanation.replace('.', '\\.')}`));
+    }
+});
+
 test('deprecation note is required in command metadata', () => {
     const metadata = commands.getCommandMetadata('deprecate');
     const note = metadata.options.find(option => option.name === 'note');
@@ -282,4 +299,14 @@ test('install of trm-rest is not blocked by an unsatisfied trm-server', () => {
     assert.equal(blocks('trm-rest', 'other'), true);
     assert.equal(blocks('TRM-REST ', 'trm-server'), false);
     assert.equal(blocks(undefined, 'trm-server'), true);
+});
+
+test('unknown options are ignored instead of failing, without shifting arguments', () => {
+    const program = new Command().exitOverride();
+    const command = new commands.View(program, 'view');
+    command.register();
+    command.command.action(() => {});
+    program.parse(['node', 'trm', 'view', '--no-prompts', 'demo', '--foo=bar', '--', '-x']);
+    assert.deepEqual(command.command.args, ['demo', '-x']);
+    assert.deepEqual(command.ignoredOptions, ['--no-prompts', '--foo=bar']);
 });
