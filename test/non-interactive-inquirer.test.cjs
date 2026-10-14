@@ -72,3 +72,16 @@ test('RFC connection without prompts accepts an explicitly blank optional SAProu
         commons.Inquirer.inquirer = previous;
     }
 });
+
+test('connection type "none" selects no connection without prompting, only where allowed', async () => {
+    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getConnections: () => [] });
+    const previous = commons.Inquirer.inquirer;
+    commons.Inquirer.inquirer = new NonInteractiveInquirer(base, 'Hint.');
+    try {
+        const result = await connect({ type: 'none', noSystemAlias: true }, false, true);
+        assert.equal(result.connect.description, 'No connection');
+        await assert.rejects(connect({ type: 'none', noSystemAlias: true }, false), /none/);
+    } finally {
+        commons.Inquirer.inquirer = previous;
+    }
+});

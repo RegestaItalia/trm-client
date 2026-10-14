@@ -14,5 +14,5 @@ export * from "./getNpmPackageLatestVersion";
 export * from "./SettingsData";
 export * from "./CacheData";
 export * from "./GlobalContext";
-export * from "./isDockerRunning";
 export * from "./getNodeRfcPackage";
+export * from "./JsonLogger";

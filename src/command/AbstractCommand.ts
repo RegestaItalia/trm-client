@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 import { RegisterCommandOpts } from "./RegisterCommandOpts";
-import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, isDockerRunning } from "../utils";
+import { checkCliUpdate, GlobalContext, getLogFolder, logError, CliVersionStatus, DummyConnector, JsonLogger } from "../utils";
 import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
@@ -16,6 +16,13 @@ import constants from "constants";
 import sanitize from "sanitize-filename";
 import { CommandMetadata, CommandMetadataExport } from "./metadata/CommandMetadata";
 import { applyCommandMetadata } from "./metadata/applyCommandMetadata";
+
+const LOGGER_DESCRIPTION = `Logger type:
+  CLI      Interactive terminal output.
+  CLI_LOG  Interactive terminal output plus a session log file.
+  CONSOLE  Plain, non-interactive console output.
+  VOID     Suppress all log output.
+  JSON     A single machine-readable JSON document.`;
 
 export interface AbstractCommandRunOptions {
     registry?: Core.AbstractRegistry;
@@ -163,6 +170,18 @@ export abstract class AbstractCommand {
         return this.trmDependenciesCheck;
     }
 
+    /**
+     * Sets the command result returned as "data" with --logger JSON.
+     * @returns true if the JSON logger is active (the command can skip printing the human readable output)
+     */
+    protected setJsonOutput(data: any): boolean {
+        if (Commons.Logger.logger instanceof JsonLogger) {
+            Commons.Logger.logger.setData(data);
+            return true;
+        }
+        return false;
+    }
+
     protected abstract handler(): Promise<void>;
 
     public register() {
@@ -173,7 +192,7 @@ export abstract class AbstractCommand {
         const logOutputFolder = GlobalContext.getInstance().getSettings().logOutputFolder;
 
         this.command
-            .option(`--logger <logger type>`, `Logger type.`, defaultLogger)
+            .option(`--logger <logger type>`, LOGGER_DESCRIPTION, defaultLogger)
             .option(`--logger-out-dir <logger out dir>`, `Logger output directory.`, logOutputFolder)
             .option(`--debug`, `Debug.`, false);
 
@@ -189,7 +208,7 @@ export abstract class AbstractCommand {
                 .option(`-n, --sys-nr <sysnr>`, `Instance number.`)
                 .option(`-e, --endpoint <endpoint>`, `REST endpoint.`)
                 .option(`-x, --forward-rfc-dest [destination]`, `REST forward RFC destination.`)
-                .addOption(new Option(`--connection-type <type>`, `Connection type (e.g. RFC, REST or a plugin connection type), skips the connection prompt.`).env(`TRM_CONNECTION_TYPE`))
+                .addOption(new Option(`--connection-type <type>`, `Connection type (e.g. RFC, REST, a plugin connection type or "none" on commands that can run without a system), skips the connection prompt.`).env(`TRM_CONNECTION_TYPE`))
                 .addOption(new Option(`--connection-args <arguments>`, `Connection arguments, passed to the connection type (JSON or path to JSON file).`).env(`TRM_CONNECTION_ARGS`));
             if (!this.registerOpts.noSystemAlias) {
                 this.command
@@ -222,6 +241,7 @@ export abstract class AbstractCommand {
             case LoggerType.CLI_LOG: return new Commons.CliLogFileLogger(logOutputFolder, debug);
             case LoggerType.CONSOLE: return new Commons.ConsoleLogger(debug);
             case LoggerType.VOID: return new Commons.DummyLogger();
+            case LoggerType.JSON: return new JsonLogger(debug);
             default: throw new Error(`Unknown logger type "${type}". Possible values are ${Object.keys(LoggerType).map(k => LoggerType[k]).join(', ')}.`);
         }
     }
@@ -498,22 +518,10 @@ export abstract class AbstractCommand {
             await Commons.Plugin.call<{ commons: typeof Commons }>("client", "loadCommons", { commons: Commons });
             Commons.Inquirer.inquirer = this.getInquirer(InquirerType.CLI);
             Commons.Logger.logger = this.getLogger(this.args.logger, this.args.debug, this.args.loggerOutDir);
-
-            /*
-            TODO: this is now useless as r3trans is now optional; needs a refactor?
-
-            const useDocker = GlobalContext.getInstance().getSettings().r3transDocker;
-            if (this.registerOpts.requiresR3trans && useDocker) {
-                Commons.Logger.info(`This command needs R3trans program dockerized.`);
-                Commons.Logger.loading(`Checking if docker is running...`);
-                if (await isDockerRunning()) {
-                    const dockerName = GlobalContext.getInstance().getSettings().r3transDockerName;
-                    Commons.Logger.info(`Docker "${dockerName || 'local/r3trans'}" will be used.`);
-                } else {
-                    throw new Error(`Command needs R3trans dockerized, docker engine is not currently running.`);
-                }
+            if (Commons.Logger.logger instanceof JsonLogger) {
+                Commons.Logger.logger.captureConsole();
             }
-            */
+
             if (process.platform !== 'win32' && process.platform !== 'darwin' && process.platform !== 'linux') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
             }
@@ -641,6 +649,9 @@ export abstract class AbstractCommand {
                 const sessionId = Commons.Logger.logger.getSessionId();
                 const logFilePath = Commons.Logger.logger.getFilePath();
                 Commons.Logger.info(`Saved log output "${logFilePath}" for session ID ${sessionId}.`);
+            }
+            if (Commons.Logger.logger instanceof JsonLogger) {
+                Commons.Logger.logger.flush(exitCode === 0);
             }
             process.exit(exitCode);
         }

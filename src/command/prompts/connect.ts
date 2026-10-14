@@ -126,7 +126,10 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
     }
 
     var inputType: string;
-    if (!commandArgs.type) {
+    if (addNoConnection && typeof commandArgs.type === 'string' && commandArgs.type.trim().toLowerCase() === 'none') {
+        //non interactive "No connection" (--connection-type none)
+        inputType = 'none';
+    } else if (!commandArgs.type) {
         const inq1 = await Inquirer.prompt({
             type: `list`,
             name: `inputType`,

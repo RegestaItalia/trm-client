@@ -221,6 +221,23 @@ test('non-interactive prompt options are hidden from GUI metadata', () => {
     }
 });
 
+test('--logger help lists and explains every logger type', () => {
+    const program = new Command();
+    const command = new commands.Info(program, 'info');
+    command.register();
+    const help = command.command.helpInformation();
+
+    for (const [logger, explanation] of [
+        ['CLI', 'Interactive terminal output.'],
+        ['CLI_LOG', 'Interactive terminal output plus a session log file.'],
+        ['CONSOLE', 'Plain, non-interactive console output.'],
+        ['VOID', 'Suppress all log output.'],
+        ['JSON', 'A single machine-readable JSON document.']
+    ]) {
+        assert.match(help, new RegExp(`${logger}\\s+${explanation.replace('.', '\\.')}`));
+    }
+});
+
 test('deprecation note is required in command metadata', () => {
     const metadata = commands.getCommandMetadata('deprecate');
     const note = metadata.options.find(option => option.name === 'note');
