@@ -17,7 +17,7 @@ export class Deprecate extends AbstractCommand {
             argument(1, { name: "version", label: "Version", description: "Release version." })
         ],
         options: [
-            option("--note <note>", { name: "note", label: "Deprecation note", description: "Message shown for the deprecated release." })
+            option("--note <note>", { name: "note", label: "Deprecation note", description: "Message shown for the deprecated release.", required: true })
         ],
         requirements: {
             requiresRegistry: true
