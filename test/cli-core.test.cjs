@@ -214,14 +214,26 @@ test('self-update resolves package managers next to the running Node executable'
     const command = new commands.Install('update');
     const expectedName = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const sibling = path.join(path.dirname(process.execPath), expectedName);
-    const expected = fs.existsSync(sibling) ? sibling : expectedName;
-    assert.equal(command.resolvePackageManagerBin('npm'), expected);
+    const npmCli = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+    const expected = process.platform === 'win32' && fs.existsSync(npmCli)
+        ? { bin: process.execPath, args: [npmCli, '--version'] }
+        : { bin: fs.existsSync(sibling) ? sibling : expectedName, args: ['--version'] };
+    assert.deepEqual(command.resolvePackageManagerCommand('npm', ['--version']), {
+        ...expected
+    });
+});
+
+test('self-update recognizes Windows package-manager shims as batch files', () => {
+    const command = new commands.Install('update');
+    assert.equal(command.isWindowsBatchFile('C:\\Program Files\\nodejs\\npm.cmd', 'win32'), true);
+    assert.equal(command.isWindowsBatchFile('C:\\Program Files\\nodejs\\npm.exe', 'win32'), false);
+    assert.equal(command.isWindowsBatchFile('/usr/local/bin/npm.cmd', 'darwin'), false);
 });
 
 test('self-update cleans the npm cache before installing globally', async () => {
     const command = new commands.Install('update');
     const calls = [];
-    command.resolvePackageManagerBin = bin => bin;
+    command.resolvePackageManagerCommand = (bin, args) => ({ bin, args });
     command.spawnCommand = async (bin, args) => calls.push([bin, args]);
     const originalUserAgent = process.env.npm_config_user_agent;
     delete process.env.npm_config_user_agent;
