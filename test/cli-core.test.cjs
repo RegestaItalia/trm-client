@@ -300,3 +300,13 @@ test('install of trm-rest is not blocked by an unsatisfied trm-server', () => {
     assert.equal(blocks('TRM-REST ', 'trm-server'), false);
     assert.equal(blocks(undefined, 'trm-server'), true);
 });
+
+test('unknown options are ignored instead of failing, without shifting arguments', () => {
+    const program = new Command().exitOverride();
+    const command = new commands.View(program, 'view');
+    command.register();
+    command.command.action(() => {});
+    program.parse(['node', 'trm', 'view', '--no-prompts', 'demo', '--foo=bar', '--', '-x']);
+    assert.deepEqual(command.command.args, ['demo', '-x']);
+    assert.deepEqual(command.ignoredOptions, ['--no-prompts', '--foo=bar']);
+});

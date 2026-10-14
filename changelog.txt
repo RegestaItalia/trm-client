@@ -15,6 +15,7 @@ Legend
 + connection type "none" for commands that can run without a system connection
 + GitHub Actions: registry authentication defaults to GitHub OIDC when none is provided
 ! registry authentication (-A) without endpoint (-E) uses the public registry
+! unknown options log a warning and are ignored instead of stopping the command
 
 2026-10-14 v13.2.2
 -------------------

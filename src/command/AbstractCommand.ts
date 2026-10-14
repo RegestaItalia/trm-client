@@ -42,6 +42,7 @@ export abstract class AbstractCommand {
     private registry: Core.AbstractRegistry;
     private registryAuthData: boolean = false;
     private registryAuthFailed: Error;
+    private ignoredOptions: string[] = [];
     private systemPackages: Core.TrmPackage[];
     private trmDependenciesCheck: Core.CheckTrmDependencies;
     private metadata: CommandMetadata;
@@ -229,7 +230,39 @@ export abstract class AbstractCommand {
                 .option(`--r3trans-path <path>`, `R3trans program path. (default: Environment variable R3TRANS_HOME)`);
         }
 
+        this.ignoreUnknownOptions();
         this.command.action(this.execute.bind(this));
+    }
+
+    // unknown options don't stop the command: they're dropped and a warning is logged when it runs
+    // (commander's allowUnknownOption would keep them as arguments)
+    private ignoreUnknownOptions(): void {
+        const command = this.command;
+        const parseOptions = command.parseOptions.bind(command);
+        command.parseOptions = (argv: string[]) => {
+            const parsed = parseOptions(argv);
+            if (command.commands.length > 0) {
+                return parsed; // unknown options may belong to a subcommand
+            }
+            const helpFlags = [(command as any)._helpLongFlag, (command as any)._helpShortFlag];
+            const unknown: string[] = [];
+            var literal = false;
+            parsed.unknown.forEach(arg => {
+                if (!literal && arg === '--') {
+                    literal = true; // what follows are arguments
+                } else if (literal) {
+                    parsed.operands.push(arg);
+                } else if (helpFlags.includes(arg)) {
+                    unknown.push(arg);
+                } else if (arg.length > 1 && arg[0] === '-') {
+                    this.ignoredOptions.push(arg);
+                } else {
+                    parsed.operands.push(arg);
+                }
+            });
+            parsed.unknown = unknown;
+            return parsed;
+        };
     }
 
     private getLogger(type: LoggerType, debug: boolean, logOutputFolder?: string): Commons.ILogger {
@@ -521,6 +554,7 @@ export abstract class AbstractCommand {
             if (Commons.Logger.logger instanceof JsonLogger) {
                 Commons.Logger.logger.captureConsole();
             }
+            this.ignoredOptions.forEach(o => Commons.Logger.warning(`Option "${o}" is not supported by this command and has no effect.`));
 
             if (process.platform !== 'win32' && process.platform !== 'darwin' && process.platform !== 'linux') {
                 Commons.Logger.warning(`Running on untested OS "${process.platform}"! Some features aren't tested yet.`);
