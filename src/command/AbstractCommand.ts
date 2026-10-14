@@ -221,7 +221,7 @@ export abstract class AbstractCommand {
             if (!this.registerOpts.onlyRegistryAlias) {
                 this.command
                     .option(`-E, --registry-endpoint <endpoint>`, `Registry endpoint.`)
-                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
+                    .option(`-A, --registry-auth <authentication>`, `Registry authentication (JSON or path to JSON file), used for the public registry when no endpoint is given, e.g. {"token":"<token>"} or, in GitHub Actions, {"oidc":"github"}.`);
             }
         }
         if (this.registerOpts.requiresR3trans) {
@@ -535,8 +535,9 @@ export abstract class AbstractCommand {
                 var registry: Core.AbstractRegistry;
                 if (this.args.registry) {
                     registryAlias = RegistryAlias.get(this.args.registry);
-                } else if (this.args.registryEndpoint) {
-                    registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint, this.parseJsonArg('registryAuth'));
+                } else if (this.args.registryEndpoint || this.args.registryAuth) {
+                    // authentication without endpoint refers to the public registry
+                    registryAlias = RegistryAlias.getTemporaryInstance(this.args.registryEndpoint || Core.PUBLIC_RESERVED_KEYWORD, this.parseJsonArg('registryAuth'));
                 } else {
                     registryAlias = await pickRegistry();
                 }
