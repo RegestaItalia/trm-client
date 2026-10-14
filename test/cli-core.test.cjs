@@ -210,6 +210,35 @@ test('removed install options are absent for all installation variants', () => {
     }
 });
 
+test('self-update resolves package managers next to the running Node executable', () => {
+    const command = new commands.Install('update');
+    const expectedName = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const sibling = path.join(path.dirname(process.execPath), expectedName);
+    const expected = fs.existsSync(sibling) ? sibling : expectedName;
+    assert.equal(command.resolvePackageManagerBin('npm'), expected);
+});
+
+test('self-update cleans the npm cache before installing globally', async () => {
+    const command = new commands.Install('update');
+    const calls = [];
+    command.resolvePackageManagerBin = bin => bin;
+    command.spawnCommand = async (bin, args) => calls.push([bin, args]);
+    const originalUserAgent = process.env.npm_config_user_agent;
+    delete process.env.npm_config_user_agent;
+
+    try {
+        await command.selfUpdate();
+    } finally {
+        if (originalUserAgent === undefined) delete process.env.npm_config_user_agent;
+        else process.env.npm_config_user_agent = originalUserAgent;
+    }
+
+    assert.deepEqual(calls, [
+        ['npm', ['cache', 'clean', '--force']],
+        ['npm', ['install', '-g', 'trm-client@latest']]
+    ]);
+});
+
 test.after(() => fs.rmSync(tempDir, { recursive: true, force: true }));
 
 test('install of trm-rest is not blocked by an unsatisfied trm-server', () => {

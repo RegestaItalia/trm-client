@@ -5,7 +5,8 @@ import { getTempFolder } from "../../utils";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { Lockfile } from "trm-core/dist/lockfile";
-import { extname } from "node:path";
+import { existsSync } from "node:fs";
+import { dirname, extname, join } from "node:path";
 import { CommandMetadata } from "../metadata/CommandMetadata";
 import { argument, option } from "../metadata/helpers";
 
@@ -129,14 +130,19 @@ export class Install extends AbstractCommand {
                     ? { bin: "yarn", args: ["global", "add", target] }
                     : { bin: "npm", args: ["install", "-g", target] }; // default
 
+        const bin = this.resolvePackageManagerBin(command.bin);
+
         try {
-            await this.spawnCommand(command.bin, command.args);
+            if (pm === "npm") {
+                await this.spawnCommand(bin, ["cache", "clean", "--force"]);
+            }
+            await this.spawnCommand(bin, command.args);
             Logger.success(`Client updated successfully.`);
         } catch (err: any) {
             if (this.isPermsError(err)) {
                 Logger.error(this.formatPermsHelp(command.bin));
             }
-            if (command.bin === "yarn" && this.looksLikeYarnBerry()) {
+            if (pm === "yarn1" && this.looksLikeYarnBerry()) {
                 Logger.error(`\Detected Yarn ≥2 (Berry). It doesn't support reliable global installs.\n` +
                     `    Try: npm install -g ${target}`
                 );
@@ -159,6 +165,17 @@ export class Install extends AbstractCommand {
                 reject(error);
             });
         });
+    }
+
+    /**
+     * A CLI started by a desktop app or an IDE can inherit a reduced PATH even
+     * though npm is installed next to the Node executable running this process.
+     * Prefer that executable before falling back to normal PATH resolution.
+     */
+    private resolvePackageManagerBin(bin: string): string {
+        const executable = os.platform() === "win32" ? `${bin}.cmd` : bin;
+        const sibling = join(dirname(process.execPath), executable);
+        return existsSync(sibling) ? sibling : executable;
     }
 
     private detectPackageManager(): PM {
