@@ -5,6 +5,7 @@ const {
     authenticateRegistry,
     getGithubOidcAudience,
     isGithubOidcAuthData,
+    getDefaultRegistryAuthData,
     GithubOidcTokenProvider,
     GITHUB_OIDC_PUBLIC_AUDIENCE
 } = require('../dist/registryAlias/githubOidc');
@@ -42,7 +43,7 @@ function headers(authorization) {
 
 const savedEnv = {};
 beforeEach(() => {
-    for (const k of ['ACTIONS_ID_TOKEN_REQUEST_URL', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN']) savedEnv[k] = process.env[k];
+    for (const k of ['GITHUB_ACTIONS', 'ACTIONS_ID_TOKEN_REQUEST_URL', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN']) savedEnv[k] = process.env[k];
     process.env.ACTIONS_ID_TOKEN_REQUEST_URL = 'https://runner.example/token?api-version=2.0';
     process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN = 'request-token';
 });
@@ -50,6 +51,16 @@ afterEach(() => {
     for (const [k, v] of Object.entries(savedEnv)) {
         if (v === undefined) delete process.env[k]; else process.env[k] = v;
     }
+});
+
+test('defaults to GitHub OIDC auth only in GitHub Actions with id-token permission', () => {
+    process.env.GITHUB_ACTIONS = 'true';
+    assert.deepEqual(getDefaultRegistryAuthData(), { oidc: 'github' });
+    delete process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+    assert.equal(getDefaultRegistryAuthData(), undefined);
+    process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN = 'request-token';
+    delete process.env.GITHUB_ACTIONS;
+    assert.equal(getDefaultRegistryAuthData(), undefined);
 });
 
 test('recognizes GitHub OIDC auth data only', () => {

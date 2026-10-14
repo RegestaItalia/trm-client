@@ -5,12 +5,12 @@ import { LoggerType } from "./LoggerType";
 import { InquirerType } from "./InquirerType";
 import * as Core from "trm-core";
 import * as Commons from "trm-commons";
-import { RegistryAlias, authenticateRegistry } from "../registryAlias";
+import { RegistryAlias, authenticateRegistry, getDefaultRegistryAuthData } from "../registryAlias";
 import { SystemAlias } from "../systemAlias";
 import chalk from "chalk";
 import { connect, pickRegistry } from "./prompts";
 import { accessSync, existsSync, readFileSync, statSync } from "fs";
-import { Package } from "trm-registry-types";
+import { AuthenticationType, Package } from "trm-registry-types";
 import { basename, dirname, resolve } from "path";
 import constants from "constants";
 import sanitize from "sanitize-filename";
@@ -543,9 +543,10 @@ export abstract class AbstractCommand {
                 if (registryAlias) {
                     registry = registryAlias.getRegistry();
                 }
+                var registryPing: Awaited<ReturnType<Core.AbstractRegistry['ping']>>;
                 try {
                     Commons.Logger.loading(`Connecting to registry "${registry.name}" (${registry.endpoint})...`);
-                    const registryPing = await registry.ping();
+                    registryPing = await registry.ping();
                     if (this.registerOpts.registryAuthBlacklist && this.registerOpts.registryAuthBlacklist.includes(registryPing.authentication_type)) {
                         throw new Error(`This command is not supported by registry "${registry.name}".`);
                     }
@@ -556,6 +557,12 @@ export abstract class AbstractCommand {
                     Commons.Logger.error(e, true);
                     if (!this.registerOpts.ignoreRegistryUnreachable) {
                         throw new Error(`Registry "${registry.name}" is unreachable.`);
+                    }
+                }
+                if (!registryAlias.authData && !this.registerOpts.noDefaultRegistryAuth && registryPing && registryPing.authentication_type !== AuthenticationType.NO_AUTH) {
+                    registryAlias.authData = getDefaultRegistryAuthData();
+                    if (registryAlias.authData) {
+                        Commons.Logger.log(`No registry authentication provided, using GitHub Actions OIDC`, true);
                     }
                 }
                 if (registryAlias.authData) {

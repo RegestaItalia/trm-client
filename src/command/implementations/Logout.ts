@@ -20,7 +20,8 @@ export class Logout extends AbstractCommand {
         requirements: {
             requiresRegistry: true,
             onlyRegistryAlias: true,
-            registryAuthBlacklist: [AuthenticationType.NO_AUTH]
+            registryAuthBlacklist: [AuthenticationType.NO_AUTH],
+            noDefaultRegistryAuth: true
         }
     };
     protected async handler(): Promise<void> {

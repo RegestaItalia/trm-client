@@ -25,6 +25,17 @@ export function isGithubOidcAuthData(authData: any): authData is GithubOidcAuthD
     return !!authData && typeof authData === "object" && typeof authData.oidc === "string" && authData.oidc.trim().toLowerCase() === "github";
 }
 
+/**
+ * Default registry auth data when none is provided: GitHub OIDC when running in a GitHub Actions job
+ * that can request OIDC tokens (GITHUB_ACTIONS is always "true" on Actions runners, the token request
+ * variables are only set with "permissions: id-token: write").
+ */
+export function getDefaultRegistryAuthData(): GithubOidcAuthData | undefined {
+    if (process.env.GITHUB_ACTIONS === "true" && process.env.ACTIONS_ID_TOKEN_REQUEST_URL && process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN) {
+        return { oidc: "github" };
+    }
+}
+
 export function getGithubOidcAudience(registry: AbstractRegistry, authData: GithubOidcAuthData): string {
     if (authData.audience) {
         return authData.audience;
