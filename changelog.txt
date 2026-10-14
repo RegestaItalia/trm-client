@@ -11,6 +11,8 @@ Legend
 2026-10-14 v13.2.2
 -------------------
 * default values in export command
+* blank saprouter
+* mandatory note in deprecate
 
 2026-10-14 v13.2.1
 -------------------
