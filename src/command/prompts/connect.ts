@@ -201,8 +201,17 @@ export async function connect(commandArgs: ConnectArguments, createAliasIfNotExi
             throw new Error(`Invalid connection type "${type}". Possible values are ${GlobalContext.getInstance().getConnections().map(o => o.name).join(', ')}.`);
         }
         commandArgs = applyConnectionArgs(connectionType, commandArgs);
+        // An explicitly blank SAProuter is valid. RFCConnect uses a blank-space sentinel
+        // to skip the optional prompt, then normalizes it back to undefined.
+        const blankSaprouter = type === 'RFC' && commandArgs.saprouter === '';
+        if (blankSaprouter) {
+            commandArgs.saprouter = ' ';
+        }
         if (connectionType.onConnectionData) {
             await connectionType.onConnectionData(force, commandArgs);
+        }
+        if (blankSaprouter) {
+            commandArgs.saprouter = undefined;
         }
         if (connectionType.loginData) {
             commandArgs = {

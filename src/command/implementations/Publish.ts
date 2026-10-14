@@ -59,8 +59,7 @@ export class Publish extends AbstractCommand {
             ],
             requirements: {
                 requiresConnection: true,
-                requiresTrmDependencies: true,
-                requiresRegistry: true
+                requiresTrmDependencies: true
             }
         },
         {
@@ -74,13 +73,14 @@ export class Publish extends AbstractCommand {
             icon: "FolderDown",
             arguments: [
                 argument(0, { name: "package", label: "Package", description: "Package name." }),
-                argument(1, { name: "version", label: "Version", description: "Release version." }),
+                argument(1, { name: "version", label: "Version", description: "Release version.", required: false }),
                 argument(2, { name: "filename", label: "Output file", description: "Output file name or path.", required: false, control: "file-picker", pickerType: "output" })
             ],
             options: Publish.releaseOptions,
             requirements: {
                 requiresConnection: true,
-                requiresTrmDependencies: true
+                requiresTrmDependencies: true,
+                requiresRegistry: true
             }
         }
     ];
@@ -102,18 +102,10 @@ export class Publish extends AbstractCommand {
                     message: 'Package name',
                     default: this.args.package,
                     when: !this.args.package
-                }, {
-                    name: 'version',
-                    type: 'input',
-                    message: 'Release version',
-                    default: this.args.version,
-                    when: !this.args.version,
-                    validate: this.validateVersion
                 }]);
                 this.args.package = pack.package ?? this.args.package;
-                this.args.version = pack.version ?? this.args.version;
             }
-            if (this.validateVersion(this.args.version) !== true) {
+            if (this.args.version && this.validateVersion(this.args.version) !== true) {
                 throw new Error(this.validateVersion(this.args.version) as string);
             }
             if (!this.args.filename) {
