@@ -11,6 +11,7 @@ import { CommandMetadata } from "../metadata/CommandMetadata";
 import { argument, option } from "../metadata/helpers";
 
 type PM = "npm" | "pnpm" | "yarn1";
+type SpawnCommand = { bin: string; args: string[] };
 
 export class Install extends AbstractCommand {
 
@@ -130,13 +131,13 @@ export class Install extends AbstractCommand {
                     ? { bin: "yarn", args: ["global", "add", target] }
                     : { bin: "npm", args: ["install", "-g", target] }; // default
 
-        const bin = this.resolvePackageManagerBin(command.bin);
-
         try {
             if (pm === "npm") {
-                await this.spawnCommand(bin, ["cache", "clean", "--force"]);
+                const cacheClean = this.resolvePackageManagerCommand(command.bin, ["cache", "clean", "--force"]);
+                await this.spawnCommand(cacheClean.bin, cacheClean.args);
             }
-            await this.spawnCommand(bin, command.args);
+            const update = this.resolvePackageManagerCommand(command.bin, command.args);
+            await this.spawnCommand(update.bin, update.args);
             Logger.success(`Client updated successfully.`);
         } catch (err: any) {
             if (this.isPermsError(err)) {
@@ -153,7 +154,13 @@ export class Install extends AbstractCommand {
 
     private spawnCommand(bin: string, args: string[]): Promise<void> {
         return new Promise((resolve, reject) => {
-            const child = spawn(bin, args, { stdio: "inherit" });
+            // The shell fallback is only used when a Windows installation does
+            // not expose a package manager's JavaScript entry point. All args
+            // passed here are generated internally by the self-update command.
+            const child = spawn(bin, args, {
+                stdio: "inherit",
+                shell: this.isWindowsBatchFile(bin)
+            });
             child.on("error", reject);
             child.on("close", exitCode => {
                 if (exitCode === 0) {
@@ -167,15 +174,43 @@ export class Install extends AbstractCommand {
         });
     }
 
+    private isWindowsBatchFile(bin: string, platform = os.platform()): boolean {
+        return platform === "win32" && /\.(?:cmd|bat)$/i.test(bin);
+    }
+
     /**
      * A CLI started by a desktop app or an IDE can inherit a reduced PATH even
      * though npm is installed next to the Node executable running this process.
      * Prefer that executable before falling back to normal PATH resolution.
      */
-    private resolvePackageManagerBin(bin: string): string {
+    private resolvePackageManagerCommand(bin: string, args: string[]): SpawnCommand {
         const executable = os.platform() === "win32" ? `${bin}.cmd` : bin;
         const sibling = join(dirname(process.execPath), executable);
-        return existsSync(sibling) ? sibling : executable;
+        const resolved = existsSync(sibling) ? sibling : executable;
+
+        if (os.platform() !== "win32") {
+            return { bin: resolved, args };
+        }
+
+        // A .cmd file is not a native executable. Passing one directly to
+        // spawn() can fail with EINVAL on Windows. Run the package manager's
+        // JavaScript entry point with the current Node executable instead.
+        const nodeDir = dirname(process.execPath);
+        const scriptCandidates: Record<string, string[]> = {
+            npm: [join(nodeDir, "node_modules", "npm", "bin", "npm-cli.js")],
+            pnpm: [
+                join(nodeDir, "node_modules", "pnpm", "bin", "pnpm.cjs"),
+                join(nodeDir, "node_modules", "corepack", "dist", "pnpm.js")
+            ],
+            yarn: [
+                join(nodeDir, "node_modules", "yarn", "bin", "yarn.js"),
+                join(nodeDir, "node_modules", "corepack", "dist", "yarn.js")
+            ]
+        };
+        const script = scriptCandidates[bin]?.find(candidate => existsSync(candidate));
+        return script
+            ? { bin: process.execPath, args: [script, ...args] }
+            : { bin: resolved, args };
     }
 
     private detectPackageManager(): PM {
