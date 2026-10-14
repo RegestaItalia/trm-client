@@ -42,3 +42,33 @@ test('REST connection without prompts fails on missing login data instead of ask
         commons.Inquirer.inquirer = previous;
     }
 });
+
+test('RFC connection without prompts accepts an explicitly blank optional SAProuter', async () => {
+    const rfc = new commons.RFCConnect();
+    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getConnections: () => [rfc] });
+    const previous = commons.Inquirer.inquirer;
+    commons.Inquirer.inquirer = new NonInteractiveInquirer(base, 'Hint.');
+    try {
+        const result = await connect({
+            type: 'RFC',
+            noSystemAlias: true,
+            ashost: 'sap.example.com',
+            sysnr: '00',
+            saprouter: '',
+            client: '100',
+            user: 'ci',
+            passwd: 'secret',
+            lang: 'EN'
+        }, false);
+        assert.deepEqual(result.connect.getData(), {
+            ashost: 'sap.example.com',
+            sysnr: '00',
+            client: '100',
+            user: 'CI',
+            passwd: 'secret',
+            lang: 'EN'
+        });
+    } finally {
+        commons.Inquirer.inquirer = previous;
+    }
+});
