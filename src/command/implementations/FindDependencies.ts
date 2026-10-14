@@ -20,7 +20,7 @@ export class FindDependencies extends AbstractCommand {
         ],
         options: [
             option("--sap-entries", { name: "sapEntries", label: "SAP entries", description: "Include required SAP table entries and objects.", control: "checkbox", defaultValue: false }),
-            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, negated: true }),
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true }),
             option("--trm-found-in", { name: "trmFoundIn", label: "Dependency references", description: "Show which objects reference each TRM dependency.", control: "checkbox", defaultValue: false })
         ],
         requirements: {

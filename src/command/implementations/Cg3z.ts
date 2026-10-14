@@ -21,7 +21,7 @@ export class Cg3z extends AbstractCommand {
         ],
         options: [
             option("--overwrite", { name: "overwrite", label: "Overwrite transport", description: "Overwrite an existing transport without confirmation.", control: "checkbox" }),
-            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable interactive prompts.", control: "checkbox", defaultValue: true, negated: true })
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable interactive prompts.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
         ],
         requirements: {
             requiresConnection: true,

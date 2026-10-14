@@ -17,7 +17,7 @@ export class Uninstall extends AbstractCommand {
             option("--no-dependants", { name: "dependants", label: "Check dependants", description: "Skip checking installed packages that depend on this package.", control: "checkbox", defaultValue: true, negated: true }),
             option("--ignore-dirty", { name: "ignoreDirty", label: "Ignore dirty changes", description: "Uninstall despite local changes without confirmation.", control: "checkbox" }),
             option("--landscape-tr-target <target>", { name: "landscapeTrTarget", label: "Landscape transport target", description: "TMS target to receive the deletion transport.", control: "transport-target-picker" }),
-            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable interactive prompts.", control: "checkbox", defaultValue: true, negated: true })
+            option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable interactive prompts.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
         ],
         requirements: {
             requiresConnection: true,

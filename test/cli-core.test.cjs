@@ -210,6 +210,17 @@ test('removed install options are absent for all installation variants', () => {
     }
 });
 
+test('non-interactive prompt options are hidden from GUI metadata', () => {
+    for (const CommandClass of commands.commands) {
+        const metadataEntries = Array.isArray(CommandClass.metadata) ? CommandClass.metadata : [CommandClass.metadata];
+        for (const metadata of metadataEntries) {
+            for (const option of metadata.options.filter(option => option.flags.includes('--no-prompts'))) {
+                assert.equal(option.guiRelevant, false, `${metadata.id} exposes ${option.flags} to the GUI`);
+            }
+        }
+    }
+});
+
 test('self-update resolves package managers next to the running Node executable', () => {
     const command = new commands.Install('update');
     const expectedName = process.platform === 'win32' ? 'npm.cmd' : 'npm';
