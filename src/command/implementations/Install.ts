@@ -24,6 +24,7 @@ export class Install extends AbstractCommand {
         option("--no-cust-tr", { name: "custTr", label: "No customizing transports", description: "Skip customizing transports import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--lang-tr", { name: "langTr", label: "Language transport", description: "Import the language transport without asking.", control: "checkbox", guiRelevant: false }),
         option("--cust-tr", { name: "custTr", label: "Customizing transports", description: "Import all customizing transports without asking.", control: "checkbox", guiRelevant: false }),
+        option("--ignore-import-errors", { name: "ignoreImportErrors", label: "Ignore import errors", description: "Log imports ending with return code 8 or higher as errors instead of failing.", control: "checkbox" }),
         option("--no-engines", { name: "engines", label: "Check engines", description: "Skip manifest engine validation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--allow-downgrade", { name: "allowDowngrade", label: "Allow downgrade", description: "Allow dependency downgrades without confirmation.", control: "checkbox" }),
         option("--keep-original", { name: "keepOriginal", label: "Keep original packages", description: "Preserve publisher SAP package names.", control: "checkbox" }),
@@ -324,7 +325,8 @@ export class Install extends AbstractCommand {
                 },
                 import: {
                     noLang: this.askIfNotPassed('langTr') ? undefined : !this.args.langTr,
-                    noCust: this.askIfNotPassed('custTr') ? undefined : !this.args.custTr
+                    noCust: this.askIfNotPassed('custTr') ? undefined : !this.args.custTr,
+                    ignoreImportErrors: this.args.ignoreImportErrors
                 },
                 installDevclass: {
                     keepOriginal: this.args.keepOriginal,

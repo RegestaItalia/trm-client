@@ -159,14 +159,23 @@ test('pack keeps package and version arguments when interactive prompts are skip
     }
 });
 
+test('install forwards --ignore-import-errors, off by default', async () => {
+    const input = mockAction('install', { manifest: { name: 'demo', version: '1.0.0' } });
+    for (const [argv, expected] of [[['demo', '--no-prompts'], undefined], [['demo', '--no-prompts', '--ignore-import-errors'], true]]) {
+        const { command, values } = parse(commands.Install, 'install', argv);
+        await command.run(values, { registry, systemPackages });
+        assert.equal(input().installData.import.ignoreImportErrors, expected);
+    }
+});
+
 test('uninstall invokes the new action with validation and landscape options', async () => {
     const input = mockAction('uninstall', { manifest: { name: 'demo', version: '1.0.0' } });
-    const { command, values } = parse(commands.Uninstall, 'uninstall', ['demo', '--no-prompts', '--no-dependants', '--ignore-dirty', '--landscape-tr-target', 'QAS']);
+    const { command, values } = parse(commands.Uninstall, 'uninstall', ['demo', '--no-prompts', '--no-dependants', '--ignore-dirty', '--landscape-tr-target', 'QAS', '--ignore-import-errors']);
     await command.run(values, { registry, systemPackages });
     assert.deepEqual(input(), {
         contextData: { systemPackages, noInquirer: true },
         packageData: { name: 'demo', registry },
-        uninstallData: { checks: { noDependants: true, ignoreDirty: true }, landscapeTransport: { targetSystem: 'QAS' } }
+        uninstallData: { checks: { noDependants: true, ignoreDirty: true }, landscapeTransport: { targetSystem: 'QAS' }, ignoreImportErrors: true }
     });
     assert.equal(commands.getCommand('uninstall'), commands.Uninstall);
 });
