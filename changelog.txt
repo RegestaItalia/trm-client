@@ -8,6 +8,10 @@ Legend
 + : added
 - : removed
 
+2026-10-19 v14.0.1
+-------------------
+* update lock
+
 2026-10-16 v14.0.0
 -------------------
 ! trm-core ^11.0.0: upgrades delete only what the new release no longer ships, through backup (BKP) and deletion (DELE) transports carried by the single landscape transport; no deletion transport is forwarded
