@@ -140,6 +140,21 @@ test('publish and pack map manifest engines, changelog and customizing arrays', 
     assert.ok(!commands.getCommandMetadata('pack').options.some(option => option.flags.includes('--drop-cust')));
 });
 
+test('install and publish forward the simulate flag', async () => {
+    const installInput = mockAction('install', { manifest: { name: 'demo', version: '1.0.0' }, simulated: true });
+    for (const [argv, simulate] of [[['demo', '--simulate'], true], [['demo'], undefined]]) {
+        const { command, values } = parse(commands.Install, 'install', argv);
+        await command.run(values, { registry, systemPackages });
+        assert.equal(installInput().contextData.simulate, simulate);
+    }
+    const publishInput = mockAction('publish', { trmPackage: { manifest: { get: () => ({ name: 'demo', version: '1.0.0' }) } }, simulated: true });
+    for (const [argv, simulate] of [[['demo', '--no-prompts', '--public', '--simulate'], true], [['demo', '--no-prompts', '--public'], undefined]]) {
+        const { command, values } = parse(commands.Publish, 'publish', argv);
+        await command.run(values, { registry, systemPackages });
+        assert.equal(publishInput().contextData.simulate, simulate);
+    }
+});
+
 test('pack keeps package and version arguments when interactive prompts are skipped', async () => {
     const input = mockAction('publish', { trmPackage: { manifest: { get: () => ({ name: 'trm-server', version: '7.0.1' }) } } });
     const originalPrompt = commons.Inquirer.prompt;

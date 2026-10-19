@@ -35,6 +35,7 @@ export class Install extends AbstractCommand {
         option("--no-namespace", { name: "namespace", label: "No customer namespace", description: "Don't import the customer namespace, without asking.", control: "checkbox", negated: true, guiRelevant: false }),
         option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--landscape-tr-target <target>", { name: "landscapeTrTarget", label: "Landscape transport target", description: "TMS target for the generated landscape transport.", control: "transport-target-picker" }),
+        option("--simulate", { name: "simulate", label: "Simulate", description: "Run every check and question of the install, then show what would change on the system without installing.", control: "checkbox" }),
         option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
@@ -305,7 +306,8 @@ export class Install extends AbstractCommand {
             contextData: {
                 logTemporaryFolder: getTempFolder(),
                 noInquirer: !this.args.prompts,
-                systemPackages: packages
+                systemPackages: packages,
+                simulate: this.args.simulate
             },
             packageData: {
                 registry,
@@ -340,7 +342,7 @@ export class Install extends AbstractCommand {
                 }
             }
         });
-        var sOutput = `${result.manifest.name} v${result.manifest.version} installed`;
+        var sOutput = `${result.manifest.name} v${result.manifest.version} ${result.simulated ? 'install simulated, nothing was installed' : 'installed'}`;
         Logger.success(sOutput);
     }
 
