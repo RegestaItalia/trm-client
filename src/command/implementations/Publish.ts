@@ -29,6 +29,7 @@ export class Publish extends AbstractCommand {
         option("--dependencies <dependencies>", { name: "dependencies", label: "Dependencies", description: "Release dependencies as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--sap-entries <sap entries>", { name: "sapEntries", label: "SAP entries", description: "Release SAP entries as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--post-activities <post activities>", { name: "postActivities", label: "Post activities", description: "Release post activities as JSON, or a path to a JSON file.", control: "textarea" }),
+        option("--simulate", { name: "simulate", label: "Simulate", description: "Run every check and question of the release, then show what it would do without creating transports or publishing.", control: "checkbox" }),
         option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
@@ -125,7 +126,8 @@ export class Publish extends AbstractCommand {
             contextData: {
                 logTemporaryFolder: getTempFolder(),
                 systemPackages: packages,
-                noInquirer: !this.args.prompts
+                noInquirer: !this.args.prompts,
+                simulate: this.args.simulate
             },
             packageData: {
                 registry,
@@ -165,7 +167,12 @@ export class Publish extends AbstractCommand {
                 transportTarget: this.args.target
             }
         });
-        Logger.success(`+ ${result.trmPackage.manifest.get().name} v${result.trmPackage.manifest.get().version}`);
+        const manifest = result.trmPackage.manifest.get();
+        if (result.simulated) {
+            Logger.success(`${manifest.name} v${manifest.version} ${this.name === 'pack' ? 'export' : 'publish'} simulated, nothing was ${this.name === 'pack' ? 'exported' : 'published'}`);
+            return;
+        }
+        Logger.success(`+ ${manifest.name} v${manifest.version}`);
     }
 
 }

@@ -8,6 +8,13 @@ Legend
 + : added
 - : removed
 
+2026-10-16 v14.0.0
+-------------------
+! trm-core ^11.0.0: upgrades delete only what the new release no longer ships, through backup (BKP) and deletion (DELE) transports carried by the single landscape transport; no deletion transport is forwarded
+! uninstall generates a landscape transport carrying the deletion (--landscape-tr-target) and prints it
+! imports ending with return code 8 or higher fail the install/uninstall
++ --ignore-import-errors (install, update, clean-install, import, uninstall): log return codes from 8 as errors instead of failing
+
 2026-10-14 v13.3.0
 -------------------
 + JSON logger (--logger JSON): one JSON document on stdout with result data and collected logs

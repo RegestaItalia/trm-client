@@ -16,7 +16,7 @@ type SpawnCommand = { bin: string; args: string[] };
 export class Install extends AbstractCommand {
 
     private static readonly installOptions = [
-        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer.", control: "transport-layer-picker" }),
+        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer of the new SAP packages, routed to the landscape transport target. Defaults to the only routed layer, otherwise asked (system default first).", control: "transport-layer-picker" }),
         option("--no-deps", { name: "deps", label: "Ignore dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-obj-check", { name: "objCheck", label: "Avoid object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-sap-entries", { name: "sapEntries", label: "Avoid SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
@@ -24,6 +24,7 @@ export class Install extends AbstractCommand {
         option("--no-cust-tr", { name: "custTr", label: "No customizing transports", description: "Skip customizing transports import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--lang-tr", { name: "langTr", label: "Language transport", description: "Import the language transport without asking.", control: "checkbox", guiRelevant: false }),
         option("--cust-tr", { name: "custTr", label: "Customizing transports", description: "Import all customizing transports without asking.", control: "checkbox", guiRelevant: false }),
+        option("--ignore-import-errors", { name: "ignoreImportErrors", label: "Ignore import errors", description: "Log imports ending with return code 8 or higher as errors instead of failing.", control: "checkbox" }),
         option("--no-engines", { name: "engines", label: "Check engines", description: "Skip manifest engine validation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--allow-downgrade", { name: "allowDowngrade", label: "Allow downgrade", description: "Allow dependency downgrades without confirmation.", control: "checkbox" }),
         option("--keep-original", { name: "keepOriginal", label: "Keep original packages", description: "Preserve publisher SAP package names.", control: "checkbox" }),
@@ -34,6 +35,7 @@ export class Install extends AbstractCommand {
         option("--no-namespace", { name: "namespace", label: "No customer namespace", description: "Don't import the customer namespace, without asking.", control: "checkbox", negated: true, guiRelevant: false }),
         option("--package-replacements <replacements>", { name: "packageReplacements", label: "Package replacements", description: "SAP package replacements as JSON, or a path to a JSON file.", control: "textarea" }),
         option("--landscape-tr-target <target>", { name: "landscapeTrTarget", label: "Landscape transport target", description: "TMS target for the generated landscape transport.", control: "transport-target-picker" }),
+        option("--simulate", { name: "simulate", label: "Simulate", description: "Run every check and question of the install, then show what would change on the system without installing.", control: "checkbox" }),
         option("--no-prompts", { name: "prompts", label: "Prompts", description: "Disable prompts and use automatic decisions.", control: "checkbox", defaultValue: true, guiRelevant: false, negated: true })
     ];
 
@@ -304,7 +306,8 @@ export class Install extends AbstractCommand {
             contextData: {
                 logTemporaryFolder: getTempFolder(),
                 noInquirer: !this.args.prompts,
-                systemPackages: packages
+                systemPackages: packages,
+                simulate: this.args.simulate
             },
             packageData: {
                 registry,
@@ -324,7 +327,8 @@ export class Install extends AbstractCommand {
                 },
                 import: {
                     noLang: this.askIfNotPassed('langTr') ? undefined : !this.args.langTr,
-                    noCust: this.askIfNotPassed('custTr') ? undefined : !this.args.custTr
+                    noCust: this.askIfNotPassed('custTr') ? undefined : !this.args.custTr,
+                    ignoreImportErrors: this.args.ignoreImportErrors
                 },
                 installDevclass: {
                     keepOriginal: this.args.keepOriginal,
@@ -338,7 +342,7 @@ export class Install extends AbstractCommand {
                 }
             }
         });
-        var sOutput = `${result.manifest.name} v${result.manifest.version} installed`;
+        var sOutput = `${result.manifest.name} v${result.manifest.version} ${result.simulated ? 'install simulated, nothing was installed' : 'installed'}`;
         Logger.success(sOutput);
     }
 

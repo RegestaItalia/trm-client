@@ -100,6 +100,7 @@ export class DummyConnector implements ISystemConnector {
     getR3transVersion = async () => this._throw();
     getR3transUnicode = async () => this._throw();
     isTransportLayerExist = async () => this._throw();
+    getTransportLayers = async () => this._throw();
     getTrmServerPackage = async () => this._throw();
     getTrmRestPackage = async () => this._throw();
     removeComments = async () => this._throw();
