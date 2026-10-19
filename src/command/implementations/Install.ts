@@ -16,7 +16,7 @@ type SpawnCommand = { bin: string; args: string[] };
 export class Install extends AbstractCommand {
 
     private static readonly installOptions = [
-        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer for imported package objects. Defaults to the system transport layer.", control: "transport-layer-picker" }),
+        option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer of the new SAP packages, routed to the landscape transport target. Defaults to the only routed layer, otherwise asked (system default first).", control: "transport-layer-picker" }),
         option("--no-deps", { name: "deps", label: "Ignore dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-obj-check", { name: "objCheck", label: "Avoid object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-sap-entries", { name: "sapEntries", label: "Avoid SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
