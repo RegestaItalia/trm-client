@@ -1,4 +1,4 @@
-import { getCoreVersion, getRoamingFolder, GlobalContext } from "../utils";
+import { getClientVersion, getCoreVersion, getRoamingFolder, GlobalContext } from "../utils";
 import path from "path";
 import * as fs from "fs";
 import * as ini from "ini";
@@ -23,7 +23,16 @@ export class RegistryAlias {
     }
 
     public getRegistry(): AbstractRegistry {
-        return new RegistryV2(this._endpoint, this._name, getCoreVersion());
+        const registry = new RegistryV2(this._endpoint, this._name, getCoreVersion());
+        const clientUserAgent = `trm-client v${getClientVersion()}`;
+        registry.setExternalUserAgent(clientUserAgent);
+
+        // RegistryV2 creates its HTTP client before the external user agent can be set.
+        // Refresh its initial headers so unauthenticated requests (notably ping) include it too.
+        const axiosInstance = (registry as any)._axiosInstance;
+        const coreUserAgent = axiosInstance.defaults.headers['User-Agent'];
+        axiosInstance.defaults.headers['User-Agent'] = `${clientUserAgent}, ${coreUserAgent}`;
+        return registry;
     }
 
     private static generateFile(content: RegistryAliasData[], filePath?: string): void {
