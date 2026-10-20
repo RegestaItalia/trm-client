@@ -10,7 +10,7 @@ const commons = require('trm-commons');
 const commands = require('../dist/command/implementations');
 const { GlobalContext } = require('../dist/utils/GlobalContext');
 
-GlobalContext.getInstance = () => ({ getSettings: () => ({}) });
+GlobalContext.getInstance = () => ({ getSettings: () => ({}), getGlobalNodeModules: () => undefined });
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'trm-cli-test-'));
 require('../dist/utils/getTempFolder').getTempFolder = () => tempDir;
 for (const name of ['loading', 'success', 'info', 'warning', 'tree', 'table']) {
@@ -333,4 +333,12 @@ test('unknown options are ignored instead of failing, without shifting arguments
     program.parse(['node', 'trm', 'view', '--no-prompts', 'demo', '--foo=bar', '--', '-x']);
     assert.deepEqual(command.command.args, ['demo', '-x']);
     assert.deepEqual(command.ignoredOptions, ['--no-prompts', '--foo=bar']);
+});
+
+test('JSON options parse inline JSON and stop on invalid JSON', () => {
+    const { AbstractCommand } = require('../dist/command/AbstractCommand');
+    const parse = (args, name) => AbstractCommand.prototype.parseJsonArg.call({ args }, name);
+    assert.deepEqual(parse({ dependencies: '[{"name":"dep"}]' }, 'dependencies'), [{ name: 'dep' }]);
+    assert.equal(parse({}, 'dependencies'), undefined);
+    assert.throws(() => parse({ postActivities: '[{name' }, 'postActivities'), /Option --post-activities is neither valid JSON nor the path of a JSON file/);
 });
