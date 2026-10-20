@@ -1,9 +1,7 @@
-import { getNodePackage } from "trm-core";
-import { GlobalContext } from "./GlobalContext";
+import { getInstalledPackage } from "./getInstalledPackage";
 
 export function getClientNodeDependencies(): {
     [key: string]: string;
 } {
-    const trmClientPackage = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), "trm-client");
-    return trmClientPackage.dependencies || {};
+    return getInstalledPackage("trm-client")?.dependencies || {};
 }

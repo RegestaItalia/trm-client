@@ -53,12 +53,13 @@ export class GlobalContext {
         return this._settings;
     }
 
+    /**
+     * Global node_modules: where the running client is installed when installed globally,
+     * otherwise detected (TRM_GLOBAL_NODE_MODULES environment variable, npm, node prefix).
+     * Not cached, as it changes with the node/npm in use.
+     */
     public getGlobalNodeModules(): string {
-        //called before load
-        if (!this.isStringCacheEntryValid(this._cache.globalNpmPath, this.getSettings().npmGlobalPathCheckCache)) {
-            this.setGlobalNpmPathInternal();
-        }
-        return this._cache.globalNpmPath.data;
+        return commonsGetGlobalNodeModules();
     }
 
     public getLatestVersion(): string {
@@ -69,8 +70,6 @@ export class GlobalContext {
     }
 
     public async load() {
-        //global npm path
-        this.setGlobalNpmPathInternal();
         //latest version
         const latestVersionCache = this._cache.latestVersion;
         if (!this.isStringCacheEntryValid(latestVersionCache, this.getSettings().cliUpdateCheckCache)) {
@@ -82,8 +81,10 @@ export class GlobalContext {
         //load plugins
         if (!this._pluginsLoaded) {
             Logger.loading(`Loading plugins...`, true);
+            const globalNodeModules = this.getGlobalNodeModules();
+            Logger.log(`Global node modules: ${globalNodeModules}`, true);
             this._plugins = await Plugin.load({
-                globalNodeModulesPath: this.getGlobalNodeModules()
+                globalNodeModulesPath: globalNodeModules
             });
             Logger.log(`Loaded ${this._plugins.length} plugins: ${this._plugins.map(o => o.name).join(', ')}`, true);
             Logger.loading(`Calling event onContextLoadConnections...`, true);
@@ -151,24 +152,11 @@ export class GlobalContext {
             loggerType: 'AUTO',
             logOutputFolder: 'default',
             cliUpdateCheckCache: 60,
-            npmGlobalPathCheckCache: 180,
             guiRegistryAutoConnect: registryAliases.length === 1,
             guiRegistryAutoConnectAlias: registryAliases.length === 1 ? registryAliases[0].alias : undefined,
             guiSystemAutoConnect: false,
             sapLandscape
         }
-    }
-
-    private setGlobalNpmPathInternal(): void {
-        var path;
-        const globalNpmPathCache = this._cache.globalNpmPath;
-        if (this.isStringCacheEntryValid(globalNpmPathCache, this.getSettings().npmGlobalPathCheckCache)) {
-            return globalNpmPathCache.data;
-        }
-        Logger.loading(`Cache expired, setting npm global modules path...`, true);
-        path = commonsGetGlobalNodeModules();
-        Logger.log(`Npm global modules path set to ${path}`, true);
-        this.setCache('globalNpmPath', path);
     }
 
     private getSettingsInternal(): SettingsData {
@@ -183,10 +171,6 @@ export class GlobalContext {
             }
             if (!settingsData.cliUpdateCheckCache) {
                 settingsData.cliUpdateCheckCache = defaultSettings.cliUpdateCheckCache;
-                this.generateSettingsFile(settingsData, filePath);
-            }
-            if (!settingsData.npmGlobalPathCheckCache) {
-                settingsData.npmGlobalPathCheckCache = defaultSettings.npmGlobalPathCheckCache;
                 this.generateSettingsFile(settingsData, filePath);
             }
             if (settingsData.guiRegistryAutoConnect === undefined) {
@@ -204,6 +188,11 @@ export class GlobalContext {
             // clear from legacy versions that had the node root in settings
             if ((settingsData as any).globalNodeModules) {
                 delete (settingsData as any).globalNodeModules;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            // clear from legacy versions that cached the node root
+            if ((settingsData as any).npmGlobalPathCheckCache) {
+                delete (settingsData as any).npmGlobalPathCheckCache;
                 this.generateSettingsFile(settingsData, filePath);
             }
             return settingsData;
@@ -225,6 +214,11 @@ export class GlobalContext {
             try {
                 const data = JSON.parse(fs.readFileSync(filePath).toString());
                 if (this.isCacheData(data)) {
+                    // clear from legacy versions that cached the node root
+                    if ((data as any).globalNpmPath) {
+                        delete (data as any).globalNpmPath;
+                        this.generateCacheFile(data, filePath);
+                    }
                     return data;
                 }
             } catch (e) { }

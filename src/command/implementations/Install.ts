@@ -1,4 +1,4 @@
-import { Logger } from "trm-commons";
+import { findNodePackage, Logger } from "trm-commons";
 import { AbstractRegistry, FileSystem, install, TRM_REST_PACKAGE_NAME, TRM_SERVER_PACKAGE_NAME, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import { getTempFolder } from "../../utils";
@@ -6,7 +6,7 @@ import os from "node:os";
 import { spawn } from "node:child_process";
 import { Lockfile } from "trm-core/dist/lockfile";
 import { existsSync } from "node:fs";
-import { dirname, extname, join } from "node:path";
+import { basename, dirname, extname, join } from "node:path";
 import { CommandMetadata } from "../metadata/CommandMetadata";
 import { argument, option } from "../metadata/helpers";
 
@@ -133,6 +133,13 @@ export class Install extends AbstractCommand {
                     ? { bin: "yarn", args: ["global", "add", target] }
                     : { bin: "npm", args: ["install", "-g", target] }; // default
 
+        if (pm === "npm") {
+            const prefix = this.getRunningGlobalPrefix();
+            if (prefix) {
+                command.args.push("--prefix", prefix);
+            }
+        }
+
         try {
             if (pm === "npm") {
                 const cacheClean = this.resolvePackageManagerCommand(command.bin, ["cache", "clean", "--force"]);
@@ -152,6 +159,22 @@ export class Install extends AbstractCommand {
             }
             throw err;
         }
+    }
+
+    /**
+     * npm prefix of the running client, when it is a global install: the update replaces
+     * the copy in use, even if npm is configured with another prefix.
+     */
+    private getRunningGlobalPrefix(): string | undefined {
+        const client = findNodePackage("trm-client", [__dirname]);
+        if (!client) return;
+        const nodeModules = dirname(client.location);
+        if (basename(nodeModules) !== "node_modules") return;
+        const isWindows = os.platform() === "win32";
+        const prefix = isWindows ? dirname(nodeModules) : dirname(dirname(nodeModules));
+        if (!isWindows && basename(dirname(nodeModules)) !== "lib") return;
+        const shim = isWindows ? join(prefix, "trm.cmd") : join(prefix, "bin", "trm");
+        return existsSync(shim) ? prefix : undefined;
     }
 
     private spawnCommand(bin: string, args: string[]): Promise<void> {
