@@ -2,7 +2,6 @@ export type SettingsData = {
     loggerType: string,
     logOutputFolder: string,
     cliUpdateCheckCache: number,
-    npmGlobalPathCheckCache: number,
     guiRegistryAutoConnect: boolean,
     guiRegistryAutoConnectAlias?: string,
     guiSystemAutoConnect: boolean,

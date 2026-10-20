@@ -16,3 +16,4 @@ export * from "./CacheData";
 export * from "./GlobalContext";
 export * from "./getNodeRfcPackage";
 export * from "./JsonLogger";
+export * from "./getInstalledPackage";

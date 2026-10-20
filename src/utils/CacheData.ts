@@ -4,6 +4,5 @@ export type Cache = {
 }
 
 export type CacheData = {
-    latestVersion?: Cache,
-    globalNpmPath?: Cache
+    latestVersion?: Cache
 }

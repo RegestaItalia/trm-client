@@ -1,7 +1,7 @@
 import { Logger, TreeLog } from "trm-commons";
-import { getCoreTrmDependencies, getNodePackage, RegistryProvider, SystemConnector, TrmPackage } from "trm-core";
+import { getCoreTrmDependencies, RegistryProvider, SystemConnector, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
-import { DummyConnector, getClientNodeDependencies, getClientVersion, getNodeRfcPackage, getNpmPackageLatestVersion, GlobalContext } from "../../utils";
+import { DummyConnector, getClientNodeDependencies, getClientVersion, getInstalledPackage, getNodeRfcPackage, getNpmPackageLatestVersion, GlobalContext } from "../../utils";
 import { gte, eq, maxSatisfying } from "semver";
 import chalk from "chalk";
 import { readFileSync } from "fs";
@@ -55,7 +55,7 @@ export class Info extends AbstractCommand {
         return text;
     }
 
-    private flat(deps: Record<string, string>, globalNodeModulesPath: string): Record<string, { range: string; installedVersion: string | undefined }> {
+    private flat(deps: Record<string, string>): Record<string, { range: string; installedVersion: string | undefined }> {
         const isWanted = (k: string) => k.startsWith("trm-") || k === "node-r3trans";
 
         const out: Record<string, { range: string; installedVersion: string | undefined }> = {};
@@ -67,7 +67,7 @@ export class Info extends AbstractCommand {
             if (seen.has(k)) continue;
             seen.add(k);
 
-            const pkg = getNodePackage(globalNodeModulesPath, k);
+            const pkg = getInstalledPackage(k);
             const installedVersion = pkg?.version;
 
             if (!out[k]) {
@@ -91,11 +91,10 @@ export class Info extends AbstractCommand {
     protected async handler(): Promise<void> {
         Logger.loading(`Reading data...`);
 
-        const globalNodeModulesPath = GlobalContext.getInstance().getGlobalNodeModules();
         const clientLatest = await this.getCliVersionStatus();
         const clientVersion = getClientVersion();
-        const dependencies = this.flat(getClientNodeDependencies(), globalNodeModulesPath);
-        const trmDependencies = getCoreTrmDependencies(globalNodeModulesPath);
+        const dependencies = this.flat(getClientNodeDependencies());
+        const trmDependencies = getCoreTrmDependencies();
         const trmDependenciesInstances = (await this.getTrmDependenciesCheck()).dependencies;
         const trmMissingDependencies = (await this.getTrmDependenciesCheck()).missingDependencies;
         const trmNotSatisfiedDependencies = (await this.getTrmDependenciesCheck()).versionNotSatisfiedDependencies;

@@ -1,7 +1,9 @@
-import { getNodePackage } from "trm-core";
-import { GlobalContext } from "./GlobalContext";
+import { getInstalledPackage } from "./getInstalledPackage";
 
 export function getClientVersion(): string {
-    const trmClientPackage = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules(), "trm-client");
+    const trmClientPackage = getInstalledPackage("trm-client");
+    if (!trmClientPackage) {
+        throw new Error(`Couldn't find "trm-client" package.json!`);
+    }
     return trmClientPackage.version;
 }

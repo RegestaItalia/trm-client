@@ -1,7 +1,5 @@
-import { getNodePackage } from "trm-core";
-import { GlobalContext } from "./GlobalContext";
+import { getInstalledPackage } from "./getInstalledPackage";
 
 export function getCoreVersion(): string {
-    const trmCorePackage = getNodePackage(GlobalContext.getInstance().getGlobalNodeModules());
-    return trmCorePackage.version;
+    return getInstalledPackage("trm-core")?.version;
 }

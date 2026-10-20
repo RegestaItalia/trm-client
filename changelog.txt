@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2026-10-20 v14.0.3
+-------------------
+* client version and dependencies read from the client location ("Couldn't find "trm-client" package.json")
+* update replaces the running installation (npm prefix of the running client)
+- npm global path cache and npmGlobalPathCheckCache setting
+
 2026-10-19 v14.0.2
 -------------------
 + registry ua
