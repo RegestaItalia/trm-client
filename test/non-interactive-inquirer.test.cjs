@@ -28,7 +28,7 @@ test('non interactive inquirer skips, defaults or fails', async () => {
 
 test('REST connection without prompts fails on missing login data instead of asking', async () => {
     const rest = new commons.RESTConnect();
-    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getConnections: () => [rest] });
+    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getGlobalNodeModules: () => undefined, getConnections: () => [rest] });
     const previous = commons.Inquirer.inquirer;
     commons.Inquirer.inquirer = new NonInteractiveInquirer(base, 'Hint.');
     try {
@@ -45,7 +45,7 @@ test('REST connection without prompts fails on missing login data instead of ask
 
 test('RFC connection without prompts accepts an explicitly blank optional SAProuter', async () => {
     const rfc = new commons.RFCConnect();
-    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getConnections: () => [rfc] });
+    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getGlobalNodeModules: () => undefined, getConnections: () => [rfc] });
     const previous = commons.Inquirer.inquirer;
     commons.Inquirer.inquirer = new NonInteractiveInquirer(base, 'Hint.');
     try {
@@ -74,7 +74,7 @@ test('RFC connection without prompts accepts an explicitly blank optional SAProu
 });
 
 test('connection type "none" selects no connection without prompting, only where allowed', async () => {
-    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getConnections: () => [] });
+    GlobalContext.getInstance = () => ({ getSettings: () => ({}), getGlobalNodeModules: () => undefined, getConnections: () => [] });
     const previous = commons.Inquirer.inquirer;
     commons.Inquirer.inquirer = new NonInteractiveInquirer(base, 'Hint.');
     try {

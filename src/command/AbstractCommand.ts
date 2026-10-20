@@ -455,7 +455,10 @@ export abstract class AbstractCommand {
             }
             try {
                 return JSON.parse(sValue);
-            } catch { }
+            } catch (e) {
+                const option = name.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`);
+                throw new Error(`Option --${option} is neither valid JSON nor the path of a JSON file: ${e instanceof Error ? e.message : e}`);
+            }
         }
     }
 
