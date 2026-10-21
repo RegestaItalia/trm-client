@@ -23,7 +23,8 @@ export class FindDependencies extends AbstractCommand {
             option("--trm-found-in", { name: "trmFoundIn", label: "Dependency references", description: "Show which objects reference each TRM dependency.", control: "checkbox", defaultValue: false, guiDefaultValue: true })
         ],
         requirements: {
-            requiresConnection: true
+            requiresConnection: true,
+            requiresTrmDependencies: true
         }
     };
     protected async handler(): Promise<void> {
