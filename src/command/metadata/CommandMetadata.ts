@@ -29,6 +29,8 @@ export interface CommandFieldMetadata {
     control: CommandControlType;
     pickerType?: "input" | "output";
     defaultValue?: unknown;
+    /** Default value in the GUI, when it differs from the CLI one (`defaultValue`). */
+    guiDefaultValue?: unknown;
     choices?: CommandValueChoice[];
     placeholder?: string;
     multiple?: boolean;
