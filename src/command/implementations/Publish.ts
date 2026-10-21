@@ -47,7 +47,7 @@ export class Publish extends AbstractCommand {
                 argument(1, { name: "version", label: "Version", description: "Release version to publish.", required: false })
             ],
             options: [
-                option("-i, --increment <increment>", { name: "increment", label: "Version increment", description: "Semantic version increment to use when no version is provided.", control: "select", defaultValue: "patch" }),
+                option("-i, --increment <increment>", { name: "increment", label: "Version increment", description: "Semantic version increment to use when no version is provided.", control: "select", defaultValue: "patch", choices: [{ label: "Patch", value: "patch" }, { label: "Minor", value: "minor" }, { label: "Major", value: "major" }] }),
                 option("--pre-release", { name: "preRelease", label: "Pre-release", description: "Publish the release as a pre-release.", control: "checkbox", defaultValue: false }),
                 option("--pre-release-identifier <identifier>", { name: "preReleaseIdentifier", label: "Pre-release identifier", description: "Identifier to append to a pre-release version." }),
                 option("--tag <tag>", { name: "tag", label: "Tags", description: "Release distribution tags, separated by commas.", multiple: true }),

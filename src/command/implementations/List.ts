@@ -19,7 +19,7 @@ export class List extends AbstractCommand {
         arguments: [],
         options: [
             option("-L, --locals", { name: "locals", label: "Include local packages", description: "Include imported and exported local packages.", control: "checkbox", defaultValue: false }),
-            option("-o, --output-type <type>", { name: "outputType", label: "Output format", description: "Output format: TREE or TABLE.", control: "select", defaultValue: "TREE" })
+            option("-o, --output-type <type>", { name: "outputType", label: "Output format", description: "Output format: TREE or TABLE.", control: "select", defaultValue: "TREE", choices: [{ label: "Tree", value: "TREE" }, { label: "Table", value: "TABLE" }], guiRelevant: false })
         ],
         requirements: {
             requiresConnection: true
