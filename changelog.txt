@@ -8,6 +8,13 @@ Legend
 + : added
 - : removed
 
+2026-10-21 v14.1.1
+-------------------
++ guiDefaultValue in command fields metadata (GUI default, when it differs from the CLI one)
+! find-dependencies: --sap-entries and --trm-found-in on by default in the GUI
+! find-dependencies output built by trm-core: one tab per category, compact TRM package and SAP entry lines
+* find-dependencies: SAP packages printed with their name (was: [object Object])
+
 2026-10-20 v14.1.0
 -------------------
 ! options taking JSON (or a JSON file path) stop with an error when the value is not valid JSON (was: silently ignored)
