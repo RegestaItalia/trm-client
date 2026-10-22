@@ -60,7 +60,8 @@ export class Publish extends AbstractCommand {
             ],
             requirements: {
                 requiresConnection: true,
-                requiresTrmDependencies: true
+                requiresTrmDependencies: true,
+                requiresRegistry: true
             }
         },
         {
@@ -80,8 +81,7 @@ export class Publish extends AbstractCommand {
             options: Publish.releaseOptions,
             requirements: {
                 requiresConnection: true,
-                requiresTrmDependencies: true,
-                requiresRegistry: true
+                requiresTrmDependencies: true
             }
         }
     ];
