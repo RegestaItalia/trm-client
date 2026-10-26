@@ -19,6 +19,7 @@ export class Install extends AbstractCommand {
         option("-T, --transport-layer <transport layer>", { name: "transportLayer", label: "Transport layer", description: "Transport layer of the new SAP packages, routed to the landscape transport target. Defaults to the only routed layer, otherwise asked (system default first).", control: "transport-layer-picker" }),
         option("--no-deps", { name: "deps", label: "Ignore dependencies", description: "Skip dependency installation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-obj-check", { name: "objCheck", label: "Avoid object existence checks", description: "Skip object existence checks before import.", control: "checkbox", defaultValue: true, negated: true }),
+        option("--no-obj-types", { name: "objTypes", label: "Avoid object types checks", description: "Install objects of types the system doesn't support (their import ends with return code 8 or higher).", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-sap-entries", { name: "sapEntries", label: "Avoid SAP entries", description: "Skip SAP entry checks before import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-lang-tr", { name: "langTr", label: "No language transport", description: "Skip language transport import.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-cust-tr", { name: "custTr", label: "No customizing transports", description: "Skip customizing transports import.", control: "checkbox", defaultValue: true, negated: true }),
@@ -346,6 +347,7 @@ export class Install extends AbstractCommand {
                     allowDowngrade: this.args.allowDowngrade,
                     noSapEntries: !this.args.sapEntries,
                     noExistingObjects: !this.args.objCheck,
+                    noObjectTypes: !this.args.objTypes,
                     lockfile: this.args.lockFile ? Lockfile.fromJson(this.parseJsonArg('lockFile')) : undefined
                 },
                 import: {

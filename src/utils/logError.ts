@@ -9,6 +9,13 @@ const _getUnauthorizedError = (): string => {
 
 export async function logError(err: any) {
     var originalException: any;
+    var rollbackErrors: string[] = [];
+    if (err.originalWorkflowError) {
+        // A failed rollback: its own exception is the rollback failure, the cause is the step failure
+        Logger.error(inspect(err, { breakLength: Infinity, compact: true }), true);
+        rollbackErrors = (err.message || '').split('\n').filter((line: string) => line.startsWith('Additionally, rollback failed:'));
+        err = err.originalWorkflowError;
+    }
     if (err.originalException) {
         originalException = err;
         while (originalException.originalException) {
@@ -60,6 +67,7 @@ export async function logError(err: any) {
     if (sError) {
         Logger.error(sError);
     }
+    aError.push(...rollbackErrors);
     aError.forEach(message => {
         if (message) {
             Logger.error(message);
