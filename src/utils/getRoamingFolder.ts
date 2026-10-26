@@ -6,7 +6,7 @@ export function getRoamingFolder() {
     const roamingPath = getRoamingPath();
     const roamingFolder = path.join(roamingPath, "trm");
     if(!fs.existsSync(roamingFolder)){
-        fs.mkdirSync(roamingFolder);
+        fs.mkdirSync(roamingFolder, { recursive: true });
     }
     return roamingFolder;
 }
