@@ -2,7 +2,7 @@ import { Command } from "commander";
 import { CommandMetadata } from "./CommandMetadata";
 
 function argumentToken(argument: CommandMetadata["arguments"][number]): string {
-    const name = argument.cliName ?? argument.name;
+    const name = `${argument.cliName ?? argument.name}${argument.multiple ? '...' : ''}`;
     return argument.required ? `<${name}>` : `[${name}]`;
 }
 
