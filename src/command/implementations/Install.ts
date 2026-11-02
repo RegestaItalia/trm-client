@@ -1,7 +1,7 @@
 import { findNodePackage, Logger } from "trm-commons";
 import { AbstractRegistry, FileSystem, install, TRM_REST_PACKAGE_NAME, TRM_SERVER_PACKAGE_NAME, TrmPackage } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
-import { getTempFolder } from "../../utils";
+import { getTempFolder, isTelemetryEnabled } from "../../utils";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { Lockfile } from "trm-core/dist/lockfile";
@@ -330,7 +330,8 @@ export class Install extends AbstractCommand {
                 logTemporaryFolder: getTempFolder(),
                 noInquirer: !this.args.prompts,
                 systemPackages: packages,
-                simulate: this.args.simulate
+                simulate: this.args.simulate,
+                telemetry: isTelemetryEnabled()
             },
             packageData: {
                 registry,

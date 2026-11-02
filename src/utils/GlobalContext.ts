@@ -155,7 +155,8 @@ export class GlobalContext {
             guiRegistryAutoConnect: registryAliases.length === 1,
             guiRegistryAutoConnectAlias: registryAliases.length === 1 ? registryAliases[0].alias : undefined,
             guiSystemAutoConnect: false,
-            sapLandscape
+            sapLandscape,
+            telemetry: false
         }
     }
 
@@ -179,6 +180,10 @@ export class GlobalContext {
             }
             if (settingsData.guiSystemAutoConnect === undefined) {
                 settingsData.guiSystemAutoConnect = defaultSettings.guiSystemAutoConnect;
+                this.generateSettingsFile(settingsData, filePath);
+            }
+            if (settingsData.telemetry === undefined) {
+                settingsData.telemetry = defaultSettings.telemetry;
                 this.generateSettingsFile(settingsData, filePath);
             }
             if (!settingsData.guiRegistryAutoConnectAlias) {

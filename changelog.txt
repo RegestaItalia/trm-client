@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2026-11-02 v14.3.0
+-------------------
++ telemetry setting (default false): when enabled (`trm settings -s telemetry=true`), install, update and import send anonymous telemetry to the package registry (outcome, durations, import return codes, object counts per type, SAP_BASIS/product/database/kernel levels). No system identifiers, user names or package contents are sent; it uses a short timeout and never fails an install
+! trm-core 11.3.0
+! trm-registry-types 5.1.0
+
 2026-11-02 v14.2.0
 -------------------
 + diff: show what changed between two releases of a package (`trm diff <package> <from> [to]`, `--summary` for the changed objects only); needs a registry with release diffs (a Pro plan on the public registry)
