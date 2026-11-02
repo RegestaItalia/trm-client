@@ -1,4 +1,5 @@
-import { Logger, TreeLog } from "trm-commons";
+import { Logger } from "trm-commons";
+import { TreeTableLog } from "trm-core";
 import { AbstractCommand } from "../AbstractCommand";
 import chalk from "chalk";
 import { CommandMetadata } from "../metadata/CommandMetadata";
@@ -20,7 +21,7 @@ export class Content extends AbstractCommand {
             argument(1, { name: "version", label: "Version", description: "Package version or distribution tag.", required: false, defaultValue: "latest" })
         ],
         options: [
-            option("--full", { name: "full", label: "Full content", description: "Show all transport entries in the package.", control: "checkbox", defaultValue: false })
+            option("--full", { name: "full", label: "Full content", description: "Show all transport entries in the package.", control: "checkbox", defaultValue: false, guiDefaultValue: true })
         ],
         requirements: {
             requiresRegistry: true
@@ -60,21 +61,31 @@ export class Content extends AbstractCommand {
             }
         }
         iOtherEntries = otherEntries;
-        var tree: TreeLog = {
+        //text loggers print each node text, the GUI renders a tab per table with the record fields as columns
+        var tree: TreeTableLog = {
             text: `${chalk.bold(this.args.package)} v${data.manifest.version} content`,
+            layout: 'tabs',
             children: []
         };
         aNodes.forEach(node => {
             if (node.content.length > 0) {
-                var tableNode: TreeLog = {
+                const isFilled = (value: any) => value !== undefined && value !== null && value !== '';
+                const columns = [...new Set(node.content.flatMap(record => Object.keys(record)))]
+                    .filter(field => node.content.some(record => isFilled(record[field])));
+                var tableNode: TreeTableLog = {
                     text: `${chalk.bold(node.tableName)} (${node.content.length} record${node.content.length > 1 ? 's' : ''})`,
+                    columns,
                     children: []
                 };
                 node.content.forEach(record => {
                     const fields = Object.entries(record)
-                        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+                        .filter(([_, value]) => isFilled(value))
                         .map(([field, value]) => `${chalk.bold(field)}: ${value}`);
-                    tableNode.children.push({ text: fields.join(', '), children: [] });
+                    tableNode.children.push({
+                        text: fields.join(', '),
+                        cells: columns.map(field => isFilled(record[field]) ? String(record[field]) : ''),
+                        children: []
+                    });
                 });
                 tree.children.push(tableNode);
             }
