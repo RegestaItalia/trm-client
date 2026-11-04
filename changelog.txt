@@ -14,6 +14,7 @@ Legend
 + show: registry details of a package release (`trm show <package>[@version] [field]`): versions, dist-tags, dependencies, namespace, post activities; a field (dotted path, e.g. `dist_tags.latest`) prints its value only
 + readme: README of a package release rendered for the terminal (`trm readme <package>[@version]`, `--raw` for the markdown source)
 ! search, show and readme need a registry with the optional navigation APIs, other registries answer "This registry does not support ..."
+! view: requires a system connection (no more "none" connection type) and shows installed packages only; registry details of a package are read with `trm show`
 ! trm-core 11.3.0
 ! trm-registry-types 5.2.0
 
