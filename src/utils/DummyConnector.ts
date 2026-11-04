@@ -14,6 +14,7 @@ export class DummyConnector implements ISystemConnector {
     getNamespacePackages = async () => this._throw();
     getInstallTransports = async () => this._throw();
     getSoftwareComponents = async () => this._throw();
+    getSystemInfo = async () => this._throw();
     getInstalledProducts = async () => this._throw();
     getNoteStatus = async () => this._throw();
     checkTableCondition = async () => this._throw();
