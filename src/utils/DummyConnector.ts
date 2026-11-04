@@ -136,4 +136,5 @@ export class DummyConnector implements ISystemConnector {
     createCustTransport = async () => this._throw();
     getObjectsLocks = async () => this._throw();
     updateTrmPackageData = async () => this._throw();
+    getSystemInfo = async () => this._throw();
 }

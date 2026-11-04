@@ -25,6 +25,9 @@ import { Settings } from "./Settings";
 import { ClearCache } from "./ClearCache";
 import { Changelog } from "./Changelog";
 import { Diff } from "./Diff";
+import { Search } from "./Search";
+import { Show } from "./Show";
+import { Readme } from "./Readme";
 
 export * from "./Ping";
 export * from "./Info";
@@ -50,6 +53,9 @@ export * from "./Content";
 export * from "./View";
 export * from "./Changelog";
 export * from "./Diff";
+export * from "./Search";
+export * from "./Show";
+export * from "./Readme";
 export * from "./Compare";
 export * from "./Dirty";
 
@@ -83,6 +89,9 @@ export const commands = [
     Dirty,
     Changelog,
     Diff,
+    Search,
+    Show,
+    Readme,
     FindDependencies,
     Cg3y,
     Cg3z,

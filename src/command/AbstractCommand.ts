@@ -325,7 +325,7 @@ export abstract class AbstractCommand {
         const commandOpts = this.command ? this.command.opts() : {};
         const commandArgs = this.metadata ? [...this.metadata.arguments].sort((a, b) => a.position - b.position) : [];
         commandArgs.forEach((a, i) => {
-            if (typeof (argsValues[i]) === 'string') {
+            if (typeof (argsValues[i]) === 'string' || (a.multiple && Array.isArray(argsValues[i]))) {
                 args[a.name] = argsValues[i];
             }
         });
