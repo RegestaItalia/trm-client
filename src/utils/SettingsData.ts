@@ -8,5 +8,7 @@ export type SettingsData = {
     guiSystemAutoConnectAlias?: string,
     sapLandscape?: string,
     r3transDocker?: boolean,
-    r3transDockerName?: string
+    r3transDockerName?: string,
+    /** Send opt-in, anonymous telemetry to the registry after installs. Defaults to false. */
+    telemetry: boolean
 }
