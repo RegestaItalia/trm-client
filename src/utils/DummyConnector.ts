@@ -10,6 +10,9 @@ export class DummyConnector implements ISystemConnector {
     getTransportEntries = async () => this._throw();
     acquireActionLocks = async () => this._throw();
     releaseActionLocks = async () => this._throw();
+    logActionStart = async () => this._throw();
+    logActionEnd = async () => this._throw();
+    logTransportEvents = async () => this._throw();
     getTrmPackageData = async () => this._throw();
     getNamespacePackages = async () => this._throw();
     getInstallTransports = async () => this._throw();
