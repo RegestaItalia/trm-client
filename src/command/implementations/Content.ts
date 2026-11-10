@@ -13,6 +13,7 @@ export class Content extends AbstractCommand {
         aliases: ["contents"],
         title: "Package content",
         group: "registry",
+        guiRelevant: false,
         groupPriority: 7,
         description: "View the contents of a package release in registry.",
         icon: "FolderTree",
