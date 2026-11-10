@@ -271,8 +271,8 @@ export abstract class AbstractCommand {
         }
         switch (type) {
             case LoggerType.CLI: return new Commons.CliLogger(debug);
-            // One session ID for the log file, the requests and the SAP action log (transaction /ATRM/LOG)
-            case LoggerType.CLI_LOG: return new Commons.CliLogFileLogger(logOutputFolder, debug, Core.getSessionId());
+            // trm-core getSessionId() adopts this logger's session ID: one ID for the log file, the requests and the SAP action log (transaction /ATRM/LOG)
+            case LoggerType.CLI_LOG: return new Commons.CliLogFileLogger(logOutputFolder, debug);
             case LoggerType.CONSOLE: return new Commons.ConsoleLogger(debug);
             case LoggerType.VOID: return new Commons.DummyLogger();
             case LoggerType.JSON: return new JsonLogger(debug);
