@@ -12,7 +12,6 @@ export class Publish extends AbstractCommand {
 
     private static readonly releaseOptions = [
         option("-P, --sap-package <sap package>", { name: "sapPackage", label: "SAP package", description: "SAP package that owns the release objects.", control: "sap-package-picker" }),
-        option("-T, --target <target>", { name: "target", label: "Transport target", description: "Target system for release transports.", control: "transport-target-picker" }),
         option("--no-lang-tr", { name: "langTr", label: "No language transport", description: "Skip language transport generation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--no-cust-tr", { name: "custTr", label: "No customizing transport", description: "Skip customizing transports generation.", control: "checkbox", defaultValue: true, negated: true }),
         option("--cust <customizing>", { name: "cust", label: "Customizing transports", description: "Customizing transport requests, separated by commas.", multiple: true }),
@@ -162,9 +161,6 @@ export class Publish extends AbstractCommand {
                 dropCustomizingTransports: this.parseArrayArg('dropCust'),
                 readme: this.parseTextArg('readme'),
                 changelog: this.parseTextArg('changelog')
-            },
-            systemData: {
-                transportTarget: this.args.target
             }
         });
         const manifest = result.trmPackage.manifest.get();
