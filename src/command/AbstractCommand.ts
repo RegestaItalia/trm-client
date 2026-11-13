@@ -684,6 +684,8 @@ export abstract class AbstractCommand {
             exitCode = 1;
         } finally {
             if (Core.SystemConnector.systemConnector) {
+                // extra guard: retry locks an action could not release (never throws)
+                await Core.releaseOpenActionLocks();
                 try {
                     await Core.SystemConnector.closeConnection();
                 } catch (e) {

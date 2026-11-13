@@ -8,6 +8,12 @@ Legend
 + : added
 - : removed
 
+2026-11-13 v14.5.0
+-------------------
+- publish: `-T`/`--target` option, publish transports always target the connected system itself
++ open SAP action locks an action could not release are released again when a command ends, before closing the system connection
+! trm-core 11.5.0
+
 2026-11-10 v14.4.0
 -------------------
 + install: `--no-obj-types` option, object types the target system doesn't support are warnings instead of errors (their import ends with return code 8 or higher)
